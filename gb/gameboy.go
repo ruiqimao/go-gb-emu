@@ -1,12 +1,19 @@
 package gb
 
 type GameBoy struct {
-	Cpu *Cpu
+	cpu *Cpu
+	mem *Memory
+
+	// Boot ROM.
+	boot [256]uint8
 }
 
 func NewGameBoy() (*GameBoy, error) {
-	gb := &GameBoy{
-		Cpu: NewCpu(),
-	}
+	gb := &GameBoy{}
+
+	// Create the components.
+	gb.cpu = NewCpu()
+	gb.mem = NewMemory(gb)
+
 	return gb, nil
 }

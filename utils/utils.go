@@ -11,16 +11,15 @@ func SplitShort(s uint16) (uint8, uint8) {
 }
 
 // Get the bit at a position.
-func GetBit(v uint8, i int) uint8 {
-	return (v >> i) & 0x1
+func GetBit(v uint8, i int) bool {
+	return (v>>i)&0x1 == 0x1
 }
 
-// Enable the bit at a position.
-func EnableBit(v uint8, i int) uint8 {
-	return v | (0x1 << i)
-}
-
-// Disable the bit at a position.
-func DisableBit(v uint8, i int) uint8 {
-	return v & ^(0x1 << i)
+// Set the bit at a position.
+func SetBit(v uint8, i int, on bool) uint8 {
+	if on {
+		return v | (0x1 << i)
+	} else {
+		return v & ^(0x1 << i)
+	}
 }

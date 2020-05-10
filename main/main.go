@@ -10,8 +10,8 @@ import (
 )
 
 func main() {
-	if len(os.Args) != 2 {
-		fmt.Fprintf(os.Stderr, "Usage: %v <rom>\n", os.Args[0])
+	if len(os.Args) != 3 {
+		fmt.Fprintf(os.Stderr, "Usage: %v <boot.bin> <rom.gb>\n", os.Args[0])
 		os.Exit(1)
 	}
 

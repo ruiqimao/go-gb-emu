@@ -24,9 +24,6 @@ type Cpu struct {
 
 func NewCpu() *Cpu {
 	c := &Cpu{}
-
-	// TODO.
-
 	return c
 }
 
@@ -122,51 +119,35 @@ func (c *Cpu) SetHL(v uint16) {
 
 // Getters/setters for flag (F) register.
 func (c *Cpu) FC() bool {
-	return utils.GetBit(c.f, 4) == 0x1
+	return utils.GetBit(c.f, 4)
 }
 
 func (c *Cpu) SetFC(v bool) {
-	if v {
-		utils.EnableBit(c.f, 4)
-	} else {
-		utils.DisableBit(c.f, 4)
-	}
+	utils.SetBit(c.f, 4, v)
 }
 
 func (c *Cpu) FH() bool {
-	return utils.GetBit(c.f, 5) == 0x1
+	return utils.GetBit(c.f, 5)
 }
 
 func (c *Cpu) SetFH(v bool) {
-	if v {
-		utils.EnableBit(c.f, 5)
-	} else {
-		utils.DisableBit(c.f, 5)
-	}
+	utils.SetBit(c.f, 5, v)
 }
 
 func (c *Cpu) FN() bool {
-	return utils.GetBit(c.f, 6) == 0x1
+	return utils.GetBit(c.f, 6)
 }
 
 func (c *Cpu) SetFN(v bool) {
-	if v {
-		utils.EnableBit(c.f, 6)
-	} else {
-		utils.DisableBit(c.f, 6)
-	}
+	utils.SetBit(c.f, 6, v)
 }
 
 func (c *Cpu) FZ() bool {
-	return utils.GetBit(c.f, 7) == 0x1
+	return utils.GetBit(c.f, 7)
 }
 
 func (c *Cpu) SetFZ(v bool) {
-	if v {
-		utils.EnableBit(c.f, 7)
-	} else {
-		utils.DisableBit(c.f, 7)
-	}
+	utils.SetBit(c.f, 7, v)
 }
 
 // Getters/setters for stack pointer and program counter.
