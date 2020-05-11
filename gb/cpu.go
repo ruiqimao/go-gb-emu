@@ -4,16 +4,35 @@ import (
 	"github.com/ruiqimao/go-gb-emu/utils"
 )
 
+const (
+	// 8 bit registers.
+	RegB = 0
+	RegC = 1
+	RegD = 2
+	RegE = 3
+	RegH = 4
+	RegL = 5
+	RegA = 6
+	RegF = 7
+
+	// 16 bit registers.
+	RegBC = 0
+	RegDE = 2
+	RegHL = 4
+	RegAF = 6
+
+	// Flags.
+	FlagC = 4
+	FlagH = 5
+	FlagN = 6
+	FlagZ = 7
+)
+
 type Cpu struct {
+	gb *GameBoy
+
 	// Registers.
-	a uint8
-	b uint8
-	c uint8
-	d uint8
-	e uint8
-	f uint8
-	h uint8
-	l uint8
+	r [8]uint8
 
 	// Stack pointer.
 	sp uint16
@@ -22,155 +41,98 @@ type Cpu struct {
 	pc uint16
 }
 
-func NewCpu() *Cpu {
-	c := &Cpu{}
+func NewCpu(gb *GameBoy) *Cpu {
+	c := &Cpu{
+		gb: gb,
+	}
 	return c
 }
 
-// Getters/setters for general registers.
-func (c *Cpu) A() uint8 {
-	return c.a
+// Get the value of a register.
+func (c *Cpu) Get(r uint8) uint8 {
+	return c.r[r]
 }
 
-func (c *Cpu) SetA(v uint8) {
-	c.a = v
+// Set the value of a register.
+func (c *Cpu) Set(r uint8, v uint8) {
+	if r == RegF {
+		// Last 4 bits of F cannot be set.
+		v &= 0xf0
+	}
+	c.r[r] = v
 }
 
-func (c *Cpu) B() uint8 {
-	return c.b
+// Get the value of a 16 bit register.
+func (c *Cpu) Get16(r uint8) uint16 {
+	return utils.CombineBytes(c.r[r], c.r[r+1])
 }
 
-func (c *Cpu) SetB(v uint8) {
-	c.b = v
+// Set the value of a 16 bit register.
+func (c *Cpu) Set16(r uint8, v uint16) {
+	if r == RegAF {
+		// Last 4 bits of F cannot be set.
+		v &= 0xfff0
+	}
+	c.r[r], c.r[r+1] = utils.SplitShort(v)
 }
 
-func (c *Cpu) C() uint8 {
-	return c.c
+// Get whether a flag is enabled.
+func (c *Cpu) GetFlag(f int) bool {
+	return utils.GetBit(c.r[RegF], f)
 }
 
-func (c *Cpu) SetC(v uint8) {
-	c.c = v
+// Set whether a flag is enabled.
+func (c *Cpu) SetFlag(f int, v bool) {
+	utils.SetBit(c.r[RegF], f, v)
 }
 
-func (c *Cpu) D() uint8 {
-	return c.d
-}
-
-func (c *Cpu) SetD(v uint8) {
-	c.d = v
-}
-
-func (c *Cpu) E() uint8 {
-	return c.e
-}
-
-func (c *Cpu) SetE(v uint8) {
-	c.e = v
-}
-
-func (c *Cpu) H() uint8 {
-	return c.h
-}
-
-func (c *Cpu) SetH(v uint8) {
-	c.h = v
-}
-
-func (c *Cpu) L() uint8 {
-	return c.l
-}
-
-func (c *Cpu) SetL(v uint8) {
-	c.l = v
-}
-
-func (c *Cpu) AF() uint16 {
-	return utils.CombineBytes(c.a, c.f)
-}
-
-func (c *Cpu) SetAF(v uint16) {
-	c.a, c.f = utils.SplitShort(v)
-	c.f &= 0xf0 // Last 4 bits of F register are always 0.
-}
-
-func (c *Cpu) BC() uint16 {
-	return utils.CombineBytes(c.b, c.c)
-}
-
-func (c *Cpu) SetBC(v uint16) {
-	c.b, c.c = utils.SplitShort(v)
-}
-
-func (c *Cpu) DE() uint16 {
-	return utils.CombineBytes(c.d, c.e)
-}
-
-func (c *Cpu) SetDE(v uint16) {
-	c.d, c.e = utils.SplitShort(v)
-}
-
-func (c *Cpu) HL() uint16 {
-	return utils.CombineBytes(c.h, c.l)
-}
-
-func (c *Cpu) SetHL(v uint16) {
-	c.h, c.l = utils.SplitShort(v)
-}
-
-// Getters/setters for flag (F) register.
-func (c *Cpu) FC() bool {
-	return utils.GetBit(c.f, 4)
-}
-
-func (c *Cpu) SetFC(v bool) {
-	utils.SetBit(c.f, 4, v)
-}
-
-func (c *Cpu) FH() bool {
-	return utils.GetBit(c.f, 5)
-}
-
-func (c *Cpu) SetFH(v bool) {
-	utils.SetBit(c.f, 5, v)
-}
-
-func (c *Cpu) FN() bool {
-	return utils.GetBit(c.f, 6)
-}
-
-func (c *Cpu) SetFN(v bool) {
-	utils.SetBit(c.f, 6, v)
-}
-
-func (c *Cpu) FZ() bool {
-	return utils.GetBit(c.f, 7)
-}
-
-func (c *Cpu) SetFZ(v bool) {
-	utils.SetBit(c.f, 7, v)
-}
-
-// Getters/setters for stack pointer and program counter.
-func (c *Cpu) SP() uint16 {
+// Get the stack pointer.
+func (c *Cpu) Sp() uint16 {
 	return c.sp
 }
 
-func (c *Cpu) IncrementSP() {
+// Increment the stack pointer.
+func (c *Cpu) IncSp() {
 	c.sp += 2
 }
 
-func (c *Cpu) DecrementSP() {
+// Decrement the stack pointer.
+func (c *Cpu) DecSp() {
 	c.sp -= 2
 }
 
-func (c *Cpu) PC() uint16 {
+// Push a register to the stack.
+func (c *Cpu) PushSp(r uint8) {
+	c.DecSp()
+	c.gb.mem.Write16(c.sp, c.Get16(r))
+}
+
+// Pop a register from the stack.
+func (c *Cpu) PopSp(r uint8) {
+	c.Set16(r, c.gb.mem.Read16(c.sp))
+	c.IncSp()
+}
+
+// Get the program counter.
+func (c *Cpu) Pc() uint16 {
 	return c.pc
 }
 
-func (c *Cpu) IncrementPC() {
-	c.pc += 2
+// Increment the program counter by a byte and return the read value.
+func (c *Cpu) IncPc() uint8 {
+	v := c.gb.mem.Read(c.pc)
+	c.pc++
+	return v
 }
 
-func (c *Cpu) SetPC(v uint16) {
+// Increment the program counter by a short and return the read value.
+func (c *Cpu) IncPc16() uint16 {
+	lo := c.IncPc()
+	hi := c.IncPc()
+	return utils.CombineBytes(hi, lo)
+}
+
+// Set the program counter.
+func (c *Cpu) SetPc(v uint16) {
 	c.pc = v
 }

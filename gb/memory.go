@@ -1,5 +1,9 @@
 package gb
 
+import (
+	"github.com/ruiqimao/go-gb-emu/utils"
+)
+
 // Memory layout:
 // 0000 - 00FF
 //   Boot ROM - This gets turned off at the end of execution.
@@ -143,4 +147,16 @@ func (m *Memory) Write(addr uint16, v uint8) {
 		m.ie = v
 
 	}
+}
+
+// Read a short from memory.
+func (m *Memory) Read16(addr uint16) uint16 {
+	return utils.CombineBytes(m.Read(addr+1), m.Read(addr))
+}
+
+// Write a short into memory.
+func (m *Memory) Write16(addr uint16, v uint16) {
+	hi, lo := utils.SplitShort(v)
+	m.Write(addr, lo)
+	m.Write(addr+1, hi)
 }

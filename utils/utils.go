@@ -1,11 +1,11 @@
 package utils
 
 // Combine two bytes into a short.
-func CombineBytes(a uint8, b uint8) uint16 {
-	return (uint16(a) << 8) | uint16(b)
+func CombineBytes(hi uint8, lo uint8) uint16 {
+	return (uint16(hi) << 8) | uint16(lo)
 }
 
-// Split a short into two bytes.
+// Split a short into high and low bytes.
 func SplitShort(s uint16) (uint8, uint8) {
 	return uint8(s >> 8), uint8(s)
 }
