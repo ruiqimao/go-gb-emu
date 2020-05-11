@@ -3,11 +3,11 @@ package gb
 // An Instruction returns how many cycles it takes to execute.
 type Instruction func() int
 
-func (gb *GameBoy) createInstructionSet() {
-	cpu := gb.cpu
-	mem := gb.mem
+func (c *Cpu) createInstructionSet() {
+	cpu := c
+	mem := c.gb.mem
 
-	gb.instructions = [0x200]Instruction{
+	c.instructions = [0x200]Instruction{
 		// 8 bit loads.
 		0x02: func() int { // LD (BC),A.
 			mem.Write(cpu.BC(), cpu.A())
@@ -958,6 +958,31 @@ func (gb *GameBoy) createInstructionSet() {
 			cpu.opCall(true, 0x0038)
 			return 16
 		},
+
+		// Control instructions.
+		0x00: func() int { // NOP.
+			return 4
+		},
+		0x10: func() int { // STOP.
+			cpu.SetHalt(true)
+			cpu.IncPC()
+			return 4
+		},
+		0x76: func() int { // HALT.
+			cpu.opHalt(cpu.IME(), mem.Read(AddrIE), mem.Read(AddrIF))
+			return 4
+		},
+		0xcb: func() int { // PREFIX CB.
+			return 4 + cpu.instructions[uint16(cpu.IncPC()) + 0x100]()
+		},
+		0xf3: func() int { // DI.
+			cpu.SetIME(false)
+			return 4
+		},
+		0xfb: func() int { // EI.
+			cpu.SetIME(true)
+			return 4
+		},
 	}
 }
 
@@ -1141,4 +1166,22 @@ func (c *Cpu) opCall(cond bool, a uint16) int {
 		return 24
 	}
 	return 12
+}
+
+// Perform a halt. Handles HALT bug, documented in section 4.10 of
+// https://github.com/AntonioND/giibiiadvance/blob/master/docs/TCAGBD.pdf.
+func (c *Cpu) opHalt(ime bool, iE uint8, iF uint8) {
+	if ime {
+		// HALT is executed normally.
+		c.SetHalt(true)
+	} else {
+		if iE & iF == 0 {
+			// HALT is executed normally.
+			c.SetHalt(true)
+		} else {
+			// HALT is not executed. Instead, the halt bug is triggered, and the CPU will fail to
+			// increment the program counter on the next instruction.
+			c.TriggerHaltBug()
+		}
+	}
 }

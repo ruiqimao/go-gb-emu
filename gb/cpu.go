@@ -7,6 +7,9 @@ import (
 type Cpu struct {
 	gb *GameBoy
 
+	// Instruction set.
+	instructions [0x200]Instruction
+
 	// Registers.
 	b uint8
 	c uint8
@@ -23,14 +26,22 @@ type Cpu struct {
 	// Program counter.
 	pc uint16
 
-	// Misc registers.
+	// Interrupt master.
 	ime bool
+
+	// Halt and bug flags.
+	halt    bool
+	haltBug bool
 }
 
 func NewCpu(gb *GameBoy) *Cpu {
 	c := &Cpu{
 		gb: gb,
 	}
+
+	// Create the instruction set.
+	c.createInstructionSet()
+
 	return c
 }
 
@@ -197,7 +208,12 @@ func (c *Cpu) PC() uint16 {
 // Increment the program counter by a byte and return the read value.
 func (c *Cpu) IncPC() uint8 {
 	v := c.gb.mem.Read(c.pc)
-	c.pc++
+
+	// If the halt bug is active, the program counter is not incremented.
+	if !c.haltBug {
+		c.pc++
+	}
+	c.haltBug = false
 	return v
 }
 
@@ -213,12 +229,27 @@ func (c *Cpu) SetPC(v uint16) {
 	c.pc = v
 }
 
-// Get the interrupt master enable.
+// Get interrupt master.
 func (c *Cpu) IME() bool {
 	return c.ime
 }
 
-// Set the interrupt master enable.
+// Set interrupt master.
 func (c *Cpu) SetIME(v bool) {
 	c.ime = v
+}
+
+// Get the halt flag.
+func (c *Cpu) Halted() bool {
+	return c.halt
+}
+
+// Set the halt flag.
+func (c *Cpu) SetHalt(v bool) {
+	c.halt = v
+}
+
+// Trigger the halt bug.
+func (c *Cpu) TriggerHaltBug() {
+	c.haltBug = true
 }
