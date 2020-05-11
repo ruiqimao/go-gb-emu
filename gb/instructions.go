@@ -1,5 +1,9 @@
 package gb
 
+import (
+	"github.com/ruiqimao/go-gb-emu/utils"
+)
+
 // An Instruction returns how many cycles it takes to execute.
 type Instruction func() int
 
@@ -852,6 +856,28 @@ func (c *Cpu) createInstructionSet() {
 			return 16
 		},
 
+		// Standard 8 bit rotations and shifts.
+		0x07: func() int { // RLCA.
+			cpu.SetA(cpu.opRotateLeft(cpu.A(), false))
+			cpu.SetFlagZ(false)
+			return 4
+		},
+		0x0f: func() int {
+			cpu.SetA(cpu.opRotateRight(cpu.A(), false))
+			cpu.SetFlagZ(false)
+			return 4
+		},
+		0x17: func() int { // RLCA.
+			cpu.SetA(cpu.opRotateLeft(cpu.A(), true))
+			cpu.SetFlagZ(false)
+			return 4
+		},
+		0x1f: func() int {
+			cpu.SetA(cpu.opRotateRight(cpu.A(), true))
+			cpu.SetFlagZ(false)
+			return 4
+		},
+
 		// Jumps and calls.
 		0x18: func() int { // JR r8.
 			cpu.opJr(true, cpu.IncPC())
@@ -1127,6 +1153,40 @@ func (c *Cpu) opAdd16(a uint16, b uint16) uint16 {
 	c.SetFlagN(false)
 	c.SetFlagH(uint32(a & 0x0fff) > r32 & 0x0fff)
 	c.SetFlagC(r32 > 0xffff)
+
+	return r
+}
+
+// Perform a rotate left, update flags, and return the result.
+func (c *Cpu) opRotateLeft(a uint8, useC bool) uint8 {
+	r := a << 1
+	if !useC {
+		r |= a >> 7
+	} else if c.FlagC() {
+		r |= 0x1
+	}
+
+	c.SetFlagZ(r == 0)
+	c.SetFlagN(false)
+	c.SetFlagH(false)
+	c.SetFlagC(utils.GetBit(a, 7))
+
+	return r
+}
+
+// Perform a rotate right, update flags, and return the result.
+func (c *Cpu) opRotateRight(a uint8, useC bool) uint8 {
+	r := a >> 1
+	if !useC {
+		r |= a & 0x1
+	} else if c.FlagC() {
+		r |= 0x80
+	}
+
+	c.SetFlagZ(r == 0)
+	c.SetFlagN(false)
+	c.SetFlagH(false)
+	c.SetFlagC(utils.GetBit(a, 0))
 
 	return r
 }
