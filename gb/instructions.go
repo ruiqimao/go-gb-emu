@@ -14,7 +14,7 @@ func (gb *GameBoy) createInstructionSet() {
 			return 8
 		},
 		0x06: func() int { // LD B,d8.
-			cpu.SetB(cpu.IncPc())
+			cpu.SetB(cpu.IncPC())
 			return 8
 		},
 		0x0a: func() int { // LD A,(BC).
@@ -22,7 +22,7 @@ func (gb *GameBoy) createInstructionSet() {
 			return 8
 		},
 		0x0e: func() int { // LD C,d8.
-			cpu.SetC(cpu.IncPc())
+			cpu.SetC(cpu.IncPC())
 			return 8
 		},
 		0x12: func() int { // LD (DE),A.
@@ -30,7 +30,7 @@ func (gb *GameBoy) createInstructionSet() {
 			return 8
 		},
 		0x16: func() int { // LD D,d8.
-			cpu.SetD(cpu.IncPc())
+			cpu.SetD(cpu.IncPC())
 			return 8
 		},
 		0x1a: func() int { // LD A,(DE).
@@ -38,7 +38,7 @@ func (gb *GameBoy) createInstructionSet() {
 			return 8
 		},
 		0x1e: func() int { // LD E,d8.
-			cpu.SetE(cpu.IncPc())
+			cpu.SetE(cpu.IncPC())
 			return 8
 		},
 		0x22: func() int { // LD (HL+),A.
@@ -48,7 +48,7 @@ func (gb *GameBoy) createInstructionSet() {
 			return 8
 		},
 		0x26: func() int { // LD H,d8.
-			cpu.SetH(cpu.IncPc())
+			cpu.SetH(cpu.IncPC())
 			return 8
 		},
 		0x2a: func() int { // LD A,(HL+).
@@ -58,7 +58,7 @@ func (gb *GameBoy) createInstructionSet() {
 			return 8
 		},
 		0x2e: func() int { // LD L,d8.
-			cpu.SetL(cpu.IncPc())
+			cpu.SetL(cpu.IncPC())
 			return 8
 		},
 		0x32: func() int { // LD (HL-),A.
@@ -68,7 +68,7 @@ func (gb *GameBoy) createInstructionSet() {
 			return 8
 		},
 		0x36: func() int { // LD (HL),d8.
-			mem.Write(cpu.HL(), cpu.IncPc())
+			mem.Write(cpu.HL(), cpu.IncPC())
 			return 12
 		},
 		0x3a: func() int { // LD A,(HL-).
@@ -78,7 +78,7 @@ func (gb *GameBoy) createInstructionSet() {
 			return 8
 		},
 		0x3e: func() int { // LD A,d8.
-			cpu.SetA(cpu.IncPc())
+			cpu.SetA(cpu.IncPC())
 			return 8
 		},
 		0x40: func() int { // LD B,B.
@@ -334,7 +334,7 @@ func (gb *GameBoy) createInstructionSet() {
 			return 4
 		},
 		0xe0: func() int { // LD ($FF00+a8),A.
-			mem.Write(0xff00+uint16(cpu.IncPc()), cpu.A())
+			mem.Write(0xff00+uint16(cpu.IncPC()), cpu.A())
 			return 12
 		},
 		0xe2: func() int { // LD ($FF00+C),A.
@@ -342,11 +342,11 @@ func (gb *GameBoy) createInstructionSet() {
 			return 8
 		},
 		0xea: func() int { // LD (a16),A.
-			mem.Write(cpu.IncPc16(), cpu.A())
+			mem.Write(cpu.IncPC16(), cpu.A())
 			return 16
 		},
 		0xf0: func() int { // LD A,($FF00+a8).
-			cpu.SetA(mem.Read(0xff00+uint16(cpu.IncPc())))
+			cpu.SetA(mem.Read(0xff00+uint16(cpu.IncPC())))
 			return 12
 		},
 		0xf2: func() int { // LD A,(C).
@@ -354,69 +354,69 @@ func (gb *GameBoy) createInstructionSet() {
 			return 8
 		},
 		0xfa: func() int { // LD A,(a16).
-			cpu.SetA(mem.Read(cpu.IncPc16()))
+			cpu.SetA(mem.Read(cpu.IncPC16()))
 			return 16
 		},
 
 		// 16 bit loads.
 		0x01: func() int { // LD BC,d16.
-			cpu.SetBC(cpu.IncPc16())
+			cpu.SetBC(cpu.IncPC16())
 			return 12
 		},
 		0x08: func() int { // LD (a16),SP.
-			mem.Write16(cpu.IncPc16(), cpu.Sp())
+			mem.Write16(cpu.IncPC16(), cpu.SP())
 			return 20
 		},
 		0x11: func() int { // LD DE,d16.
-			cpu.SetDE(cpu.IncPc16())
+			cpu.SetDE(cpu.IncPC16())
 			return 12
 		},
 		0x21: func() int { // LD HL,d16.
-			cpu.SetHL(cpu.IncPc16())
+			cpu.SetHL(cpu.IncPC16())
 			return 12
 		},
 		0x31: func() int { // LD SP,d16.
-			cpu.SetSp(cpu.IncPc16())
+			cpu.SetSP(cpu.IncPC16())
 			return 12
 		},
 		0xc1: func() int { // POP BC.
-			cpu.SetBC(cpu.PopSp())
+			cpu.SetBC(cpu.PopSP())
 			return 12
 		},
 		0xc5: func() int { // PUSH BC.
-			cpu.PushSp(cpu.BC())
+			cpu.PushSP(cpu.BC())
 			return 16
 		},
 		0xd1: func() int { // POP DE.
-			cpu.SetDE(cpu.PopSp())
+			cpu.SetDE(cpu.PopSP())
 			return 12
 		},
 		0xd5: func() int { // PUSH DE.
-			cpu.PushSp(cpu.DE())
+			cpu.PushSP(cpu.DE())
 			return 16
 		},
 		0xe1: func() int { // POP HL.
-			cpu.SetHL(cpu.PopSp())
+			cpu.SetHL(cpu.PopSP())
 			return 12
 		},
 		0xe5: func() int { // PUSH HL.
-			cpu.PushSp(cpu.HL())
+			cpu.PushSP(cpu.HL())
 			return 16
 		},
 		0xf1: func() int { // POP AF.
-			cpu.SetAF(cpu.PopSp())
+			cpu.SetAF(cpu.PopSP())
 			return 12
 		},
 		0xf5: func() int { // PUSH AF.
-			cpu.PushSp(cpu.AF())
+			cpu.PushSP(cpu.AF())
 			return 16
 		},
 		0xf8: func() int { // LD HL,SP+r8.
-			cpu.SetHL(cpu.opSignedAdd(cpu.Sp(), cpu.IncPc()))
+			cpu.SetHL(cpu.opSignedAdd(cpu.SP(), cpu.IncPC()))
 			return 12
 		},
 		0xf9: func() int { // LD SP,HL.
-			cpu.SetSp(cpu.HL())
+			cpu.SetSP(cpu.HL())
 			return 8
 		},
 
@@ -766,35 +766,35 @@ func (gb *GameBoy) createInstructionSet() {
 			return 4
 		},
 		0xc6: func() int { // ADD A,d8.
-			cpu.SetA(cpu.opAdd(cpu.A(), cpu.IncPc(), 0))
+			cpu.SetA(cpu.opAdd(cpu.A(), cpu.IncPC(), 0))
 			return 8
 		},
 		0xce: func() int { // ADC A,d8.
-			cpu.SetA(cpu.opAdd(cpu.A(), cpu.IncPc(), 1))
+			cpu.SetA(cpu.opAdd(cpu.A(), cpu.IncPC(), 1))
 			return 8
 		},
 		0xd6: func() int { // SUB d8.
-			cpu.SetA(cpu.opSub(cpu.A(), cpu.IncPc(), 0))
+			cpu.SetA(cpu.opSub(cpu.A(), cpu.IncPC(), 0))
 			return 8
 		},
 		0xde: func() int { // SBC A,d8.
-			cpu.SetA(cpu.opSub(cpu.A(), cpu.IncPc(), 1))
+			cpu.SetA(cpu.opSub(cpu.A(), cpu.IncPC(), 1))
 			return 8
 		},
 		0xe6: func() int { // AND d8.
-			cpu.SetA(cpu.opAnd(cpu.A(), cpu.IncPc()))
+			cpu.SetA(cpu.opAnd(cpu.A(), cpu.IncPC()))
 			return 8
 		},
 		0xee: func() int { // XOR d8.
-			cpu.SetA(cpu.opXor(cpu.A(), cpu.IncPc()))
+			cpu.SetA(cpu.opXor(cpu.A(), cpu.IncPC()))
 			return 8
 		},
 		0xf6: func() int { // OR d8.
-			cpu.SetA(cpu.opOr(cpu.A(), cpu.IncPc()))
+			cpu.SetA(cpu.opOr(cpu.A(), cpu.IncPC()))
 			return 8
 		},
 		0xfe: func() int { // CP d8.
-			cpu.SetA(cpu.opCp(cpu.A(), cpu.IncPc()))
+			cpu.SetA(cpu.opCp(cpu.A(), cpu.IncPC()))
 			return 8
 		},
 
@@ -836,19 +836,19 @@ func (gb *GameBoy) createInstructionSet() {
 			return 8
 		},
 		0x33: func() int { // INC SP.
-			cpu.SetSp(cpu.Sp()+1)
+			cpu.SetSP(cpu.SP()+1)
 			return 8
 		},
 		0x39: func() int { // ADD HL,SP.
-			cpu.SetHL(cpu.opAdd16(cpu.HL(), cpu.Sp()))
+			cpu.SetHL(cpu.opAdd16(cpu.HL(), cpu.SP()))
 			return 8
 		},
 		0x3b: func() int { // DEC SP.
-			cpu.SetSp(cpu.Sp()-1)
+			cpu.SetSP(cpu.SP()-1)
 			return 8
 		},
 		0xe8: func() int { // ADD SP,r8.
-			cpu.SetSp(cpu.opSignedAdd(cpu.Sp(), cpu.IncPc()))
+			cpu.SetSP(cpu.opSignedAdd(cpu.SP(), cpu.IncPC()))
 			return 16
 		},
 	}

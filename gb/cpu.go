@@ -164,48 +164,48 @@ func (c *Cpu) SetFlagC(v bool) {
 }
 
 // Get the stack pointer.
-func (c *Cpu) Sp() uint16 {
+func (c *Cpu) SP() uint16 {
 	return c.sp
 }
 
 // Push a value to the stack.
-func (c *Cpu) PushSp(v uint16) {
+func (c *Cpu) PushSP(v uint16) {
 	c.sp -= 2
 	c.gb.mem.Write16(c.sp, v)
 }
 
 // Pop a value from the stack.
-func (c *Cpu) PopSp() uint16 {
+func (c *Cpu) PopSP() uint16 {
 	v := c.gb.mem.Read16(c.sp)
 	c.sp += 2
 	return v
 }
 
 // Set the stack pointer.
-func (c *Cpu) SetSp(v uint16) {
+func (c *Cpu) SetSP(v uint16) {
 	c.sp = v
 }
 
 // Get the program counter.
-func (c *Cpu) Pc() uint16 {
+func (c *Cpu) PC() uint16 {
 	return c.pc
 }
 
 // Increment the program counter by a byte and return the read value.
-func (c *Cpu) IncPc() uint8 {
+func (c *Cpu) IncPC() uint8 {
 	v := c.gb.mem.Read(c.pc)
 	c.pc++
 	return v
 }
 
 // Increment the program counter by a short and return the read value.
-func (c *Cpu) IncPc16() uint16 {
-	lo := c.IncPc()
-	hi := c.IncPc()
+func (c *Cpu) IncPC16() uint16 {
+	lo := c.IncPC()
+	hi := c.IncPC()
 	return utils.CombineBytes(hi, lo)
 }
 
 // Set the program counter.
-func (c *Cpu) SetPc(v uint16) {
+func (c *Cpu) SetPC(v uint16) {
 	c.pc = v
 }
