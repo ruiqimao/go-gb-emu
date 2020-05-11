@@ -797,6 +797,60 @@ func (gb *GameBoy) createInstructionSet() {
 			cpu.Set(RegA, cpu.opCp(cpu.Get(RegA), cpu.IncPc()))
 			return 8
 		},
+
+		// 16 bit arithmetic.
+		0x03: func() int { // INC BC.
+			cpu.Set16(RegBC, cpu.Get16(RegBC)+1)
+			return 8
+		},
+		0x09: func() int { // ADD HL,BC.
+			cpu.Set16(RegHL, cpu.opAdd16(cpu.Get16(RegHL), cpu.Get16(RegBC)))
+			return 8
+		},
+		0x0b: func() int { // DEC BC.
+			cpu.Set16(RegBC, cpu.Get16(RegBC)-1)
+			return 8
+		},
+		0x13: func() int { // INC DE.
+			cpu.Set16(RegDE, cpu.Get16(RegDE)+1)
+			return 8
+		},
+		0x19: func() int { // ADD HL,DE.
+			cpu.Set16(RegHL, cpu.opAdd16(cpu.Get16(RegHL), cpu.Get16(RegDE)))
+			return 8
+		},
+		0x1b: func() int { // DEC DE.
+			cpu.Set16(RegDE, cpu.Get16(RegDE)-1)
+			return 8
+		},
+		0x23: func() int { // INC HL.
+			cpu.Set16(RegHL, cpu.Get16(RegHL)+1)
+			return 8
+		},
+		0x29: func() int { // ADD HL,HL.
+			cpu.Set16(RegHL, cpu.opAdd16(cpu.Get16(RegHL), cpu.Get16(RegHL)))
+			return 8
+		},
+		0x2b: func() int { // DEC HL.
+			cpu.Set16(RegHL, cpu.Get16(RegHL)-1)
+			return 8
+		},
+		0x33: func() int { // INC SP.
+			cpu.SetSp(cpu.Sp()+1)
+			return 8
+		},
+		0x39: func() int { // ADD HL,SP.
+			cpu.Set16(RegHL, cpu.opAdd16(cpu.Get16(RegHL), cpu.Sp()))
+			return 8
+		},
+		0x3b: func() int { // DEC SP.
+			cpu.SetSp(cpu.Sp()-1)
+			return 8
+		},
+		0xe8: func() int { // ADD SP,r8.
+			cpu.SetSp(cpu.opSignedAdd(cpu.Sp(), cpu.IncPc()))
+			return 16
+		},
 	}
 }
 
@@ -929,6 +983,18 @@ func (c *Cpu) opCp(a uint8, b uint8) uint8 {
 	c.SetFlag(FlagN, true)
 	c.SetFlag(FlagH, a & 0xf < b & 0xf)
 	c.SetFlag(FlagC, a < b)
+
+	return r
+}
+
+// Perform a 16 bit add, update flags, and return the result.
+func (c *Cpu) opAdd16(a uint16, b uint16) uint16 {
+	r32 := uint32(a) + uint32(b)
+	r := uint16(r32)
+
+	c.SetFlag(FlagN, false)
+	c.SetFlag(FlagH, uint32(a & 0x0fff) > r32 & 0x0fff)
+	c.SetFlag(FlagC, r32 > 0xffff)
 
 	return r
 }

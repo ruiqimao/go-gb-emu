@@ -91,26 +91,16 @@ func (c *Cpu) Sp() uint16 {
 	return c.sp
 }
 
-// Increment the stack pointer.
-func (c *Cpu) IncSp() {
-	c.sp += 2
-}
-
-// Decrement the stack pointer.
-func (c *Cpu) DecSp() {
-	c.sp -= 2
-}
-
 // Push a value to the stack.
 func (c *Cpu) PushSp(v uint16) {
-	c.DecSp()
+	c.sp -= 2
 	c.gb.mem.Write16(c.sp, v)
 }
 
 // Pop a value from the stack.
 func (c *Cpu) PopSp() uint16 {
 	v := c.gb.mem.Read16(c.sp)
-	c.IncSp()
+	c.sp += 2
 	return v
 }
 
