@@ -48,7 +48,7 @@ func (c *Cpu) createInstructionSet() {
 		0x22: func() int { // LD (HL+),A.
 			hl := cpu.HL()
 			mem.Write(hl, cpu.A())
-			cpu.SetHL(hl+1)
+			cpu.SetHL(hl + 1)
 			return 8
 		},
 		0x26: func() int { // LD H,d8.
@@ -58,7 +58,7 @@ func (c *Cpu) createInstructionSet() {
 		0x2a: func() int { // LD A,(HL+).
 			hl := cpu.HL()
 			cpu.SetA(mem.Read(hl))
-			cpu.SetHL(hl+1)
+			cpu.SetHL(hl + 1)
 			return 8
 		},
 		0x2e: func() int { // LD L,d8.
@@ -68,7 +68,7 @@ func (c *Cpu) createInstructionSet() {
 		0x32: func() int { // LD (HL-),A.
 			hl := cpu.HL()
 			mem.Write(hl, cpu.A())
-			cpu.SetHL(hl-1)
+			cpu.SetHL(hl - 1)
 			return 8
 		},
 		0x36: func() int { // LD (HL),d8.
@@ -78,7 +78,7 @@ func (c *Cpu) createInstructionSet() {
 		0x3a: func() int { // LD A,(HL-).
 			hl := cpu.HL()
 			cpu.SetA(mem.Read(hl))
-			cpu.SetHL(hl-1)
+			cpu.SetHL(hl - 1)
 			return 8
 		},
 		0x3e: func() int { // LD A,d8.
@@ -350,11 +350,11 @@ func (c *Cpu) createInstructionSet() {
 			return 16
 		},
 		0xf0: func() int { // LD A,($FF00+a8).
-			cpu.SetA(mem.Read(0xff00+uint16(cpu.IncPC())))
+			cpu.SetA(mem.Read(0xff00 + uint16(cpu.IncPC())))
 			return 12
 		},
 		0xf2: func() int { // LD A,(C).
-			cpu.SetA(mem.Read(0xff00+uint16(cpu.C())))
+			cpu.SetA(mem.Read(0xff00 + uint16(cpu.C())))
 			return 8
 		},
 		0xfa: func() int { // LD A,(a16).
@@ -804,7 +804,7 @@ func (c *Cpu) createInstructionSet() {
 
 		// 16 bit arithmetic.
 		0x03: func() int { // INC BC.
-			cpu.SetBC(cpu.BC()+1)
+			cpu.SetBC(cpu.BC() + 1)
 			return 8
 		},
 		0x09: func() int { // ADD HL,BC.
@@ -812,11 +812,11 @@ func (c *Cpu) createInstructionSet() {
 			return 8
 		},
 		0x0b: func() int { // DEC BC.
-			cpu.SetBC(cpu.BC()-1)
+			cpu.SetBC(cpu.BC() - 1)
 			return 8
 		},
 		0x13: func() int { // INC DE.
-			cpu.SetDE(cpu.DE()+1)
+			cpu.SetDE(cpu.DE() + 1)
 			return 8
 		},
 		0x19: func() int { // ADD HL,DE.
@@ -824,11 +824,11 @@ func (c *Cpu) createInstructionSet() {
 			return 8
 		},
 		0x1b: func() int { // DEC DE.
-			cpu.SetDE(cpu.DE()-1)
+			cpu.SetDE(cpu.DE() - 1)
 			return 8
 		},
 		0x23: func() int { // INC HL.
-			cpu.SetHL(cpu.HL()+1)
+			cpu.SetHL(cpu.HL() + 1)
 			return 8
 		},
 		0x29: func() int { // ADD HL,HL.
@@ -836,11 +836,11 @@ func (c *Cpu) createInstructionSet() {
 			return 8
 		},
 		0x2b: func() int { // DEC HL.
-			cpu.SetHL(cpu.HL()-1)
+			cpu.SetHL(cpu.HL() - 1)
 			return 8
 		},
 		0x33: func() int { // INC SP.
-			cpu.SetSP(cpu.SP()+1)
+			cpu.SetSP(cpu.SP() + 1)
 			return 8
 		},
 		0x39: func() int { // ADD HL,SP.
@@ -848,7 +848,7 @@ func (c *Cpu) createInstructionSet() {
 			return 8
 		},
 		0x3b: func() int { // DEC SP.
-			cpu.SetSP(cpu.SP()-1)
+			cpu.SetSP(cpu.SP() - 1)
 			return 8
 		},
 		0xe8: func() int { // ADD SP,r8.
@@ -999,7 +999,7 @@ func (c *Cpu) createInstructionSet() {
 			return 4
 		},
 		0xcb: func() int { // PREFIX CB.
-			return 4 + cpu.instructions[uint16(cpu.IncPC()) + 0x100]()
+			return 4 + cpu.instructions[uint16(cpu.IncPC())+0x100]()
 		},
 		0xf3: func() int { // DI.
 			cpu.SetIME(false)
@@ -1019,7 +1019,7 @@ func (c *Cpu) opAdd(a uint8, b uint8, cy uint8) uint8 {
 
 	c.SetFlagZ(r == 0)
 	c.SetFlagN(false)
-	c.SetFlagH((a & 0xf) + (b & 0xf) + (cy & 0xf) > 0xf)
+	c.SetFlagH((a&0xf)+(b&0xf)+(cy&0xf) > 0xf)
 	c.SetFlagC(r16 > 0xff)
 
 	return r
@@ -1032,7 +1032,7 @@ func (c *Cpu) opSub(a uint8, b uint8, bw uint8) uint8 {
 
 	c.SetFlagZ(r == 0)
 	c.SetFlagN(true)
-	c.SetFlagH((a & 0xf) - (b & 0xf) - (bw & 0xf) > 0xf)
+	c.SetFlagH((a&0xf)-(b&0xf)-(bw&0xf) > 0xf)
 	c.SetFlagC(r16 > 0xff)
 
 	return r
@@ -1074,7 +1074,7 @@ func (c *Cpu) opDaa() uint8 {
 
 	// Stolen from https://forums.nesdev.com/viewtopic.php?t=15944#p196282.
 	if !c.FlagN() {
-		if c.FlagH() || (a & 0xf) > 9 {
+		if c.FlagH() || (a&0xf) > 9 {
 			a += 0x06
 		}
 		if c.FlagC() || a > 0x99 {
@@ -1095,7 +1095,6 @@ func (c *Cpu) opDaa() uint8 {
 
 	return a
 }
-
 
 // Perform an AND operation, update flags, and return the result.
 func (c *Cpu) opAnd(a uint8, b uint8) uint8 {
@@ -1139,7 +1138,7 @@ func (c *Cpu) opCp(a uint8, b uint8) uint8 {
 
 	c.SetFlagZ(r == 0)
 	c.SetFlagN(true)
-	c.SetFlagH(a & 0xf < b & 0xf)
+	c.SetFlagH(a&0xf < b&0xf)
 	c.SetFlagC(a < b)
 
 	return r
@@ -1151,7 +1150,7 @@ func (c *Cpu) opAdd16(a uint16, b uint16) uint16 {
 	r := uint16(r32)
 
 	c.SetFlagN(false)
-	c.SetFlagH(uint32(a & 0x0fff) > r32 & 0x0fff)
+	c.SetFlagH(uint32(a&0x0fff) > r32&0x0fff)
 	c.SetFlagC(r32 > 0xffff)
 
 	return r
@@ -1235,7 +1234,7 @@ func (c *Cpu) opHalt(ime bool, iE uint8, iF uint8) {
 		// HALT is executed normally.
 		c.SetHalt(true)
 	} else {
-		if iE & iF == 0 {
+		if iE&iF == 0 {
 			// HALT is executed normally.
 			c.SetHalt(true)
 		} else {
