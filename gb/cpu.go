@@ -1,6 +1,8 @@
 package gb
 
 import (
+	"fmt"
+
 	"github.com/ruiqimao/go-gb-emu/utils"
 )
 
@@ -39,10 +41,25 @@ func NewCpu(gb *GameBoy) *Cpu {
 		gb: gb,
 	}
 
-	// Create the instruction set.
-	c.createInstructionSet()
-
 	return c
+}
+
+// Perform a step and return how many cycles were used.
+func (c *Cpu) Step() (int, error) {
+	// If the CPU is halted, do nothing.
+	if c.Halted() {
+		return 4, nil
+	}
+
+	// Read an instruction.
+	opCode := c.IncPC()
+	inst := c.instructions[opCode]
+	if inst == nil {
+		return 0, fmt.Errorf("Unimplemented OP code: %02x", opCode)
+	}
+
+	// Execute the instruction.
+	return inst(), nil
 }
 
 // Getters/setters for registers.

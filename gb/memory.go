@@ -63,7 +63,7 @@ func (m *Memory) Read(addr uint16) uint8 {
 		return 0x00
 
 	// Cartridge ROM bank 1 - N.
-	case addr < 8000:
+	case addr < 0x8000:
 		// TODO.
 		return 0x00
 

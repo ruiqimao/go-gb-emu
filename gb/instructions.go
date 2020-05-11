@@ -7,7 +7,7 @@ import (
 // An Instruction returns how many cycles it takes to execute.
 type Instruction func() int
 
-func (c *Cpu) createInstructionSet() {
+func (c *Cpu) CreateInstructionSet() {
 	cpu := c
 	mem := c.gb.mem
 
@@ -862,17 +862,17 @@ func (c *Cpu) createInstructionSet() {
 			cpu.SetFlagZ(false)
 			return 4
 		},
-		0x0f: func() int {
+		0x0f: func() int { // RRCA.
 			cpu.SetA(cpu.opRotateRight(cpu.A(), false))
 			cpu.SetFlagZ(false)
 			return 4
 		},
-		0x17: func() int { // RLCA.
+		0x17: func() int { // RLA.
 			cpu.SetA(cpu.opRotateLeft(cpu.A(), true))
 			cpu.SetFlagZ(false)
 			return 4
 		},
-		0x1f: func() int {
+		0x1f: func() int { // RRA.
 			cpu.SetA(cpu.opRotateRight(cpu.A(), true))
 			cpu.SetFlagZ(false)
 			return 4
