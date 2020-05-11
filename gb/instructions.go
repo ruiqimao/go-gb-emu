@@ -851,6 +851,113 @@ func (gb *GameBoy) createInstructionSet() {
 			cpu.SetSP(cpu.opSignedAdd(cpu.SP(), cpu.IncPC()))
 			return 16
 		},
+
+		// Jumps and calls.
+		0x18: func() int { // JR r8.
+			cpu.opJr(true, cpu.IncPC())
+			return 12
+		},
+		0x20: func() int { // JR NZ,r8.
+			return cpu.opJr(!cpu.FlagZ(), cpu.IncPC())
+		},
+		0x28: func() int { // JR Z,r8.
+			return cpu.opJr(cpu.FlagZ(), cpu.IncPC())
+		},
+		0x30: func() int { // JR NC,r8.
+			return cpu.opJr(!cpu.FlagC(), cpu.IncPC())
+		},
+		0x38: func() int { // JR C,r8.
+			return cpu.opJr(cpu.FlagC(), cpu.IncPC())
+		},
+		0xc0: func() int { // RET NZ.
+			return cpu.opRet(!cpu.FlagZ())
+		},
+		0xc2: func() int { // JP NZ,a16.
+			return cpu.opJp(!cpu.FlagZ(), cpu.IncPC16())
+		},
+		0xc3: func() int { // JP a16.
+			cpu.opJp(true, cpu.IncPC16())
+			return 16
+		},
+		0xc4: func() int { // CALL NZ,a16.
+			return cpu.opCall(!cpu.FlagZ(), cpu.IncPC16())
+		},
+		0xc7: func() int { // RST 00H.
+			cpu.opCall(true, 0x0000)
+			return 16
+		},
+		0xc8: func() int { // RET Z.
+			return cpu.opRet(cpu.FlagZ())
+		},
+		0xc9: func() int { // RET.
+			cpu.opRet(true)
+			return 16
+		},
+		0xca: func() int { // JP Z,a16.
+			return cpu.opJp(cpu.FlagZ(), cpu.IncPC16())
+		},
+		0xcc: func() int { // CALL Z,a16.
+			return cpu.opCall(cpu.FlagZ(), cpu.IncPC16())
+		},
+		0xcd: func() int { // CALL a16.
+			cpu.opCall(true, cpu.IncPC16())
+			return 24
+		},
+		0xcf: func() int { // RST 08H.
+			cpu.opCall(true, 0x0008)
+			return 16
+		},
+		0xd0: func() int { // RET NC.
+			return cpu.opRet(!cpu.FlagC())
+		},
+		0xd2: func() int { // JP NC,a16.
+			return cpu.opJp(!cpu.FlagC(), cpu.IncPC16())
+		},
+		0xd4: func() int { // CALL NC,a16.
+			return cpu.opCall(!cpu.FlagC(), cpu.IncPC16())
+		},
+		0xd7: func() int { // RST 10H.
+			cpu.opCall(true, 0x0010)
+			return 16
+		},
+		0xd8: func() int { // RET C.
+			return cpu.opRet(cpu.FlagC())
+		},
+		0xd9: func() int { // RETI.
+			cpu.opRet(true)
+			cpu.SetIME(true)
+			return 16
+		},
+		0xda: func() int { // JP C,a16.
+			return cpu.opJp(cpu.FlagC(), cpu.IncPC16())
+		},
+		0xdc: func() int { // CALL C,a16.
+			return cpu.opCall(cpu.FlagC(), cpu.IncPC16())
+		},
+		0xdf: func() int { // RST 18H.
+			cpu.opCall(true, 0x0018)
+			return 16
+		},
+		0xe7: func() int { // RST 20H.
+			cpu.opCall(true, 0x0020)
+			return 16
+		},
+		0xe9: func() int { // JP (HL).
+			cpu.opJp(true, mem.Read16(cpu.HL()))
+			return 4
+		},
+		0xef: func() int { // RST 28H.
+			cpu.opCall(true, 0x0028)
+			return 16
+		},
+		0xf7: func() int { // RST 30H.
+			cpu.opCall(true, 0x0030)
+			return 16
+		},
+		0xff: func() int { // RST 38H.
+			cpu.opCall(true, 0x0038)
+			return 16
+		},
 	}
 }
 
@@ -997,4 +1104,41 @@ func (c *Cpu) opAdd16(a uint16, b uint16) uint16 {
 	c.SetFlagC(r32 > 0xffff)
 
 	return r
+}
+
+// Perform a relative jump if the given condition is true. Returns how many cycles it took.
+func (c *Cpu) opJr(cond bool, r uint8) int {
+	if cond {
+		c.SetPC(c.PC() + uint16(int8(r)))
+		return 12
+	}
+	return 8
+}
+
+// Perform a return if the given condition is true. Returns how many cycles it took.
+func (c *Cpu) opRet(cond bool) int {
+	if cond {
+		c.SetPC(c.PopSP())
+		return 20
+	}
+	return 8
+}
+
+// Perform a jump if the given condition is true. Returns how many cycles it took.
+func (c *Cpu) opJp(cond bool, a uint16) int {
+	if cond {
+		c.SetPC(a)
+		return 16
+	}
+	return 12
+}
+
+// Perform a call if the given condition is true. Returns how many cycles it took.
+func (c *Cpu) opCall(cond bool, a uint16) int {
+	if cond {
+		c.PushSP(c.PC())
+		c.SetPC(a)
+		return 24
+	}
+	return 12
 }

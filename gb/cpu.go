@@ -22,6 +22,9 @@ type Cpu struct {
 
 	// Program counter.
 	pc uint16
+
+	// Misc registers.
+	ime bool
 }
 
 func NewCpu(gb *GameBoy) *Cpu {
@@ -208,4 +211,14 @@ func (c *Cpu) IncPC16() uint16 {
 // Set the program counter.
 func (c *Cpu) SetPC(v uint16) {
 	c.pc = v
+}
+
+// Get the interrupt master enable.
+func (c *Cpu) IME() bool {
+	return c.ime
+}
+
+// Set the interrupt master enable.
+func (c *Cpu) SetIME(v bool) {
+	c.ime = v
 }
