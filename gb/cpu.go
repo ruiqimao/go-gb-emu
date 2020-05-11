@@ -4,35 +4,18 @@ import (
 	"github.com/ruiqimao/go-gb-emu/utils"
 )
 
-const (
-	// 8 bit registers.
-	RegB = 0
-	RegC = 1
-	RegD = 2
-	RegE = 3
-	RegH = 4
-	RegL = 5
-	RegA = 6
-	RegF = 7
-
-	// 16 bit registers.
-	RegBC = 0
-	RegDE = 2
-	RegHL = 4
-	RegAF = 6
-
-	// Flags.
-	FlagC = 4
-	FlagH = 5
-	FlagN = 6
-	FlagZ = 7
-)
-
 type Cpu struct {
 	gb *GameBoy
 
 	// Registers.
-	r [8]uint8
+	b uint8
+	c uint8
+	d uint8
+	e uint8
+	h uint8
+	l uint8
+	a uint8
+	f uint8
 
 	// Stack pointer.
 	sp uint16
@@ -48,42 +31,136 @@ func NewCpu(gb *GameBoy) *Cpu {
 	return c
 }
 
-// Get the value of a register.
-func (c *Cpu) Get(r uint8) uint8 {
-	return c.r[r]
+// Getters/setters for registers.
+func (c *Cpu) B() uint8 {
+	return c.b
 }
 
-// Set the value of a register.
-func (c *Cpu) Set(r uint8, v uint8) {
-	if r == RegF {
-		// Last 4 bits of F cannot be set.
-		v &= 0xf0
-	}
-	c.r[r] = v
+func (c *Cpu) SetB(v uint8) {
+	c.b = v
 }
 
-// Get the value of a 16 bit register.
-func (c *Cpu) Get16(r uint8) uint16 {
-	return utils.CombineBytes(c.r[r], c.r[r+1])
+func (c *Cpu) C() uint8 {
+	return c.c
 }
 
-// Set the value of a 16 bit register.
-func (c *Cpu) Set16(r uint8, v uint16) {
-	if r == RegAF {
-		// Last 4 bits of F cannot be set.
-		v &= 0xfff0
-	}
-	c.r[r], c.r[r+1] = utils.SplitShort(v)
+func (c *Cpu) SetC(v uint8) {
+	c.c = v
 }
 
-// Get whether a flag is enabled.
-func (c *Cpu) GetFlag(f int) bool {
-	return utils.GetBit(c.r[RegF], f)
+func (c *Cpu) D() uint8 {
+	return c.d
 }
 
-// Set whether a flag is enabled.
-func (c *Cpu) SetFlag(f int, v bool) {
-	utils.SetBit(c.r[RegF], f, v)
+func (c *Cpu) SetD(v uint8) {
+	c.d = v
+}
+
+func (c *Cpu) E() uint8 {
+	return c.e
+}
+
+func (c *Cpu) SetE(v uint8) {
+	c.e = v
+}
+
+func (c *Cpu) H() uint8 {
+	return c.h
+}
+
+func (c *Cpu) SetH(v uint8) {
+	c.h = v
+}
+
+func (c *Cpu) L() uint8 {
+	return c.l
+}
+
+func (c *Cpu) SetL(v uint8) {
+	c.l = v
+}
+
+func (c *Cpu) A() uint8 {
+	return c.a
+}
+
+func (c *Cpu) SetA(v uint8) {
+	c.a = v
+}
+
+func (c *Cpu) F() uint8 {
+	return c.f
+}
+
+func (c *Cpu) SetF(v uint8) {
+	// Last 4 bits of F must be 0.
+	c.f = v & 0xf0
+}
+
+func (c *Cpu) BC() uint16 {
+	return utils.CombineBytes(c.b, c.c)
+}
+
+func (c *Cpu) SetBC(v uint16) {
+	c.b, c.c = utils.SplitShort(v)
+}
+
+func (c *Cpu) DE() uint16 {
+	return utils.CombineBytes(c.d, c.e)
+}
+
+func (c *Cpu) SetDE(v uint16) {
+	c.d, c.e = utils.SplitShort(v)
+}
+
+func (c *Cpu) HL() uint16 {
+	return utils.CombineBytes(c.h, c.l)
+}
+
+func (c *Cpu) SetHL(v uint16) {
+	c.h, c.l = utils.SplitShort(v)
+}
+
+func (c *Cpu) AF() uint16 {
+	return utils.CombineBytes(c.a, c.f)
+}
+
+func (c *Cpu) SetAF(v uint16) {
+	// Last 4 bits of F must be 0.
+	c.a, c.f = utils.SplitShort(v & 0xfff0)
+}
+
+// Getters/setters for flags.
+func (c *Cpu) FlagZ() bool {
+	return utils.GetBit(c.f, 7)
+}
+
+func (c *Cpu) SetFlagZ(v bool) {
+	utils.SetBit(c.f, 7, v)
+}
+
+func (c *Cpu) FlagN() bool {
+	return utils.GetBit(c.f, 6)
+}
+
+func (c *Cpu) SetFlagN(v bool) {
+	utils.SetBit(c.f, 6, v)
+}
+
+func (c *Cpu) FlagH() bool {
+	return utils.GetBit(c.f, 5)
+}
+
+func (c *Cpu) SetFlagH(v bool) {
+	utils.SetBit(c.f, 5, v)
+}
+
+func (c *Cpu) FlagC() bool {
+	return utils.GetBit(c.f, 4)
+}
+
+func (c *Cpu) SetFlagC(v bool) {
+	utils.SetBit(c.f, 4, v)
 }
 
 // Get the stack pointer.
