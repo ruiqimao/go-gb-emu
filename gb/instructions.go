@@ -1,5 +1,9 @@
 package gb
 
+import (
+	"github.com/ruiqimao/go-gb-emu/utils"
+)
+
 // An Instruction returns how many cycles it takes to execute.
 type Instruction func() int
 
@@ -357,5 +361,95 @@ func (gb *GameBoy) createInstructionSet() {
 			cpu.Set(RegA, mem.Read(cpu.IncPc16()))
 			return 16
 		},
+
+		// 16 bit loads.
+		0x01: func() int { // LD BC,d16.
+			cpu.Set16(RegBC, cpu.IncPc16())
+			return 12
+		},
+		0x08: func() int { // LD (a16),SP.
+			mem.Write16(cpu.IncPc16(), cpu.Sp())
+			return 20
+		},
+		0x11: func() int { // LD DE,d16.
+			cpu.Set16(RegDE, cpu.IncPc16())
+			return 12
+		},
+		0x21: func() int { // LD HL,d16.
+			cpu.Set16(RegHL, cpu.IncPc16())
+			return 12
+		},
+		0x31: func() int { // LD SP,d16.
+			cpu.SetSp(cpu.IncPc16())
+			return 12
+		},
+		0xc1: func() int { // POP BC.
+			cpu.Set16(RegBC, cpu.PopSp())
+			return 12
+		},
+		0xc5: func() int { // PUSH BC.
+			cpu.PushSp(cpu.Get16(RegBC))
+			return 16
+		},
+		0xd1: func() int { // POP DE.
+			cpu.Set16(RegDE, cpu.PopSp())
+			return 12
+		},
+		0xd5: func() int { // PUSH DE.
+			cpu.PushSp(cpu.Get16(RegDE))
+			return 16
+		},
+		0xe1: func() int { // POP HL.
+			cpu.Set16(RegHL, cpu.PopSp())
+			return 12
+		},
+		0xe5: func() int { // PUSH HL.
+			cpu.PushSp(cpu.Get16(RegHL))
+			return 16
+		},
+		0xf1: func() int { // POP AF.
+			cpu.Set16(RegAF, cpu.PopSp())
+			return 12
+		},
+		0xf5: func() int { // PUSH AF.
+			cpu.PushSp(cpu.Get16(RegAF))
+			return 16
+		},
+		0xf8: func() int { // LD HL,SP+r8.
+			r, flags := opSignedAdd(cpu.Sp(), cpu.IncPc())
+			cpu.Set16(RegHL, r)
+			cpu.Set(RegF, flags)
+			return 12
+		},
+		0xf9: func() int { // LD SP,HL.
+			cpu.SetSp(cpu.Get16(RegHL))
+			return 8
+		},
 	}
+}
+
+// Perform an add and return the result and updated flags.
+func opAdd(a uint8, b uint8, c uint8) (uint8, uint8) {
+	r16 := uint16(a) + uint16(b) + uint16(c)
+	r := uint8(r16)
+
+	flags := uint8(0)
+	flags = utils.SetBit(flags, FlagZ, r == 0)
+	flags = utils.SetBit(flags, FlagN, false)
+	flags = utils.SetBit(flags, FlagH, (a & 0xf) + (b & 0xf) + (c & 0xf) > 0xf)
+	flags = utils.SetBit(flags, FlagC, r16 > 0xff)
+
+	return r, flags
+}
+
+// Perform a signed add and return the result and updated flags.
+func opSignedAdd(a uint16, b uint8) (uint16, uint8) {
+	r := uint16(int32(a) + int32(int8(b)))
+
+	// Get the flags from doing an ordinary add.
+	_, flags := opAdd(uint8(a), b, 0)
+	flags = utils.SetBit(flags, FlagZ, false)
+	flags = utils.SetBit(flags, FlagN, false)
+
+	return r, flags
 }

@@ -101,16 +101,22 @@ func (c *Cpu) DecSp() {
 	c.sp -= 2
 }
 
-// Push a register to the stack.
-func (c *Cpu) PushSp(r uint8) {
+// Push a value to the stack.
+func (c *Cpu) PushSp(v uint16) {
 	c.DecSp()
-	c.gb.mem.Write16(c.sp, c.Get16(r))
+	c.gb.mem.Write16(c.sp, v)
 }
 
-// Pop a register from the stack.
-func (c *Cpu) PopSp(r uint8) {
-	c.Set16(r, c.gb.mem.Read16(c.sp))
+// Pop a value from the stack.
+func (c *Cpu) PopSp() uint16 {
+	v := c.gb.mem.Read16(c.sp)
 	c.IncSp()
+	return v
+}
+
+// Set the stack pointer.
+func (c *Cpu) SetSp(v uint16) {
+	c.sp = v
 }
 
 // Get the program counter.
