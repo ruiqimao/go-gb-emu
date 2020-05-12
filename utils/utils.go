@@ -23,3 +23,17 @@ func SetBit(v uint8, i int, on bool) uint8 {
 		return v & ^(0x1 << i)
 	}
 }
+
+// Get the bit at a position for a short.
+func GetBit16(v uint16, i int) bool {
+	return (v>>i)&0x1 == 0x1
+}
+
+// Set the bit at a position for a short.
+func SetBit16(v uint16, i int, on bool) uint16 {
+	if on {
+		return v | (0x1 << i)
+	} else {
+		return v & ^(0x1 << i)
+	}
+}

@@ -70,16 +70,47 @@ func (m *Memory) BootRomEnabled() bool {
 
 // Read an I/O register.
 func (m *Memory) ReadIO(addr uint16) uint8 {
+	switch addr {
+
 	// TODO.
-	return 0x00
+
+	case AddrDIV:
+		// DIV register is upper 8 bits of internal counter.
+		return uint8(m.gb.cpu.IC() >> 8)
+
+	case AddrIF:
+		// Upper 3 bits are always high.
+		return m.io[addr-0xff00] | 0xe0
+
+	default:
+		return m.io[addr-0xff00]
+
+	}
 }
 
 // Write to an I/O register.
 func (m *Memory) WriteIO(addr uint16, v uint8) {
-	// TODO.
 	if m.gb.Debugging() {
-		if addr == 0xff01 {
-			fmt.Printf("%c", v)
+		if addr == AddrSC && v == 0x81 {
+			fmt.Printf("%c", m.Read(AddrSB))
 		}
+	}
+
+	switch addr {
+
+	// TODO.
+
+	case AddrDIV:
+		// DIV maps directly to internal counter.
+		lo := uint8(m.gb.cpu.IC())
+		m.gb.cpu.SetIC(utils.CombineBytes(v, lo))
+
+	case AddrTAC:
+		// Only lower 3 bits are writable.
+		m.io[addr-0xff00] = v & 0x07
+
+	default:
+		m.io[addr-0xff00] = v
+
 	}
 }

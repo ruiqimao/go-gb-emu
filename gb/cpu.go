@@ -28,17 +28,25 @@ type Cpu struct {
 	// Program counter.
 	pc uint16
 
+	// Internal counter.
+	ic uint16
+
 	// Interrupt master.
 	ime bool
 
 	// Halt and bug flags.
 	halt    bool
 	haltBug bool
+
+	// Misc flags.
+	of bool // Timer overflow.
+
 }
 
 func NewCpu(gb *GameBoy) *Cpu {
 	c := &Cpu{
 		gb: gb,
+		ic: 0xabcc, // Initial value of internal counter.
 	}
 
 	return c
@@ -46,6 +54,27 @@ func NewCpu(gb *GameBoy) *Cpu {
 
 // Perform a step and return how many cycles were used.
 func (c *Cpu) Step() (int, error) {
+	// Get whether interrupts will be handled this cycle. This gives us the behavior of EI taking
+	// effect in the following cycle.
+	ime := c.ime
+
+	// Execute the next instruction.
+	cycles, err := c.execNextInstruction()
+	if err != nil {
+		return cycles, err
+	}
+
+	// Handle interrupts.
+	cycles += c.handleInterrupts(ime)
+
+	// Update timers.
+	c.updateTimers(cycles)
+
+	return cycles, nil
+}
+
+// Execute the next instruction and return how many cycles were used.
+func (c *Cpu) execNextInstruction() (int, error) {
 	// If the CPU is halted, do nothing.
 	if c.Halted() {
 		return 4, nil
@@ -244,6 +273,16 @@ func (c *Cpu) IncPC16() uint16 {
 // Set the program counter.
 func (c *Cpu) SetPC(v uint16) {
 	c.pc = v
+}
+
+// Get the internal counter.
+func (c *Cpu) IC() uint16 {
+	return c.ic
+}
+
+// Set the internal counter.
+func (c *Cpu) SetIC(v uint16) {
+	c.ic = v
 }
 
 // Get interrupt master.

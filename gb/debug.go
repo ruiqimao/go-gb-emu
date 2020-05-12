@@ -31,7 +31,7 @@ type Snapshot struct {
 	SP uint16
 
 	// Program counter.
-	PC uint16
+	PC              uint16
 	InstructionName string
 
 	// Memory.
@@ -147,7 +147,7 @@ func (gb *GameBoy) InstructionName() string {
 	name := InstructionNames[opCode]
 
 	// Get all the possible components.
-	d16 := gb.mem.Read16(gb.cpu.PC()+0x1)
+	d16 := gb.mem.Read16(gb.cpu.PC() + 0x1)
 	d8 := uint8(d16)
 	a16 := fmt.Sprintf("$%04x", d16)
 	a8 := fmt.Sprintf("$%02x", d8)

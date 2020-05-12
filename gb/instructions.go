@@ -990,6 +990,7 @@ func (c *Cpu) CreateInstructionSet() {
 			return 4
 		},
 		0x10: func() int { // STOP.
+			// TODO: Properly implement STOP.
 			cpu.SetHalt(true)
 			cpu.IncPC()
 			return 4
@@ -1293,7 +1294,7 @@ func (c *Cpu) CreateInstructionSet() {
 		},
 		0x146: func() int { // BIT 0,(HL).
 			cpu.opBit(mem.Read(cpu.HL()), 0)
-			return 16
+			return 12
 		},
 		0x147: func() int { // BIT 0,A.
 			cpu.opBit(cpu.A(), 0)
@@ -1325,7 +1326,7 @@ func (c *Cpu) CreateInstructionSet() {
 		},
 		0x14e: func() int { // BIT 1,(HL).
 			cpu.opBit(mem.Read(cpu.HL()), 1)
-			return 16
+			return 12
 		},
 		0x14f: func() int { // BIT 1,A.
 			cpu.opBit(cpu.A(), 1)
@@ -1357,7 +1358,7 @@ func (c *Cpu) CreateInstructionSet() {
 		},
 		0x156: func() int { // BIT 2,(HL).
 			cpu.opBit(mem.Read(cpu.HL()), 2)
-			return 16
+			return 12
 		},
 		0x157: func() int { // BIT 2,A.
 			cpu.opBit(cpu.A(), 2)
@@ -1389,7 +1390,7 @@ func (c *Cpu) CreateInstructionSet() {
 		},
 		0x15e: func() int { // BIT 3,(HL).
 			cpu.opBit(mem.Read(cpu.HL()), 3)
-			return 16
+			return 12
 		},
 		0x15f: func() int { // BIT 3,A.
 			cpu.opBit(cpu.A(), 3)
@@ -1421,7 +1422,7 @@ func (c *Cpu) CreateInstructionSet() {
 		},
 		0x166: func() int { // BIT 4,(HL).
 			cpu.opBit(mem.Read(cpu.HL()), 4)
-			return 16
+			return 12
 		},
 		0x167: func() int { // BIT 4,A.
 			cpu.opBit(cpu.A(), 4)
@@ -1453,7 +1454,7 @@ func (c *Cpu) CreateInstructionSet() {
 		},
 		0x16e: func() int { // BIT 5,(HL).
 			cpu.opBit(mem.Read(cpu.HL()), 5)
-			return 16
+			return 12
 		},
 		0x16f: func() int { // BIT 5,A.
 			cpu.opBit(cpu.A(), 5)
@@ -1485,7 +1486,7 @@ func (c *Cpu) CreateInstructionSet() {
 		},
 		0x176: func() int { // BIT 6,(HL).
 			cpu.opBit(mem.Read(cpu.HL()), 6)
-			return 16
+			return 12
 		},
 		0x177: func() int { // BIT 6,A.
 			cpu.opBit(cpu.A(), 6)
@@ -1517,7 +1518,7 @@ func (c *Cpu) CreateInstructionSet() {
 		},
 		0x17e: func() int { // BIT 7,(HL).
 			cpu.opBit(mem.Read(cpu.HL()), 7)
-			return 16
+			return 12
 		},
 		0x17f: func() int { // BIT 7,A.
 			cpu.opBit(cpu.A(), 7)
@@ -2310,7 +2311,7 @@ func (c *Cpu) opSr(a uint8, keepMSB bool) uint8 {
 
 // Perform a swap, update flags, and return the result.
 func (c *Cpu) opSwap(a uint8) uint8 {
-	r := (a & 0x0f) << 4 | (a & 0xf0) >> 4
+	r := (a&0x0f)<<4 | (a&0xf0)>>4
 
 	c.SetFlagZ(r == 0)
 	c.SetFlagN(false)

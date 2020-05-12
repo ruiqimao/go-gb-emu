@@ -39,6 +39,7 @@ type Memory struct {
 	wram [0x2000]uint8
 	oam  [0x100]uint8
 	hram [0xff]uint8
+	io   [0x80]uint8
 	ie   uint8
 }
 
