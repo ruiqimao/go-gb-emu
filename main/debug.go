@@ -53,7 +53,7 @@ func (e *Emulator) debugExec(input []string) {
 		fmt.Printf("\n")
 
 		// Print stack pointer and program counter.
-		fmt.Printf("SP: %04x (%04x)\n", ss.SP, binary.BigEndian.Uint16(ss.Memory[ss.SP:]))
+		fmt.Printf("SP: %04x (%04x)\n", ss.SP, binary.LittleEndian.Uint16(ss.Memory[ss.SP:]))
 		fmt.Printf("PC: %04x (%02x) (%s)\n", ss.PC, ss.Memory[ss.PC], ss.InstructionName)
 
 	// Read memory.
@@ -84,6 +84,25 @@ func (e *Emulator) debugExec(input []string) {
 		}
 		cycles := 0
 		for i := 0; i < steps; i++ {
+			cycles += e.gb.Step()
+		}
+		fmt.Printf("%d cycles\n", cycles)
+
+	// Run until PC reaches memory address.
+	case "break", "b":
+		addrBytes, err := hex.DecodeString(fmt.Sprintf("%04s", input[1]))
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%v\n", err)
+			break
+		}
+		addr := binary.BigEndian.Uint16(addrBytes)
+
+		cycles := e.gb.Step()
+		for {
+			if e.gb.PC() == addr {
+				break
+			}
+
 			cycles += e.gb.Step()
 		}
 		fmt.Printf("%d cycles\n", cycles)

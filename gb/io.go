@@ -1,6 +1,8 @@
 package gb
 
 import (
+	"fmt"
+
 	"github.com/ruiqimao/go-gb-emu/utils"
 )
 
@@ -75,4 +77,9 @@ func (m *Memory) ReadIO(addr uint16) uint8 {
 // Write to an I/O register.
 func (m *Memory) WriteIO(addr uint16, v uint8) {
 	// TODO.
+	if m.gb.Debugging() {
+		if addr == 0xff01 {
+			fmt.Printf("%c", v)
+		}
+	}
 }

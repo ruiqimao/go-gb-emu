@@ -51,6 +51,10 @@ func NewMemory(gb *GameBoy) *Memory {
 
 // Read a byte from memory.
 func (m *Memory) Read(addr uint16) uint8 {
+	if m.gb.Debugging() && int(addr) < len(m.gb.dbgRom) {
+		return m.gb.dbgRom[addr]
+	}
+
 	switch {
 
 	// Boot ROM.

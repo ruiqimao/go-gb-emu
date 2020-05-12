@@ -52,6 +52,7 @@ func (c *Cpu) Step() (int, error) {
 	}
 
 	// Read an instruction.
+	//fmt.Printf("%04x: %s\n", c.PC(), c.gb.InstructionName())
 	opCode := c.IncPC()
 	inst := c.instructions[opCode]
 	if inst == nil {

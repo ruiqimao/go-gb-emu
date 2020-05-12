@@ -1,5 +1,10 @@
 package gb
 
+import (
+	"fmt"
+	"strings"
+)
+
 // A snapshot of the Game Boy state.
 type Snapshot struct {
 	// Registers.
@@ -44,6 +49,25 @@ type Snapshot struct {
 	IME     bool
 }
 
+// Load a debug ROM.
+func (gb *GameBoy) LoadDebugRom(r []uint8) {
+	gb.dbgRom = make([]uint8, len(r))
+	copy(gb.dbgRom, r)
+
+	// Initialize manually due to no Boot ROM.
+	gb.cpu.SetSP(0xfffe)
+	gb.cpu.SetPC(0x0100)
+	gb.cpu.SetBC(0x0013)
+	gb.cpu.SetDE(0x00d8)
+	gb.cpu.SetHL(0x014d)
+	gb.cpu.SetAF(0x01b0)
+}
+
+// Whether debug is enabled.
+func (gb *GameBoy) Debugging() bool {
+	return gb.dbgRom != nil
+}
+
 // Run the Game Boy clock.
 func (gb *GameBoy) Resume() {
 	gb.clk.Resume()
@@ -82,11 +106,7 @@ func (gb *GameBoy) Snapshot() Snapshot {
 
 	// Program counter.
 	ss.PC = gb.cpu.PC()
-	inst := uint16(gb.mem.Read(ss.PC))
-	if inst == 0xcb {
-		inst = 0x100 + uint16(gb.mem.Read(ss.PC+1))
-	}
-	ss.InstructionName = InstructionNames[inst]
+	ss.InstructionName = gb.InstructionName()
 
 	// Flags.
 	ss.FlagZ = gb.cpu.FlagZ()
@@ -111,4 +131,39 @@ func (gb *GameBoy) Snapshot() Snapshot {
 	ss.IME = gb.cpu.IME()
 
 	return ss
+}
+
+// Get the program counter for breakpoints.
+func (gb *GameBoy) PC() uint16 {
+	return gb.cpu.PC()
+}
+
+// Get a readable version of the current instruction.
+func (gb *GameBoy) InstructionName() string {
+	opCode := uint16(gb.mem.Read(gb.cpu.PC()))
+	if opCode == 0xcb {
+		opCode = uint16(gb.mem.Read(gb.cpu.PC())+1) + 0x100
+	}
+	name := InstructionNames[opCode]
+
+	// Get all the possible components.
+	d16 := gb.mem.Read16(gb.cpu.PC()+0x1)
+	d8 := uint8(d16)
+	a16 := fmt.Sprintf("$%04x", d16)
+	a8 := fmt.Sprintf("$%02x", d8)
+	r8 := int8(d8)
+
+	// Replace tokens.
+	if r8 < 0 {
+		name = strings.ReplaceAll(name, "+r8", "r8")
+		name = strings.ReplaceAll(name, "r8", "-r8")
+		r8 *= -1
+	}
+	name = strings.ReplaceAll(name, "d16", fmt.Sprintf("%04x", d16))
+	name = strings.ReplaceAll(name, "d8", fmt.Sprintf("%02x", d8))
+	name = strings.ReplaceAll(name, "a16", a16)
+	name = strings.ReplaceAll(name, "a8", a8)
+	name = strings.ReplaceAll(name, "r8", fmt.Sprintf("%02x", r8))
+
+	return name
 }

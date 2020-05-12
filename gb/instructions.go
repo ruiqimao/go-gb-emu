@@ -514,131 +514,131 @@ func (c *Cpu) CreateInstructionSet() {
 			return 4
 		},
 		0x80: func() int { // ADD A,B.
-			cpu.SetA(cpu.opAdd(cpu.A(), cpu.B(), 0))
+			cpu.SetA(cpu.opAdd(cpu.A(), cpu.B(), false))
 			return 4
 		},
 		0x81: func() int { // ADD A,C.
-			cpu.SetA(cpu.opAdd(cpu.A(), cpu.C(), 0))
+			cpu.SetA(cpu.opAdd(cpu.A(), cpu.C(), false))
 			return 4
 		},
 		0x82: func() int { // ADD A,D.
-			cpu.SetA(cpu.opAdd(cpu.A(), cpu.D(), 0))
+			cpu.SetA(cpu.opAdd(cpu.A(), cpu.D(), false))
 			return 4
 		},
 		0x83: func() int { // ADD A,E.
-			cpu.SetA(cpu.opAdd(cpu.A(), cpu.E(), 0))
+			cpu.SetA(cpu.opAdd(cpu.A(), cpu.E(), false))
 			return 4
 		},
 		0x84: func() int { // ADD A,H.
-			cpu.SetA(cpu.opAdd(cpu.A(), cpu.H(), 0))
+			cpu.SetA(cpu.opAdd(cpu.A(), cpu.H(), false))
 			return 4
 		},
 		0x85: func() int { // ADD A,L.
-			cpu.SetA(cpu.opAdd(cpu.A(), cpu.L(), 0))
+			cpu.SetA(cpu.opAdd(cpu.A(), cpu.L(), false))
 			return 4
 		},
 		0x86: func() int { // ADD A,(HL).
-			cpu.SetA(cpu.opAdd(cpu.A(), mem.Read(cpu.HL()), 0))
+			cpu.SetA(cpu.opAdd(cpu.A(), mem.Read(cpu.HL()), false))
 			return 8
 		},
 		0x87: func() int { // ADD A,A.
-			cpu.SetA(cpu.opAdd(cpu.A(), cpu.A(), 0))
+			cpu.SetA(cpu.opAdd(cpu.A(), cpu.A(), false))
 			return 4
 		},
 		0x88: func() int { // ADC A,B.
-			cpu.SetA(cpu.opAdd(cpu.A(), cpu.B(), 1))
+			cpu.SetA(cpu.opAdd(cpu.A(), cpu.B(), cpu.FlagC()))
 			return 4
 		},
 		0x89: func() int { // ADC A,C.
-			cpu.SetA(cpu.opAdd(cpu.A(), cpu.C(), 1))
+			cpu.SetA(cpu.opAdd(cpu.A(), cpu.C(), cpu.FlagC()))
 			return 4
 		},
 		0x8a: func() int { // ADC A,D.
-			cpu.SetA(cpu.opAdd(cpu.A(), cpu.D(), 1))
+			cpu.SetA(cpu.opAdd(cpu.A(), cpu.D(), cpu.FlagC()))
 			return 4
 		},
 		0x8b: func() int { // ADC A,E.
-			cpu.SetA(cpu.opAdd(cpu.A(), cpu.E(), 1))
+			cpu.SetA(cpu.opAdd(cpu.A(), cpu.E(), cpu.FlagC()))
 			return 4
 		},
 		0x8c: func() int { // ADC A,H.
-			cpu.SetA(cpu.opAdd(cpu.A(), cpu.H(), 1))
+			cpu.SetA(cpu.opAdd(cpu.A(), cpu.H(), cpu.FlagC()))
 			return 4
 		},
 		0x8d: func() int { // ADC A,L.
-			cpu.SetA(cpu.opAdd(cpu.A(), cpu.L(), 1))
+			cpu.SetA(cpu.opAdd(cpu.A(), cpu.L(), cpu.FlagC()))
 			return 4
 		},
 		0x8e: func() int { // ADC A,(HL).
-			cpu.SetA(cpu.opAdd(cpu.A(), mem.Read(cpu.HL()), 1))
+			cpu.SetA(cpu.opAdd(cpu.A(), mem.Read(cpu.HL()), cpu.FlagC()))
 			return 8
 		},
 		0x8f: func() int { // ADC A,A.
-			cpu.SetA(cpu.opAdd(cpu.A(), cpu.A(), 1))
+			cpu.SetA(cpu.opAdd(cpu.A(), cpu.A(), cpu.FlagC()))
 			return 4
 		},
 		0x90: func() int { // SUB B.
-			cpu.SetA(cpu.opSub(cpu.A(), cpu.B(), 0))
+			cpu.SetA(cpu.opSub(cpu.A(), cpu.B(), false))
 			return 4
 		},
 		0x91: func() int { // SUB C.
-			cpu.SetA(cpu.opSub(cpu.A(), cpu.C(), 0))
+			cpu.SetA(cpu.opSub(cpu.A(), cpu.C(), false))
 			return 4
 		},
 		0x92: func() int { // SUB D.
-			cpu.SetA(cpu.opSub(cpu.A(), cpu.D(), 0))
+			cpu.SetA(cpu.opSub(cpu.A(), cpu.D(), false))
 			return 4
 		},
 		0x93: func() int { // SUB E.
-			cpu.SetA(cpu.opSub(cpu.A(), cpu.E(), 0))
+			cpu.SetA(cpu.opSub(cpu.A(), cpu.E(), false))
 			return 4
 		},
 		0x94: func() int { // SUB H.
-			cpu.SetA(cpu.opSub(cpu.A(), cpu.H(), 0))
+			cpu.SetA(cpu.opSub(cpu.A(), cpu.H(), false))
 			return 4
 		},
 		0x95: func() int { // SUB L.
-			cpu.SetA(cpu.opSub(cpu.A(), cpu.L(), 0))
+			cpu.SetA(cpu.opSub(cpu.A(), cpu.L(), false))
 			return 4
 		},
 		0x96: func() int { // SUB (HL).
-			cpu.SetA(cpu.opSub(cpu.A(), mem.Read(cpu.HL()), 0))
+			cpu.SetA(cpu.opSub(cpu.A(), mem.Read(cpu.HL()), false))
 			return 8
 		},
 		0x97: func() int { // SUB A.
-			cpu.SetA(cpu.opSub(cpu.A(), cpu.A(), 0))
+			cpu.SetA(cpu.opSub(cpu.A(), cpu.A(), false))
 			return 4
 		},
 		0x98: func() int { // SBC A,B.
-			cpu.SetA(cpu.opSub(cpu.A(), cpu.B(), 1))
+			cpu.SetA(cpu.opSub(cpu.A(), cpu.B(), cpu.FlagC()))
 			return 4
 		},
 		0x99: func() int { // SBC A,C.
-			cpu.SetA(cpu.opSub(cpu.A(), cpu.C(), 1))
+			cpu.SetA(cpu.opSub(cpu.A(), cpu.C(), cpu.FlagC()))
 			return 4
 		},
 		0x9a: func() int { // SBC A,D.
-			cpu.SetA(cpu.opSub(cpu.A(), cpu.D(), 1))
+			cpu.SetA(cpu.opSub(cpu.A(), cpu.D(), cpu.FlagC()))
 			return 4
 		},
 		0x9b: func() int { // SBC A,E.
-			cpu.SetA(cpu.opSub(cpu.A(), cpu.E(), 1))
+			cpu.SetA(cpu.opSub(cpu.A(), cpu.E(), cpu.FlagC()))
 			return 4
 		},
 		0x9c: func() int { // SBC A,H.
-			cpu.SetA(cpu.opSub(cpu.A(), cpu.H(), 1))
+			cpu.SetA(cpu.opSub(cpu.A(), cpu.H(), cpu.FlagC()))
 			return 4
 		},
 		0x9d: func() int { // SBC A,L.
-			cpu.SetA(cpu.opSub(cpu.A(), cpu.L(), 1))
+			cpu.SetA(cpu.opSub(cpu.A(), cpu.L(), cpu.FlagC()))
 			return 4
 		},
 		0x9e: func() int { // SBC A,(HL).
-			cpu.SetA(cpu.opSub(cpu.A(), mem.Read(cpu.HL()), 1))
+			cpu.SetA(cpu.opSub(cpu.A(), mem.Read(cpu.HL()), cpu.FlagC()))
 			return 8
 		},
 		0x9f: func() int { // SBC A,A.
-			cpu.SetA(cpu.opSub(cpu.A(), cpu.A(), 1))
+			cpu.SetA(cpu.opSub(cpu.A(), cpu.A(), cpu.FlagC()))
 			return 4
 		},
 		0xa0: func() int { // AND B.
@@ -738,51 +738,51 @@ func (c *Cpu) CreateInstructionSet() {
 			return 4
 		},
 		0xb8: func() int { // CP B.
-			cpu.SetA(cpu.opCp(cpu.A(), cpu.B()))
+			cpu.opCp(cpu.A(), cpu.B())
 			return 4
 		},
 		0xb9: func() int { // CP C.
-			cpu.SetA(cpu.opCp(cpu.A(), cpu.C()))
+			cpu.opCp(cpu.A(), cpu.C())
 			return 4
 		},
 		0xba: func() int { // CP D.
-			cpu.SetA(cpu.opCp(cpu.A(), cpu.D()))
+			cpu.opCp(cpu.A(), cpu.D())
 			return 4
 		},
 		0xbb: func() int { // CP E.
-			cpu.SetA(cpu.opCp(cpu.A(), cpu.E()))
+			cpu.opCp(cpu.A(), cpu.E())
 			return 4
 		},
 		0xbc: func() int { // CP H.
-			cpu.SetA(cpu.opCp(cpu.A(), cpu.H()))
+			cpu.opCp(cpu.A(), cpu.H())
 			return 4
 		},
 		0xbd: func() int { // CP L.
-			cpu.SetA(cpu.opCp(cpu.A(), cpu.L()))
+			cpu.opCp(cpu.A(), cpu.L())
 			return 4
 		},
 		0xbe: func() int { // CP (HL).
-			cpu.SetA(cpu.opCp(cpu.A(), mem.Read(cpu.HL())))
+			cpu.opCp(cpu.A(), mem.Read(cpu.HL()))
 			return 8
 		},
 		0xbf: func() int { // CP A.
-			cpu.SetA(cpu.opCp(cpu.A(), cpu.A()))
+			cpu.opCp(cpu.A(), cpu.A())
 			return 4
 		},
 		0xc6: func() int { // ADD A,d8.
-			cpu.SetA(cpu.opAdd(cpu.A(), cpu.IncPC(), 0))
+			cpu.SetA(cpu.opAdd(cpu.A(), cpu.IncPC(), false))
 			return 8
 		},
 		0xce: func() int { // ADC A,d8.
-			cpu.SetA(cpu.opAdd(cpu.A(), cpu.IncPC(), 1))
+			cpu.SetA(cpu.opAdd(cpu.A(), cpu.IncPC(), cpu.FlagC()))
 			return 8
 		},
 		0xd6: func() int { // SUB d8.
-			cpu.SetA(cpu.opSub(cpu.A(), cpu.IncPC(), 0))
+			cpu.SetA(cpu.opSub(cpu.A(), cpu.IncPC(), false))
 			return 8
 		},
 		0xde: func() int { // SBC A,d8.
-			cpu.SetA(cpu.opSub(cpu.A(), cpu.IncPC(), 1))
+			cpu.SetA(cpu.opSub(cpu.A(), cpu.IncPC(), cpu.FlagC()))
 			return 8
 		},
 		0xe6: func() int { // AND d8.
@@ -798,7 +798,7 @@ func (c *Cpu) CreateInstructionSet() {
 			return 8
 		},
 		0xfe: func() int { // CP d8.
-			cpu.SetA(cpu.opCp(cpu.A(), cpu.IncPC()))
+			cpu.opCp(cpu.A(), cpu.IncPC())
 			return 8
 		},
 
@@ -969,7 +969,7 @@ func (c *Cpu) CreateInstructionSet() {
 			return 16
 		},
 		0xe9: func() int { // JP (HL).
-			cpu.opJp(true, mem.Read16(cpu.HL()))
+			cpu.opJp(true, cpu.HL())
 			return 4
 		},
 		0xef: func() int { // RST 28H.
@@ -2039,7 +2039,12 @@ func (c *Cpu) CreateInstructionSet() {
 }
 
 // Perform an add, update flags, and return the result.
-func (c *Cpu) opAdd(a uint8, b uint8, cy uint8) uint8 {
+func (c *Cpu) opAdd(a uint8, b uint8, carry bool) uint8 {
+	cy := uint8(0)
+	if carry {
+		cy = 1
+	}
+
 	r16 := uint16(a) + uint16(b) + uint16(cy)
 	r := uint8(r16)
 
@@ -2052,7 +2057,11 @@ func (c *Cpu) opAdd(a uint8, b uint8, cy uint8) uint8 {
 }
 
 // Perform a subtract, update flags, and return the result.
-func (c *Cpu) opSub(a uint8, b uint8, bw uint8) uint8 {
+func (c *Cpu) opSub(a uint8, b uint8, borrow bool) uint8 {
+	bw := uint8(0)
+	if borrow {
+		bw = 1
+	}
 	r16 := uint16(a) - uint16(b) - uint16(bw)
 	r := uint8(r16)
 
@@ -2069,7 +2078,7 @@ func (c *Cpu) opSignedAdd(a uint16, b uint8) uint16 {
 	r := uint16(int32(a) + int32(int8(b)))
 
 	// Get the flags from doing an ordinary add.
-	c.opAdd(uint8(a), b, 0)
+	c.opAdd(uint8(a), b, false)
 	c.SetFlagZ(false)
 	c.SetFlagN(false)
 
@@ -2080,7 +2089,7 @@ func (c *Cpu) opSignedAdd(a uint16, b uint8) uint16 {
 func (c *Cpu) opInc(v uint8) uint8 {
 	// Do not update the carry flag.
 	cy := c.FlagC()
-	r := c.opAdd(v, 1, 0)
+	r := c.opAdd(v, 1, false)
 	c.SetFlagC(cy)
 	return r
 }
@@ -2089,7 +2098,7 @@ func (c *Cpu) opInc(v uint8) uint8 {
 func (c *Cpu) opDec(v uint8) uint8 {
 	// Do not update the carry flag.
 	cy := c.FlagC()
-	r := c.opSub(v, 1, 0)
+	r := c.opSub(v, 1, false)
 	c.SetFlagC(cy)
 	return r
 }
@@ -2100,19 +2109,20 @@ func (c *Cpu) opDaa() uint8 {
 
 	// Stolen from https://forums.nesdev.com/viewtopic.php?t=15944#p196282.
 	if !c.FlagN() {
-		if c.FlagH() || (a&0xf) > 9 {
-			a += 0x06
-		}
 		if c.FlagC() || a > 0x99 {
 			a += 0x60
 			c.SetFlagC(true)
 		}
+		if c.FlagH() || (a&0xf) > 0x09 {
+			a += 0x06
+		}
 	} else {
 		if c.FlagC() {
 			a -= 0x60
+			c.SetFlagC(true)
 		}
 		if c.FlagH() {
-			a -= 0x6
+			a -= 0x06
 		}
 	}
 
@@ -2203,7 +2213,7 @@ func (c *Cpu) opRl(a uint8, thruC bool) uint8 {
 func (c *Cpu) opRr(a uint8, thruC bool) uint8 {
 	r := a >> 1
 	if !thruC {
-		r |= a & 0x1
+		r |= (a & 0x1) << 7
 	} else if c.FlagC() {
 		r |= 0x80
 	}

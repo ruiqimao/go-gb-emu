@@ -19,13 +19,12 @@ type GameBoy struct {
 	// Boot ROM.
 	boot [0x100]uint8
 
-	dbgC chan bool // Used to perform single steps for debug.
+	// Debug.
+	dbgRom []uint8
 }
 
 func NewGameBoy() (*GameBoy, error) {
-	gb := &GameBoy{
-		dbgC: make(chan bool),
-	}
+	gb := &GameBoy{}
 
 	// Create the components.
 	gb.cpu = NewCpu(gb)
