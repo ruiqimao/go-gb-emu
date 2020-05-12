@@ -858,22 +858,22 @@ func (c *Cpu) CreateInstructionSet() {
 
 		// Standard 8 bit rotations and shifts.
 		0x07: func() int { // RLCA.
-			cpu.SetA(cpu.opRotateLeft(cpu.A(), false))
+			cpu.SetA(cpu.opRl(cpu.A(), false))
 			cpu.SetFlagZ(false)
 			return 4
 		},
 		0x0f: func() int { // RRCA.
-			cpu.SetA(cpu.opRotateRight(cpu.A(), false))
+			cpu.SetA(cpu.opRr(cpu.A(), false))
 			cpu.SetFlagZ(false)
 			return 4
 		},
 		0x17: func() int { // RLA.
-			cpu.SetA(cpu.opRotateLeft(cpu.A(), true))
+			cpu.SetA(cpu.opRl(cpu.A(), true))
 			cpu.SetFlagZ(false)
 			return 4
 		},
 		0x1f: func() int { // RRA.
-			cpu.SetA(cpu.opRotateRight(cpu.A(), true))
+			cpu.SetA(cpu.opRr(cpu.A(), true))
 			cpu.SetFlagZ(false)
 			return 4
 		},
@@ -999,7 +999,7 @@ func (c *Cpu) CreateInstructionSet() {
 			return 4
 		},
 		0xcb: func() int { // PREFIX CB.
-			return 4 + cpu.instructions[uint16(cpu.IncPC())+0x100]()
+			return cpu.instructions[uint16(cpu.IncPC())+0x100]()
 		},
 		0xf3: func() int { // DI.
 			cpu.SetIME(false)
@@ -1008,6 +1008,1032 @@ func (c *Cpu) CreateInstructionSet() {
 		0xfb: func() int { // EI.
 			cpu.SetIME(true)
 			return 4
+		},
+
+		// CB prefix extensions.
+		0x100: func() int { // RLC B.
+			cpu.SetB(cpu.opRl(cpu.B(), false))
+			return 8
+		},
+		0x101: func() int { // RLC C.
+			cpu.SetC(cpu.opRl(cpu.C(), false))
+			return 8
+		},
+		0x102: func() int { // RLC D.
+			cpu.SetD(cpu.opRl(cpu.D(), false))
+			return 8
+		},
+		0x103: func() int { // RLC E.
+			cpu.SetE(cpu.opRl(cpu.E(), false))
+			return 8
+		},
+		0x104: func() int { // RLC H.
+			cpu.SetH(cpu.opRl(cpu.H(), false))
+			return 8
+		},
+		0x105: func() int { // RLC L.
+			cpu.SetL(cpu.opRl(cpu.L(), false))
+			return 8
+		},
+		0x106: func() int { // RLC (HL).
+			mem.Write(cpu.HL(), cpu.opRl(mem.Read(cpu.HL()), false))
+			return 16
+		},
+		0x107: func() int { // RLC A.
+			cpu.SetA(cpu.opRl(cpu.A(), false))
+			return 8
+		},
+		0x108: func() int { // RRC B.
+			cpu.SetB(cpu.opRr(cpu.B(), false))
+			return 8
+		},
+		0x109: func() int { // RRC C.
+			cpu.SetC(cpu.opRr(cpu.C(), false))
+			return 8
+		},
+		0x10a: func() int { // RRC D.
+			cpu.SetD(cpu.opRr(cpu.D(), false))
+			return 8
+		},
+		0x10b: func() int { // RRC E.
+			cpu.SetE(cpu.opRr(cpu.E(), false))
+			return 8
+		},
+		0x10c: func() int { // RRC H.
+			cpu.SetH(cpu.opRr(cpu.H(), false))
+			return 8
+		},
+		0x10d: func() int { // RRC L.
+			cpu.SetL(cpu.opRr(cpu.L(), false))
+			return 8
+		},
+		0x10e: func() int { // RRC (HL).
+			mem.Write(cpu.HL(), cpu.opRr(mem.Read(cpu.HL()), false))
+			return 16
+		},
+		0x10f: func() int { // RRC A.
+			cpu.SetA(cpu.opRr(cpu.A(), false))
+			return 8
+		},
+		0x110: func() int { // RL B.
+			cpu.SetB(cpu.opRl(cpu.B(), true))
+			return 8
+		},
+		0x111: func() int { // RL C.
+			cpu.SetC(cpu.opRl(cpu.C(), true))
+			return 8
+		},
+		0x112: func() int { // RL D.
+			cpu.SetD(cpu.opRl(cpu.D(), true))
+			return 8
+		},
+		0x113: func() int { // RL E.
+			cpu.SetE(cpu.opRl(cpu.E(), true))
+			return 8
+		},
+		0x114: func() int { // RL H.
+			cpu.SetH(cpu.opRl(cpu.H(), true))
+			return 8
+		},
+		0x115: func() int { // RL L.
+			cpu.SetL(cpu.opRl(cpu.L(), true))
+			return 8
+		},
+		0x116: func() int { // RL (HL).
+			mem.Write(cpu.HL(), cpu.opRl(mem.Read(cpu.HL()), true))
+			return 16
+		},
+		0x117: func() int { // RL A.
+			cpu.SetA(cpu.opRl(cpu.A(), true))
+			return 8
+		},
+		0x118: func() int { // RR B.
+			cpu.SetB(cpu.opRr(cpu.B(), true))
+			return 8
+		},
+		0x119: func() int { // RR C.
+			cpu.SetC(cpu.opRr(cpu.C(), true))
+			return 8
+		},
+		0x11a: func() int { // RR D.
+			cpu.SetD(cpu.opRr(cpu.D(), true))
+			return 8
+		},
+		0x11b: func() int { // RR E.
+			cpu.SetE(cpu.opRr(cpu.E(), true))
+			return 8
+		},
+		0x11c: func() int { // RR H.
+			cpu.SetH(cpu.opRr(cpu.H(), true))
+			return 8
+		},
+		0x11d: func() int { // RR L.
+			cpu.SetL(cpu.opRr(cpu.L(), true))
+			return 8
+		},
+		0x11e: func() int { // RR (HL).
+			mem.Write(cpu.HL(), cpu.opRr(mem.Read(cpu.HL()), true))
+			return 16
+		},
+		0x11f: func() int { // RR A.
+			cpu.SetA(cpu.opRr(cpu.A(), true))
+			return 8
+		},
+		0x120: func() int { // SLA B.
+			cpu.SetB(cpu.opSl(cpu.B()))
+			return 8
+		},
+		0x121: func() int { // SLA C.
+			cpu.SetC(cpu.opSl(cpu.C()))
+			return 8
+		},
+		0x122: func() int { // SLA D.
+			cpu.SetD(cpu.opSl(cpu.D()))
+			return 8
+		},
+		0x123: func() int { // SLA E.
+			cpu.SetE(cpu.opSl(cpu.E()))
+			return 8
+		},
+		0x124: func() int { // SLA H.
+			cpu.SetH(cpu.opSl(cpu.H()))
+			return 8
+		},
+		0x125: func() int { // SLA L.
+			cpu.SetL(cpu.opSl(cpu.L()))
+			return 8
+		},
+		0x126: func() int { // SLA (HL).
+			mem.Write(cpu.HL(), cpu.opSl(mem.Read(cpu.HL())))
+			return 16
+		},
+		0x127: func() int { // SLA A.
+			cpu.SetA(cpu.opSl(cpu.A()))
+			return 8
+		},
+		0x128: func() int { // SRA B.
+			cpu.SetB(cpu.opSr(cpu.B(), true))
+			return 8
+		},
+		0x129: func() int { // SRA C.
+			cpu.SetC(cpu.opSr(cpu.C(), true))
+			return 8
+		},
+		0x12a: func() int { // SRA D.
+			cpu.SetD(cpu.opSr(cpu.D(), true))
+			return 8
+		},
+		0x12b: func() int { // SRA E.
+			cpu.SetE(cpu.opSr(cpu.E(), true))
+			return 8
+		},
+		0x12c: func() int { // SRA H.
+			cpu.SetH(cpu.opSr(cpu.H(), true))
+			return 8
+		},
+		0x12d: func() int { // SRA L.
+			cpu.SetL(cpu.opSr(cpu.L(), true))
+			return 8
+		},
+		0x12e: func() int { // SRA (HL).
+			mem.Write(cpu.HL(), cpu.opSr(mem.Read(cpu.HL()), true))
+			return 16
+		},
+		0x12f: func() int { // SRA A.
+			cpu.SetA(cpu.opSr(cpu.A(), true))
+			return 8
+		},
+		0x130: func() int { // SWAP B.
+			cpu.SetB(cpu.opSwap(cpu.B()))
+			return 8
+		},
+		0x131: func() int { // SWAP C.
+			cpu.SetC(cpu.opSwap(cpu.C()))
+			return 8
+		},
+		0x132: func() int { // SWAP D.
+			cpu.SetD(cpu.opSwap(cpu.D()))
+			return 8
+		},
+		0x133: func() int { // SWAP E.
+			cpu.SetE(cpu.opSwap(cpu.E()))
+			return 8
+		},
+		0x134: func() int { // SWAP H.
+			cpu.SetH(cpu.opSwap(cpu.H()))
+			return 8
+		},
+		0x135: func() int { // SWAP L.
+			cpu.SetL(cpu.opSwap(cpu.L()))
+			return 8
+		},
+		0x136: func() int { // SWAP (HL).
+			mem.Write(cpu.HL(), cpu.opSwap(mem.Read(cpu.HL())))
+			return 16
+		},
+		0x137: func() int { // SWAP A.
+			cpu.SetA(cpu.opSwap(cpu.A()))
+			return 8
+		},
+		0x138: func() int { // SRL B.
+			cpu.SetB(cpu.opSr(cpu.B(), false))
+			return 8
+		},
+		0x139: func() int { // SRL C.
+			cpu.SetC(cpu.opSr(cpu.C(), false))
+			return 8
+		},
+		0x13a: func() int { // SRL D.
+			cpu.SetD(cpu.opSr(cpu.D(), false))
+			return 8
+		},
+		0x13b: func() int { // SRL E.
+			cpu.SetE(cpu.opSr(cpu.E(), false))
+			return 8
+		},
+		0x13c: func() int { // SRL H.
+			cpu.SetH(cpu.opSr(cpu.H(), false))
+			return 8
+		},
+		0x13d: func() int { // SRL L.
+			cpu.SetL(cpu.opSr(cpu.L(), false))
+			return 8
+		},
+		0x13e: func() int { // SRL (HL).
+			mem.Write(cpu.HL(), cpu.opSr(mem.Read(cpu.HL()), false))
+			return 16
+		},
+		0x13f: func() int { // SRL A.
+			cpu.SetA(cpu.opSr(cpu.A(), false))
+			return 8
+		},
+		0x140: func() int { // BIT 0,B.
+			cpu.opBit(cpu.B(), 0)
+			return 8
+		},
+		0x141: func() int { // BIT 0,C.
+			cpu.opBit(cpu.C(), 0)
+			return 8
+		},
+		0x142: func() int { // BIT 0,D.
+			cpu.opBit(cpu.D(), 0)
+			return 8
+		},
+		0x143: func() int { // BIT 0,E.
+			cpu.opBit(cpu.E(), 0)
+			return 8
+		},
+		0x144: func() int { // BIT 0,H.
+			cpu.opBit(cpu.H(), 0)
+			return 8
+		},
+		0x145: func() int { // BIT 0,L.
+			cpu.opBit(cpu.L(), 0)
+			return 8
+		},
+		0x146: func() int { // BIT 0,(HL).
+			cpu.opBit(mem.Read(cpu.HL()), 0)
+			return 16
+		},
+		0x147: func() int { // BIT 0,A.
+			cpu.opBit(cpu.A(), 0)
+			return 8
+		},
+		0x148: func() int { // BIT 1,B.
+			cpu.opBit(cpu.B(), 1)
+			return 8
+		},
+		0x149: func() int { // BIT 1,C.
+			cpu.opBit(cpu.C(), 1)
+			return 8
+		},
+		0x14a: func() int { // BIT 1,D.
+			cpu.opBit(cpu.D(), 1)
+			return 8
+		},
+		0x14b: func() int { // BIT 1,E.
+			cpu.opBit(cpu.E(), 1)
+			return 8
+		},
+		0x14c: func() int { // BIT 1,H.
+			cpu.opBit(cpu.H(), 1)
+			return 8
+		},
+		0x14d: func() int { // BIT 1,L.
+			cpu.opBit(cpu.L(), 1)
+			return 8
+		},
+		0x14e: func() int { // BIT 1,(HL).
+			cpu.opBit(mem.Read(cpu.HL()), 1)
+			return 16
+		},
+		0x14f: func() int { // BIT 1,A.
+			cpu.opBit(cpu.A(), 1)
+			return 8
+		},
+		0x150: func() int { // BIT 2,B.
+			cpu.opBit(cpu.B(), 2)
+			return 8
+		},
+		0x151: func() int { // BIT 2,C.
+			cpu.opBit(cpu.C(), 2)
+			return 8
+		},
+		0x152: func() int { // BIT 2,D.
+			cpu.opBit(cpu.D(), 2)
+			return 8
+		},
+		0x153: func() int { // BIT 2,E.
+			cpu.opBit(cpu.E(), 2)
+			return 8
+		},
+		0x154: func() int { // BIT 2,H.
+			cpu.opBit(cpu.H(), 2)
+			return 8
+		},
+		0x155: func() int { // BIT 2,L.
+			cpu.opBit(cpu.L(), 2)
+			return 8
+		},
+		0x156: func() int { // BIT 2,(HL).
+			cpu.opBit(mem.Read(cpu.HL()), 2)
+			return 16
+		},
+		0x157: func() int { // BIT 2,A.
+			cpu.opBit(cpu.A(), 2)
+			return 8
+		},
+		0x158: func() int { // BIT 3,B.
+			cpu.opBit(cpu.B(), 3)
+			return 8
+		},
+		0x159: func() int { // BIT 3,C.
+			cpu.opBit(cpu.C(), 3)
+			return 8
+		},
+		0x15a: func() int { // BIT 3,D.
+			cpu.opBit(cpu.D(), 3)
+			return 8
+		},
+		0x15b: func() int { // BIT 3,E.
+			cpu.opBit(cpu.E(), 3)
+			return 8
+		},
+		0x15c: func() int { // BIT 3,H.
+			cpu.opBit(cpu.H(), 3)
+			return 8
+		},
+		0x15d: func() int { // BIT 3,L.
+			cpu.opBit(cpu.L(), 3)
+			return 8
+		},
+		0x15e: func() int { // BIT 3,(HL).
+			cpu.opBit(mem.Read(cpu.HL()), 3)
+			return 16
+		},
+		0x15f: func() int { // BIT 3,A.
+			cpu.opBit(cpu.A(), 3)
+			return 8
+		},
+		0x160: func() int { // BIT 4,B.
+			cpu.opBit(cpu.B(), 4)
+			return 8
+		},
+		0x161: func() int { // BIT 4,C.
+			cpu.opBit(cpu.C(), 4)
+			return 8
+		},
+		0x162: func() int { // BIT 4,D.
+			cpu.opBit(cpu.D(), 4)
+			return 8
+		},
+		0x163: func() int { // BIT 4,E.
+			cpu.opBit(cpu.E(), 4)
+			return 8
+		},
+		0x164: func() int { // BIT 4,H.
+			cpu.opBit(cpu.H(), 4)
+			return 8
+		},
+		0x165: func() int { // BIT 4,L.
+			cpu.opBit(cpu.L(), 4)
+			return 8
+		},
+		0x166: func() int { // BIT 4,(HL).
+			cpu.opBit(mem.Read(cpu.HL()), 4)
+			return 16
+		},
+		0x167: func() int { // BIT 4,A.
+			cpu.opBit(cpu.A(), 4)
+			return 8
+		},
+		0x168: func() int { // BIT 5,B.
+			cpu.opBit(cpu.B(), 5)
+			return 8
+		},
+		0x169: func() int { // BIT 5,C.
+			cpu.opBit(cpu.C(), 5)
+			return 8
+		},
+		0x16a: func() int { // BIT 5,D.
+			cpu.opBit(cpu.D(), 5)
+			return 8
+		},
+		0x16b: func() int { // BIT 5,E.
+			cpu.opBit(cpu.E(), 5)
+			return 8
+		},
+		0x16c: func() int { // BIT 5,H.
+			cpu.opBit(cpu.H(), 5)
+			return 8
+		},
+		0x16d: func() int { // BIT 5,L.
+			cpu.opBit(cpu.L(), 5)
+			return 8
+		},
+		0x16e: func() int { // BIT 5,(HL).
+			cpu.opBit(mem.Read(cpu.HL()), 5)
+			return 16
+		},
+		0x16f: func() int { // BIT 5,A.
+			cpu.opBit(cpu.A(), 5)
+			return 8
+		},
+		0x170: func() int { // BIT 6,B.
+			cpu.opBit(cpu.B(), 6)
+			return 8
+		},
+		0x171: func() int { // BIT 6,C.
+			cpu.opBit(cpu.C(), 6)
+			return 8
+		},
+		0x172: func() int { // BIT 6,D.
+			cpu.opBit(cpu.D(), 6)
+			return 8
+		},
+		0x173: func() int { // BIT 6,E.
+			cpu.opBit(cpu.E(), 6)
+			return 8
+		},
+		0x174: func() int { // BIT 6,H.
+			cpu.opBit(cpu.H(), 6)
+			return 8
+		},
+		0x175: func() int { // BIT 6,L.
+			cpu.opBit(cpu.L(), 6)
+			return 8
+		},
+		0x176: func() int { // BIT 6,(HL).
+			cpu.opBit(mem.Read(cpu.HL()), 6)
+			return 16
+		},
+		0x177: func() int { // BIT 6,A.
+			cpu.opBit(cpu.A(), 6)
+			return 8
+		},
+		0x178: func() int { // BIT 7,B.
+			cpu.opBit(cpu.B(), 7)
+			return 8
+		},
+		0x179: func() int { // BIT 7,C.
+			cpu.opBit(cpu.C(), 7)
+			return 8
+		},
+		0x17a: func() int { // BIT 7,D.
+			cpu.opBit(cpu.D(), 7)
+			return 8
+		},
+		0x17b: func() int { // BIT 7,E.
+			cpu.opBit(cpu.E(), 7)
+			return 8
+		},
+		0x17c: func() int { // BIT 7,H.
+			cpu.opBit(cpu.H(), 7)
+			return 8
+		},
+		0x17d: func() int { // BIT 7,L.
+			cpu.opBit(cpu.L(), 7)
+			return 8
+		},
+		0x17e: func() int { // BIT 7,(HL).
+			cpu.opBit(mem.Read(cpu.HL()), 7)
+			return 16
+		},
+		0x17f: func() int { // BIT 7,A.
+			cpu.opBit(cpu.A(), 7)
+			return 8
+		},
+		0x180: func() int { // RES 0,B.
+			cpu.SetB(utils.SetBit(cpu.B(), 0, false))
+			return 8
+		},
+		0x181: func() int { // RES 0,C.
+			cpu.SetC(utils.SetBit(cpu.C(), 0, false))
+			return 8
+		},
+		0x182: func() int { // RES 0,D.
+			cpu.SetD(utils.SetBit(cpu.D(), 0, false))
+			return 8
+		},
+		0x183: func() int { // RES 0,E.
+			cpu.SetE(utils.SetBit(cpu.E(), 0, false))
+			return 8
+		},
+		0x184: func() int { // RES 0,H.
+			cpu.SetH(utils.SetBit(cpu.H(), 0, false))
+			return 8
+		},
+		0x185: func() int { // RES 0,L.
+			cpu.SetL(utils.SetBit(cpu.L(), 0, false))
+			return 8
+		},
+		0x186: func() int { // RES 0,(HL).
+			mem.Write(cpu.HL(), utils.SetBit(mem.Read(cpu.HL()), 0, false))
+			return 16
+		},
+		0x187: func() int { // RES 0,A.
+			cpu.SetA(utils.SetBit(cpu.A(), 0, false))
+			return 8
+		},
+		0x188: func() int { // RES 1,B.
+			cpu.SetB(utils.SetBit(cpu.B(), 1, false))
+			return 8
+		},
+		0x189: func() int { // RES 1,C.
+			cpu.SetC(utils.SetBit(cpu.C(), 1, false))
+			return 8
+		},
+		0x18a: func() int { // RES 1,D.
+			cpu.SetD(utils.SetBit(cpu.D(), 1, false))
+			return 8
+		},
+		0x18b: func() int { // RES 1,E.
+			cpu.SetE(utils.SetBit(cpu.E(), 1, false))
+			return 8
+		},
+		0x18c: func() int { // RES 1,H.
+			cpu.SetH(utils.SetBit(cpu.H(), 1, false))
+			return 8
+		},
+		0x18d: func() int { // RES 1,L.
+			cpu.SetL(utils.SetBit(cpu.L(), 1, false))
+			return 8
+		},
+		0x18e: func() int { // RES 1,(HL).
+			mem.Write(cpu.HL(), utils.SetBit(mem.Read(cpu.HL()), 1, false))
+			return 16
+		},
+		0x18f: func() int { // RES 1,A.
+			cpu.SetA(utils.SetBit(cpu.A(), 1, false))
+			return 8
+		},
+		0x190: func() int { // RES 2,B.
+			cpu.SetB(utils.SetBit(cpu.B(), 2, false))
+			return 8
+		},
+		0x191: func() int { // RES 2,C.
+			cpu.SetC(utils.SetBit(cpu.C(), 2, false))
+			return 8
+		},
+		0x192: func() int { // RES 2,D.
+			cpu.SetD(utils.SetBit(cpu.D(), 2, false))
+			return 8
+		},
+		0x193: func() int { // RES 2,E.
+			cpu.SetE(utils.SetBit(cpu.E(), 2, false))
+			return 8
+		},
+		0x194: func() int { // RES 2,H.
+			cpu.SetH(utils.SetBit(cpu.H(), 2, false))
+			return 8
+		},
+		0x195: func() int { // RES 2,L.
+			cpu.SetL(utils.SetBit(cpu.L(), 2, false))
+			return 8
+		},
+		0x196: func() int { // RES 2,(HL).
+			mem.Write(cpu.HL(), utils.SetBit(mem.Read(cpu.HL()), 2, false))
+			return 16
+		},
+		0x197: func() int { // RES 2,A.
+			cpu.SetA(utils.SetBit(cpu.A(), 2, false))
+			return 8
+		},
+		0x198: func() int { // RES 3,B.
+			cpu.SetB(utils.SetBit(cpu.B(), 3, false))
+			return 8
+		},
+		0x199: func() int { // RES 3,C.
+			cpu.SetC(utils.SetBit(cpu.C(), 3, false))
+			return 8
+		},
+		0x19a: func() int { // RES 3,D.
+			cpu.SetD(utils.SetBit(cpu.D(), 3, false))
+			return 8
+		},
+		0x19b: func() int { // RES 3,E.
+			cpu.SetE(utils.SetBit(cpu.E(), 3, false))
+			return 8
+		},
+		0x19c: func() int { // RES 3,H.
+			cpu.SetH(utils.SetBit(cpu.H(), 3, false))
+			return 8
+		},
+		0x19d: func() int { // RES 3,L.
+			cpu.SetL(utils.SetBit(cpu.L(), 3, false))
+			return 8
+		},
+		0x19e: func() int { // RES 3,(HL).
+			mem.Write(cpu.HL(), utils.SetBit(mem.Read(cpu.HL()), 3, false))
+			return 16
+		},
+		0x19f: func() int { // RES 3,A.
+			cpu.SetA(utils.SetBit(cpu.A(), 3, false))
+			return 8
+		},
+		0x1a0: func() int { // RES 4,B.
+			cpu.SetB(utils.SetBit(cpu.B(), 4, false))
+			return 8
+		},
+		0x1a1: func() int { // RES 4,C.
+			cpu.SetC(utils.SetBit(cpu.C(), 4, false))
+			return 8
+		},
+		0x1a2: func() int { // RES 4,D.
+			cpu.SetD(utils.SetBit(cpu.D(), 4, false))
+			return 8
+		},
+		0x1a3: func() int { // RES 4,E.
+			cpu.SetE(utils.SetBit(cpu.E(), 4, false))
+			return 8
+		},
+		0x1a4: func() int { // RES 4,H.
+			cpu.SetH(utils.SetBit(cpu.H(), 4, false))
+			return 8
+		},
+		0x1a5: func() int { // RES 4,L.
+			cpu.SetL(utils.SetBit(cpu.L(), 4, false))
+			return 8
+		},
+		0x1a6: func() int { // RES 4,(HL).
+			mem.Write(cpu.HL(), utils.SetBit(mem.Read(cpu.HL()), 4, false))
+			return 16
+		},
+		0x1a7: func() int { // RES 4,A.
+			cpu.SetA(utils.SetBit(cpu.A(), 4, false))
+			return 8
+		},
+		0x1a8: func() int { // RES 5,B.
+			cpu.SetB(utils.SetBit(cpu.B(), 5, false))
+			return 8
+		},
+		0x1a9: func() int { // RES 5,C.
+			cpu.SetC(utils.SetBit(cpu.C(), 5, false))
+			return 8
+		},
+		0x1aa: func() int { // RES 5,D.
+			cpu.SetD(utils.SetBit(cpu.D(), 5, false))
+			return 8
+		},
+		0x1ab: func() int { // RES 5,E.
+			cpu.SetE(utils.SetBit(cpu.E(), 5, false))
+			return 8
+		},
+		0x1ac: func() int { // RES 5,H.
+			cpu.SetH(utils.SetBit(cpu.H(), 5, false))
+			return 8
+		},
+		0x1ad: func() int { // RES 5,L.
+			cpu.SetL(utils.SetBit(cpu.L(), 5, false))
+			return 8
+		},
+		0x1ae: func() int { // RES 5,(HL).
+			mem.Write(cpu.HL(), utils.SetBit(mem.Read(cpu.HL()), 5, false))
+			return 16
+		},
+		0x1af: func() int { // RES 5,A.
+			cpu.SetA(utils.SetBit(cpu.A(), 5, false))
+			return 8
+		},
+		0x1b0: func() int { // RES 6,B.
+			cpu.SetB(utils.SetBit(cpu.B(), 6, false))
+			return 8
+		},
+		0x1b1: func() int { // RES 6,C.
+			cpu.SetC(utils.SetBit(cpu.C(), 6, false))
+			return 8
+		},
+		0x1b2: func() int { // RES 6,D.
+			cpu.SetD(utils.SetBit(cpu.D(), 6, false))
+			return 8
+		},
+		0x1b3: func() int { // RES 6,E.
+			cpu.SetE(utils.SetBit(cpu.E(), 6, false))
+			return 8
+		},
+		0x1b4: func() int { // RES 6,H.
+			cpu.SetH(utils.SetBit(cpu.H(), 6, false))
+			return 8
+		},
+		0x1b5: func() int { // RES 6,L.
+			cpu.SetL(utils.SetBit(cpu.L(), 6, false))
+			return 8
+		},
+		0x1b6: func() int { // RES 6,(HL).
+			mem.Write(cpu.HL(), utils.SetBit(mem.Read(cpu.HL()), 6, false))
+			return 16
+		},
+		0x1b7: func() int { // RES 6,A.
+			cpu.SetA(utils.SetBit(cpu.A(), 6, false))
+			return 8
+		},
+		0x1b8: func() int { // RES 7,B.
+			cpu.SetB(utils.SetBit(cpu.B(), 7, false))
+			return 8
+		},
+		0x1b9: func() int { // RES 7,C.
+			cpu.SetC(utils.SetBit(cpu.C(), 7, false))
+			return 8
+		},
+		0x1ba: func() int { // RES 7,D.
+			cpu.SetD(utils.SetBit(cpu.D(), 7, false))
+			return 8
+		},
+		0x1bb: func() int { // RES 7,E.
+			cpu.SetE(utils.SetBit(cpu.E(), 7, false))
+			return 8
+		},
+		0x1bc: func() int { // RES 7,H.
+			cpu.SetH(utils.SetBit(cpu.H(), 7, false))
+			return 8
+		},
+		0x1bd: func() int { // RES 7,L.
+			cpu.SetL(utils.SetBit(cpu.L(), 7, false))
+			return 8
+		},
+		0x1be: func() int { // RES 7,(HL).
+			mem.Write(cpu.HL(), utils.SetBit(mem.Read(cpu.HL()), 7, false))
+			return 16
+		},
+		0x1bf: func() int { // RES 7,A.
+			cpu.SetA(utils.SetBit(cpu.A(), 7, false))
+			return 8
+		},
+		0x1c0: func() int { // SET 0,B.
+			cpu.SetB(utils.SetBit(cpu.B(), 0, true))
+			return 8
+		},
+		0x1c1: func() int { // SET 0,C.
+			cpu.SetC(utils.SetBit(cpu.C(), 0, true))
+			return 8
+		},
+		0x1c2: func() int { // SET 0,D.
+			cpu.SetD(utils.SetBit(cpu.D(), 0, true))
+			return 8
+		},
+		0x1c3: func() int { // SET 0,E.
+			cpu.SetE(utils.SetBit(cpu.E(), 0, true))
+			return 8
+		},
+		0x1c4: func() int { // SET 0,H.
+			cpu.SetH(utils.SetBit(cpu.H(), 0, true))
+			return 8
+		},
+		0x1c5: func() int { // SET 0,L.
+			cpu.SetL(utils.SetBit(cpu.L(), 0, true))
+			return 8
+		},
+		0x1c6: func() int { // SET 0,(HL).
+			mem.Write(cpu.HL(), utils.SetBit(mem.Read(cpu.HL()), 0, true))
+			return 16
+		},
+		0x1c7: func() int { // SET 0,A.
+			cpu.SetA(utils.SetBit(cpu.A(), 0, true))
+			return 8
+		},
+		0x1c8: func() int { // SET 1,B.
+			cpu.SetB(utils.SetBit(cpu.B(), 1, true))
+			return 8
+		},
+		0x1c9: func() int { // SET 1,C.
+			cpu.SetC(utils.SetBit(cpu.C(), 1, true))
+			return 8
+		},
+		0x1ca: func() int { // SET 1,D.
+			cpu.SetD(utils.SetBit(cpu.D(), 1, true))
+			return 8
+		},
+		0x1cb: func() int { // SET 1,E.
+			cpu.SetE(utils.SetBit(cpu.E(), 1, true))
+			return 8
+		},
+		0x1cc: func() int { // SET 1,H.
+			cpu.SetH(utils.SetBit(cpu.H(), 1, true))
+			return 8
+		},
+		0x1cd: func() int { // SET 1,L.
+			cpu.SetL(utils.SetBit(cpu.L(), 1, true))
+			return 8
+		},
+		0x1ce: func() int { // SET 1,(HL).
+			mem.Write(cpu.HL(), utils.SetBit(mem.Read(cpu.HL()), 1, true))
+			return 16
+		},
+		0x1cf: func() int { // SET 1,A.
+			cpu.SetA(utils.SetBit(cpu.A(), 1, true))
+			return 8
+		},
+		0x1d0: func() int { // SET 2,B.
+			cpu.SetB(utils.SetBit(cpu.B(), 2, true))
+			return 8
+		},
+		0x1d1: func() int { // SET 2,C.
+			cpu.SetC(utils.SetBit(cpu.C(), 2, true))
+			return 8
+		},
+		0x1d2: func() int { // SET 2,D.
+			cpu.SetD(utils.SetBit(cpu.D(), 2, true))
+			return 8
+		},
+		0x1d3: func() int { // SET 2,E.
+			cpu.SetE(utils.SetBit(cpu.E(), 2, true))
+			return 8
+		},
+		0x1d4: func() int { // SET 2,H.
+			cpu.SetH(utils.SetBit(cpu.H(), 2, true))
+			return 8
+		},
+		0x1d5: func() int { // SET 2,L.
+			cpu.SetL(utils.SetBit(cpu.L(), 2, true))
+			return 8
+		},
+		0x1d6: func() int { // SET 2,(HL).
+			mem.Write(cpu.HL(), utils.SetBit(mem.Read(cpu.HL()), 2, true))
+			return 16
+		},
+		0x1d7: func() int { // SET 2,A.
+			cpu.SetA(utils.SetBit(cpu.A(), 2, true))
+			return 8
+		},
+		0x1d8: func() int { // SET 3,B.
+			cpu.SetB(utils.SetBit(cpu.B(), 3, true))
+			return 8
+		},
+		0x1d9: func() int { // SET 3,C.
+			cpu.SetC(utils.SetBit(cpu.C(), 3, true))
+			return 8
+		},
+		0x1da: func() int { // SET 3,D.
+			cpu.SetD(utils.SetBit(cpu.D(), 3, true))
+			return 8
+		},
+		0x1db: func() int { // SET 3,E.
+			cpu.SetE(utils.SetBit(cpu.E(), 3, true))
+			return 8
+		},
+		0x1dc: func() int { // SET 3,H.
+			cpu.SetH(utils.SetBit(cpu.H(), 3, true))
+			return 8
+		},
+		0x1dd: func() int { // SET 3,L.
+			cpu.SetL(utils.SetBit(cpu.L(), 3, true))
+			return 8
+		},
+		0x1de: func() int { // SET 3,(HL).
+			mem.Write(cpu.HL(), utils.SetBit(mem.Read(cpu.HL()), 3, true))
+			return 16
+		},
+		0x1df: func() int { // SET 3,A.
+			cpu.SetA(utils.SetBit(cpu.A(), 3, true))
+			return 8
+		},
+		0x1e0: func() int { // SET 4,B.
+			cpu.SetB(utils.SetBit(cpu.B(), 4, true))
+			return 8
+		},
+		0x1e1: func() int { // SET 4,C.
+			cpu.SetC(utils.SetBit(cpu.C(), 4, true))
+			return 8
+		},
+		0x1e2: func() int { // SET 4,D.
+			cpu.SetD(utils.SetBit(cpu.D(), 4, true))
+			return 8
+		},
+		0x1e3: func() int { // SET 4,E.
+			cpu.SetE(utils.SetBit(cpu.E(), 4, true))
+			return 8
+		},
+		0x1e4: func() int { // SET 4,H.
+			cpu.SetH(utils.SetBit(cpu.H(), 4, true))
+			return 8
+		},
+		0x1e5: func() int { // SET 4,L.
+			cpu.SetL(utils.SetBit(cpu.L(), 4, true))
+			return 8
+		},
+		0x1e6: func() int { // SET 4,(HL).
+			mem.Write(cpu.HL(), utils.SetBit(mem.Read(cpu.HL()), 4, true))
+			return 16
+		},
+		0x1e7: func() int { // SET 4,A.
+			cpu.SetA(utils.SetBit(cpu.A(), 4, true))
+			return 8
+		},
+		0x1e8: func() int { // SET 5,B.
+			cpu.SetB(utils.SetBit(cpu.B(), 5, true))
+			return 8
+		},
+		0x1e9: func() int { // SET 5,C.
+			cpu.SetC(utils.SetBit(cpu.C(), 5, true))
+			return 8
+		},
+		0x1ea: func() int { // SET 5,D.
+			cpu.SetD(utils.SetBit(cpu.D(), 5, true))
+			return 8
+		},
+		0x1eb: func() int { // SET 5,E.
+			cpu.SetE(utils.SetBit(cpu.E(), 5, true))
+			return 8
+		},
+		0x1ec: func() int { // SET 5,H.
+			cpu.SetH(utils.SetBit(cpu.H(), 5, true))
+			return 8
+		},
+		0x1ed: func() int { // SET 5,L.
+			cpu.SetL(utils.SetBit(cpu.L(), 5, true))
+			return 8
+		},
+		0x1ee: func() int { // SET 5,(HL).
+			mem.Write(cpu.HL(), utils.SetBit(mem.Read(cpu.HL()), 5, true))
+			return 16
+		},
+		0x1ef: func() int { // SET 5,A.
+			cpu.SetA(utils.SetBit(cpu.A(), 5, true))
+			return 8
+		},
+		0x1f0: func() int { // SET 6,B.
+			cpu.SetB(utils.SetBit(cpu.B(), 6, true))
+			return 8
+		},
+		0x1f1: func() int { // SET 6,C.
+			cpu.SetC(utils.SetBit(cpu.C(), 6, true))
+			return 8
+		},
+		0x1f2: func() int { // SET 6,D.
+			cpu.SetD(utils.SetBit(cpu.D(), 6, true))
+			return 8
+		},
+		0x1f3: func() int { // SET 6,E.
+			cpu.SetE(utils.SetBit(cpu.E(), 6, true))
+			return 8
+		},
+		0x1f4: func() int { // SET 6,H.
+			cpu.SetH(utils.SetBit(cpu.H(), 6, true))
+			return 8
+		},
+		0x1f5: func() int { // SET 6,L.
+			cpu.SetL(utils.SetBit(cpu.L(), 6, true))
+			return 8
+		},
+		0x1f6: func() int { // SET 6,(HL).
+			mem.Write(cpu.HL(), utils.SetBit(mem.Read(cpu.HL()), 6, true))
+			return 16
+		},
+		0x1f7: func() int { // SET 6,A.
+			cpu.SetA(utils.SetBit(cpu.A(), 6, true))
+			return 8
+		},
+		0x1f8: func() int { // SET 7,B.
+			cpu.SetB(utils.SetBit(cpu.B(), 7, true))
+			return 8
+		},
+		0x1f9: func() int { // SET 7,C.
+			cpu.SetC(utils.SetBit(cpu.C(), 7, true))
+			return 8
+		},
+		0x1fa: func() int { // SET 7,D.
+			cpu.SetD(utils.SetBit(cpu.D(), 7, true))
+			return 8
+		},
+		0x1fb: func() int { // SET 7,E.
+			cpu.SetE(utils.SetBit(cpu.E(), 7, true))
+			return 8
+		},
+		0x1fc: func() int { // SET 7,H.
+			cpu.SetH(utils.SetBit(cpu.H(), 7, true))
+			return 8
+		},
+		0x1fd: func() int { // SET 7,L.
+			cpu.SetL(utils.SetBit(cpu.L(), 7, true))
+			return 8
+		},
+		0x1fe: func() int { // SET 7,(HL).
+			mem.Write(cpu.HL(), utils.SetBit(mem.Read(cpu.HL()), 7, true))
+			return 16
+		},
+		0x1ff: func() int { // SET 7,A.
+			cpu.SetA(utils.SetBit(cpu.A(), 7, true))
+			return 8
 		},
 	}
 }
@@ -1157,9 +2183,9 @@ func (c *Cpu) opAdd16(a uint16, b uint16) uint16 {
 }
 
 // Perform a rotate left, update flags, and return the result.
-func (c *Cpu) opRotateLeft(a uint8, useC bool) uint8 {
+func (c *Cpu) opRl(a uint8, thruC bool) uint8 {
 	r := a << 1
-	if !useC {
+	if !thruC {
 		r |= a >> 7
 	} else if c.FlagC() {
 		r |= 0x1
@@ -1174,9 +2200,9 @@ func (c *Cpu) opRotateLeft(a uint8, useC bool) uint8 {
 }
 
 // Perform a rotate right, update flags, and return the result.
-func (c *Cpu) opRotateRight(a uint8, useC bool) uint8 {
+func (c *Cpu) opRr(a uint8, thruC bool) uint8 {
 	r := a >> 1
-	if !useC {
+	if !thruC {
 		r |= a & 0x1
 	} else if c.FlagC() {
 		r |= 0x80
@@ -1243,4 +2269,50 @@ func (c *Cpu) opHalt(ime bool, iE uint8, iF uint8) {
 			c.TriggerHaltBug()
 		}
 	}
+}
+
+// Perform a shift left, update flags, and return the result.
+func (c *Cpu) opSl(a uint8) uint8 {
+	r := a << 1
+
+	c.SetFlagZ(r == 0)
+	c.SetFlagN(false)
+	c.SetFlagH(false)
+	c.SetFlagC(utils.GetBit(a, 7))
+
+	return r
+}
+
+// Perform a shift right, update flags, and return the result.
+func (c *Cpu) opSr(a uint8, keepMSB bool) uint8 {
+	r := a >> 1
+	if keepMSB {
+		r = utils.SetBit(r, 7, utils.GetBit(a, 7))
+	}
+
+	c.SetFlagZ(r == 0)
+	c.SetFlagN(false)
+	c.SetFlagH(false)
+	c.SetFlagC(utils.GetBit(a, 0))
+
+	return r
+}
+
+// Perform a swap, update flags, and return the result.
+func (c *Cpu) opSwap(a uint8) uint8 {
+	r := (a & 0x0f) << 4 | (a & 0xf0) >> 4
+
+	c.SetFlagZ(r == 0)
+	c.SetFlagN(false)
+	c.SetFlagH(false)
+	c.SetFlagC(false)
+
+	return r
+}
+
+// Perform a bit test and update flags.
+func (c *Cpu) opBit(a uint8, b int) {
+	c.SetFlagZ(!utils.GetBit(a, b))
+	c.SetFlagN(false)
+	c.SetFlagH(true)
 }

@@ -167,7 +167,7 @@ func (c *Cpu) FlagZ() bool {
 }
 
 func (c *Cpu) SetFlagZ(v bool) {
-	utils.SetBit(c.f, 7, v)
+	c.f = utils.SetBit(c.f, 7, v)
 }
 
 func (c *Cpu) FlagN() bool {
@@ -175,7 +175,7 @@ func (c *Cpu) FlagN() bool {
 }
 
 func (c *Cpu) SetFlagN(v bool) {
-	utils.SetBit(c.f, 6, v)
+	c.f = utils.SetBit(c.f, 6, v)
 }
 
 func (c *Cpu) FlagH() bool {
@@ -183,7 +183,7 @@ func (c *Cpu) FlagH() bool {
 }
 
 func (c *Cpu) SetFlagH(v bool) {
-	utils.SetBit(c.f, 5, v)
+	c.f = utils.SetBit(c.f, 5, v)
 }
 
 func (c *Cpu) FlagC() bool {
@@ -191,7 +191,7 @@ func (c *Cpu) FlagC() bool {
 }
 
 func (c *Cpu) SetFlagC(v bool) {
-	utils.SetBit(c.f, 4, v)
+	c.f = utils.SetBit(c.f, 4, v)
 }
 
 // Get the stack pointer.

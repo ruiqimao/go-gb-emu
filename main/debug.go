@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/ruiqimao/go-gfx/gfx"
@@ -28,6 +29,7 @@ func (e *Emulator) debugLoop() {
 }
 
 func (e *Emulator) debugExec(input []string) {
+	var err error
 	cmd := strings.ToLower(input[0])
 	switch cmd {
 
@@ -72,7 +74,18 @@ func (e *Emulator) debugExec(input []string) {
 
 	// Step forward.
 	case "step", "s":
-		cycles := e.gb.Step()
+		steps := 1
+		if len(input) == 2 {
+			steps, err = strconv.Atoi(input[1])
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "%v\n", err)
+				break
+			}
+		}
+		cycles := 0
+		for i := 0; i < steps; i++ {
+			cycles += e.gb.Step()
+		}
 		fmt.Printf("%d cycles\n", cycles)
 
 	// Run.
