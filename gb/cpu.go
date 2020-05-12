@@ -59,9 +59,19 @@ func (c *Cpu) Step() (int, error) {
 	ime := c.ime
 
 	// Execute the next instruction.
-	cycles, err := c.execNextInstruction()
-	if err != nil {
-		return cycles, err
+	var cycles int = 0
+	if c.Halted() {
+		cycles = 4
+	} else {
+		// Read an instruction.
+		opCode := c.IncPC()
+		inst := c.instructions[opCode]
+		if inst == nil {
+			return 0, fmt.Errorf("Unimplemented OP code: %02x", opCode)
+		}
+
+		// Execute the instruction.
+		cycles = inst()
 	}
 
 	// Handle interrupts.
@@ -71,24 +81,6 @@ func (c *Cpu) Step() (int, error) {
 	c.updateTimers(cycles)
 
 	return cycles, nil
-}
-
-// Execute the next instruction and return how many cycles were used.
-func (c *Cpu) execNextInstruction() (int, error) {
-	// If the CPU is halted, do nothing.
-	if c.Halted() {
-		return 4, nil
-	}
-
-	// Read an instruction.
-	opCode := c.IncPC()
-	inst := c.instructions[opCode]
-	if inst == nil {
-		return 0, fmt.Errorf("Unimplemented OP code: %02x", opCode)
-	}
-
-	// Execute the instruction.
-	return inst(), nil
 }
 
 // Getters/setters for registers.

@@ -7,6 +7,9 @@ import (
 // An Instruction returns how many cycles it takes to execute.
 type Instruction func() int
 
+// Instruction set taken from https://www.pastraiser.com/cpu/gameboy/gameboy_opcodes.html.
+// The CB prefix table is appended to the end, e.g. 0xcb 0x14 would be 0x114 in the table.
+// The BIT b,(HL) cycle count has been fixed in this implementation (16 cycles -> 12 cycles).
 func (c *Cpu) CreateInstructionSet() {
 	cpu := c
 	mem := c.gb.mem
