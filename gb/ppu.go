@@ -33,7 +33,7 @@ const (
 
 // Buffer constants.
 const (
-	FrameWidth = 160
+	FrameWidth  = 160
 	FrameHeight = 144
 )
 
@@ -42,7 +42,7 @@ type PPU struct {
 	gb *GameBoy
 
 	sc uint16 // Scanline counter.
-	ly uint8 // Current scanline.
+	ly uint8  // Current scanline.
 
 	lcdc uint8 // LCD control.
 	stat uint8 // LCD status.
@@ -52,7 +52,7 @@ type PPU struct {
 	oam  [0x100]uint8
 
 	// Current frame.
-	frame [FrameWidth*FrameHeight]uint8
+	frame [FrameWidth * FrameHeight]uint8
 }
 
 func NewPPU(gb *GameBoy) *PPU {
@@ -101,7 +101,7 @@ func (p *PPU) Update(cycles int) {
 
 // Set the mode.
 func (p *PPU) setMode(m uint8) {
-	p.stat = p.stat & 0xf8 | m & 0x03
+	p.stat = p.stat&0xf8 | m&0x03
 }
 
 // Read a byte from the VRAM.
@@ -154,7 +154,7 @@ func (p *PPU) STAT() uint8 {
 // Set the value of STAT.
 func (p *PPU) SetSTAT(v uint8) {
 	// Only set writable values.
-	p.stat = p.stat & 0x0f | v & 0xf0
+	p.stat = p.stat&0x0f | v&0xf0
 }
 
 // Get the mode.

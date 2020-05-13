@@ -4,4 +4,3 @@ package gb
 func (p *PPU) stepOAM() {
 	// TODO.
 }
-

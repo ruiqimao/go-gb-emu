@@ -16,8 +16,8 @@ type Display struct {
 	window *glfw.Window
 
 	// Graphics objects.
-	program *gfx.Program // Shader program.
-	quad *gfx.Vao // Quad shape.
+	program *gfx.Program   // Shader program.
+	quad    *gfx.Vao       // Quad shape.
 	texture *gfx.Texture2D // Display texture.
 }
 
@@ -27,7 +27,7 @@ func NewDisplay() (*Display, error) {
 
 	// Initialize the window.
 	var err error
-	d.window, err = gfx.NewWindow(DisplayScale * gb.FrameWidth, DisplayScale * gb.FrameHeight, "Game Boy", false)
+	d.window, err = gfx.NewWindow(DisplayScale*gb.FrameWidth, DisplayScale*gb.FrameHeight, "Game Boy", false)
 	if err != nil {
 		return nil, err
 	}

@@ -32,18 +32,18 @@ import (
 // FFFF
 //   Interrupts enable register.
 const (
-	AddrBoot = 0x0000
+	AddrBoot     = 0x0000
 	AddrCartROM0 = 0x0000
 	AddrCartROMN = 0x4000
-	AddrVRAM = 0x8000
-	AddrCartRAM = 0xa000
-	AddrWRAM0 = 0xc000
-	AddrWRAMN = 0xd000
-	AddrEcho = 0xe000
-	AddrOAM = 0xfe00
-	AddrEmpty = 0xfea0
-	AddrIO = 0xff00
-	AddrHRAM = 0xff80
+	AddrVRAM     = 0x8000
+	AddrCartRAM  = 0xa000
+	AddrWRAM0    = 0xc000
+	AddrWRAMN    = 0xd000
+	AddrEcho     = 0xe000
+	AddrOAM      = 0xfe00
+	AddrEmpty    = 0xfea0
+	AddrIO       = 0xff00
+	AddrHRAM     = 0xff80
 )
 
 type Memory struct {
@@ -54,7 +54,7 @@ type Memory struct {
 
 	// Scratch space for I/O registers.
 	// IE flag is stored in last byte of scratch space.
-	IO   [0x81]uint8
+	IO [0x81]uint8
 }
 
 func NewMemory(gb *GameBoy) *Memory {
@@ -88,7 +88,7 @@ func (m *Memory) Read(addr uint16) uint8 {
 
 	// Video RAM.
 	case addr < AddrCartRAM:
-		return m.gb.ppu.ReadVRAM(addr-AddrVRAM)
+		return m.gb.ppu.ReadVRAM(addr - AddrVRAM)
 
 	// Cartridge RAM.
 	case addr < AddrWRAM0:
@@ -105,7 +105,7 @@ func (m *Memory) Read(addr uint16) uint8 {
 
 	// Sprite attribute table.
 	case addr < AddrEmpty:
-		return m.gb.ppu.ReadOAM(addr-AddrOAM)
+		return m.gb.ppu.ReadOAM(addr - AddrOAM)
 
 	// Empty.
 	case addr < AddrIO:
@@ -117,7 +117,7 @@ func (m *Memory) Read(addr uint16) uint8 {
 
 	// High RAM.
 	case addr < AddrIE:
-		return m.hram[addr-AddrIO]
+		return m.hram[addr-AddrHRAM]
 
 	// Interrupt enable register.
 	case addr == AddrIE:
