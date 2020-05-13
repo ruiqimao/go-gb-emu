@@ -47,6 +47,10 @@ type PPU struct {
 	lcdc uint8 // LCD control.
 	stat uint8 // LCD status.
 
+	// VRAM and OAM.
+	vram [0x4000]uint8
+	oam  [0x100]uint8
+
 	// Current frame.
 	frame [FrameWidth*FrameHeight]uint8
 }
@@ -95,32 +99,41 @@ func (p *PPU) Update(cycles int) {
 	}
 }
 
-// Execute a step of OAM searching.
-func (p *PPU) stepOAM() {
-	// TODO.
-}
-
-// Execute a step of pixel transfer.
-func (p *PPU) stepTransfer() {
-	// TODO.
-}
-
-// Push the current frame into the channel.
-func (p *PPU) pushFrame() {
-	// Make a copy of the frame.
-	frame := make([]byte, len(p.frame))
-	copy(frame, p.frame[:])
-
-	// Try to push the frame. If the channel is full, drop the frame.
-	select {
-	case p.gb.F <- frame:
-	default:
-	}
-}
-
 // Set the mode.
 func (p *PPU) setMode(m uint8) {
 	p.stat = p.stat & 0xf8 | m & 0x03
+}
+
+// Read a byte from the VRAM.
+func (p *PPU) ReadVRAM(addr uint16) uint8 {
+	if p.Mode() == ModeTransfer {
+		return 0x00
+	}
+	return p.vram[addr]
+}
+
+// Write a byte to the VRAM.
+func (p *PPU) WriteVRAM(addr uint16, v uint8) {
+	if p.Mode() == ModeTransfer {
+		return
+	}
+	p.vram[addr] = v
+}
+
+// Read a byte from the OAM.
+func (p *PPU) ReadOAM(addr uint16) uint8 {
+	if p.Mode() == ModeTransfer || p.Mode() == ModeOAM {
+		return 0x00
+	}
+	return p.oam[addr]
+}
+
+// Write a byte to the OAM.
+func (p *PPU) WriteOAM(addr uint16, v uint8) {
+	if p.Mode() == ModeTransfer || p.Mode() == ModeOAM {
+		return
+	}
+	p.oam[addr] = v
 }
 
 // Get the value of LCDC.

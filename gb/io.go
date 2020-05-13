@@ -70,39 +70,38 @@ func (m *Memory) BootRomEnabled() bool {
 
 // Read an I/O register.
 func (m *Memory) ReadIO(addr uint16) uint8 {
+	gb := m.gb
+
 	switch addr {
 
 	// TODO.
 
 	case AddrDIV:
-		// DIV register is upper 8 bits of internal counter.
-		return uint8(m.gb.cpu.IC() >> 8)
+		return gb.cpu.DIV()
 
 	case AddrIF:
-		// Upper 3 bits are always high.
-		return m.io[addr-AddrIO] | 0xe0
+		return gb.cpu.IF()
 
 	case AddrLCDC:
-		// Retrieve from PPU.
-		return m.gb.ppu.LCDC()
+		return gb.ppu.LCDC()
 
 	case AddrSTAT:
-		// Retrieve from PPU.
-		return m.gb.ppu.STAT()
+		return gb.ppu.STAT()
 
 	case AddrLY:
-		// Retrieve from PPU.
-		return m.gb.ppu.LY()
+		return gb.ppu.LY()
 
 	default:
-		return m.io[addr-AddrIO]
+		return m.IO[addr-AddrIO]
 
 	}
 }
 
 // Write to an I/O register.
 func (m *Memory) WriteIO(addr uint16, v uint8) {
-	if m.gb.Debugging() {
+	gb := m.gb
+
+	if gb.Debugging() {
 		if addr == AddrSC && v == 0x81 {
 			fmt.Printf("%c", m.Read(AddrSB))
 		}
@@ -113,27 +112,19 @@ func (m *Memory) WriteIO(addr uint16, v uint8) {
 	// TODO.
 
 	case AddrDIV:
-		// DIV maps directly to internal counter.
-		lo := uint8(m.gb.cpu.IC())
-		m.gb.cpu.SetIC(utils.CombineBytes(v, lo))
+		gb.cpu.SetDIV(v)
 
 	case AddrTAC:
-		// Only lower 3 bits are writable.
-		m.io[addr-AddrIO] = v & 0x07
+		gb.cpu.SetTAC(v)
 
 	case AddrLCDC:
-		// Redirect to PPU.
-		m.gb.ppu.SetLCDC(v)
+		gb.ppu.SetLCDC(v)
 
 	case AddrSTAT:
-		// Redirect to PPU.
-		m.gb.ppu.SetSTAT(v)
-
-	case AddrLY:
-		// Read only.
+		gb.ppu.SetSTAT(v)
 
 	default:
-		m.io[addr-AddrIO] = v
+		m.IO[addr-AddrIO] = v
 
 	}
 }

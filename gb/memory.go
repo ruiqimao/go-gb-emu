@@ -49,12 +49,12 @@ const (
 type Memory struct {
 	gb *GameBoy
 
-	vram [0x4000]uint8
 	wram [0x2000]uint8
-	oam  [0x100]uint8
 	hram [0xff]uint8
-	io   [0x80]uint8
-	ie   uint8
+
+	// Scratch space for I/O registers.
+	// IE flag is stored in last byte of scratch space.
+	IO   [0x81]uint8
 }
 
 func NewMemory(gb *GameBoy) *Memory {
@@ -88,12 +88,7 @@ func (m *Memory) Read(addr uint16) uint8 {
 
 	// Video RAM.
 	case addr < AddrCartRAM:
-		// Make sure VRAM is currently accessible.
-		mode := m.gb.ppu.Mode()
-		if mode == ModeTransfer {
-			return 0x00
-		}
-		return m.vram[addr-AddrVRAM]
+		return m.gb.ppu.ReadVRAM(addr-AddrVRAM)
 
 	// Cartridge RAM.
 	case addr < AddrWRAM0:
@@ -110,12 +105,7 @@ func (m *Memory) Read(addr uint16) uint8 {
 
 	// Sprite attribute table.
 	case addr < AddrEmpty:
-		// Make sure the OAM is currently accessible.
-		mode := m.gb.ppu.Mode()
-		if mode == ModeTransfer || mode == ModeOAM {
-			return 0x00
-		}
-		return m.oam[addr-AddrOAM]
+		return m.gb.ppu.ReadOAM(addr-AddrOAM)
 
 	// Empty.
 	case addr < AddrIO:
@@ -131,7 +121,7 @@ func (m *Memory) Read(addr uint16) uint8 {
 
 	// Interrupt enable register.
 	case addr == AddrIE:
-		return m.ie
+		return m.IO[0x80]
 
 	}
 
@@ -145,12 +135,7 @@ func (m *Memory) Write(addr uint16, v uint8) {
 
 	// Video RAM.
 	case addr >= AddrVRAM && addr < AddrCartRAM:
-		// Make sure VRAM is currently accessible.
-		mode := m.gb.ppu.Mode()
-		if mode == ModeTransfer {
-			break
-		}
-		m.vram[addr-AddrVRAM] = v
+		m.gb.ppu.WriteVRAM(addr-AddrVRAM, v)
 
 	// Cartridge RAM.
 	case addr >= AddrCartRAM && addr < AddrWRAM0:
@@ -166,12 +151,7 @@ func (m *Memory) Write(addr uint16, v uint8) {
 
 	// Sprite attribute table.
 	case addr >= AddrOAM && addr < AddrIO:
-		// Make sure the OAM is currently accessible.
-		mode := m.gb.ppu.Mode()
-		if mode == ModeTransfer || mode == ModeOAM {
-			break
-		}
-		m.oam[addr-AddrOAM] = v
+		m.gb.ppu.WriteOAM(addr-AddrOAM, v)
 
 	// I/O registers.
 	case addr >= AddrIO && addr < AddrHRAM:
@@ -183,7 +163,7 @@ func (m *Memory) Write(addr uint16, v uint8) {
 
 	// Interrupt enable register.
 	case addr == AddrIE:
-		m.ie = v
+		m.IO[0x80] = v
 
 	}
 }
