@@ -82,3 +82,23 @@ func (gb *GameBoy) LoadBootRom(rom []byte) error {
 	copy(gb.boot[:], rom)
 	return nil
 }
+
+// Get the CPU.
+func (gb *GameBoy) CPU() *CPU {
+	return gb.cpu
+}
+
+// Get the PPU.
+func (gb *GameBoy) PPU() *PPU {
+	return gb.ppu
+}
+
+// Get the memory controller.
+func (gb *GameBoy) Memory() *Memory {
+	return gb.mem
+}
+
+// Get the clock.
+func (gb *GameBoy) Clock() *Clock {
+	return gb.clk
+}

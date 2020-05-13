@@ -29,37 +29,37 @@ func (e *Emulator) debugLoop() {
 }
 
 func (e *Emulator) debugExec(input []string) {
+	cpu := e.gb.CPU()
+	mem := e.gb.Memory()
+
 	var err error
 	cmd := strings.ToLower(input[0])
 	switch cmd {
 
 	// Dump CPU.
 	case "dump", "d":
-		ss := e.gb.Snapshot()
 
 		// Print registers.
-		fmt.Printf("B  C  D  E  H  L  A  F\n")
-		fmt.Printf("%02x %02x %02x %02x %02x %02x %02x %02x\n",
-			ss.B, ss.C, ss.D, ss.E, ss.H, ss.L, ss.A, ss.F)
-		fmt.Printf("\n")
-		fmt.Printf("BC   DE   HL   AF\n")
-		fmt.Printf("%04x %04x %04x %04x\n", ss.BC, ss.DE, ss.HL, ss.AF)
+		fmt.Printf("B  C   D  E   H  L   A  F\n")
+		fmt.Printf("%02x %02x  %02x %02x  %02x %02x  %02x %02x\n",
+			cpu.B(), cpu.C(), cpu.D(), cpu.E(), cpu.H(), cpu.L(), cpu.A(), cpu.F())
 		fmt.Printf("\n")
 
 		// Print flags.
 		fmt.Printf("Z N H C\n")
 		fmt.Printf("%d %d %d %d\n",
-			boolToUint8(ss.FlagZ), boolToUint8(ss.FlagN), boolToUint8(ss.FlagH), boolToUint8(ss.FlagC))
+			boolToUint8(cpu.FlagZ()),
+			boolToUint8(cpu.FlagN()),
+			boolToUint8(cpu.FlagH()),
+			boolToUint8(cpu.FlagC()))
 		fmt.Printf("\n")
 
 		// Print stack pointer and program counter.
-		fmt.Printf("SP: %04x (%04x)\n", ss.SP, binary.LittleEndian.Uint16(ss.Memory[ss.SP:]))
-		fmt.Printf("PC: %04x (%02x) (%s)\n", ss.PC, ss.Memory[ss.PC], ss.InstructionName)
+		fmt.Printf("SP: %04x (%04x)\n", cpu.SP(), mem.Read16(cpu.SP()))
+		fmt.Printf("PC: %04x (%s)\n", cpu.PC(), e.gb.InstructionName())
 
 	// Read memory.
-	case "read", "r":
-		ss := e.gb.Snapshot()
-
+	case "print", "p":
 		addrBytes, err := hex.DecodeString(fmt.Sprintf("%04s", input[1]))
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "%v\n", err)
@@ -68,9 +68,7 @@ func (e *Emulator) debugExec(input []string) {
 		addr := binary.BigEndian.Uint16(addrBytes)
 
 		// Read both a byte and a short at the address.
-		b := ss.Memory[addr]
-		s := binary.LittleEndian.Uint16(ss.Memory[addr:])
-		fmt.Printf("%02x %04x\n", b, s)
+		fmt.Printf("%02x %04x\n", mem.Read(addr), mem.Read16(addr))
 
 	// Step forward.
 	case "step", "s":
@@ -99,7 +97,7 @@ func (e *Emulator) debugExec(input []string) {
 
 		cycles := e.gb.Step()
 		for {
-			if e.gb.PC() == addr {
+			if cpu.PC() == addr {
 				break
 			}
 
@@ -108,11 +106,11 @@ func (e *Emulator) debugExec(input []string) {
 		fmt.Printf("%d cycles\n", cycles)
 
 	// Run.
-	case "run":
+	case "run", "r":
 		e.gb.Resume()
 
-	// Pause.
-	case "pause", "p":
+	// Halt.
+	case "halt", "h":
 		e.gb.Pause()
 
 	default:

@@ -2,7 +2,7 @@ package gb
 
 // LCDC flags.
 const (
-	FlagLcdPower      = 7
+	FlagLCDPower      = 7
 	FlagWindowTileMap = 6
 	FlagWindowEnable  = 5
 	FlagBgTileset     = 4
