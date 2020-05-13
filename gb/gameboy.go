@@ -7,12 +7,12 @@ import (
 
 const (
 	BaseClock = 256     // Run at a base of 256Hz.
-	CpuClock  = 4194304 // CPU clock is 4.194304MHz.
+	CPUClock  = 4194304 // CPU clock is 4.194304MHz.
 )
 
 type GameBoy struct {
-	cpu *Cpu
-	ppu *Ppu
+	cpu *CPU
+	ppu *PPU
 	mem *Memory
 
 	clk *Clock
@@ -28,8 +28,8 @@ func NewGameBoy() (*GameBoy, error) {
 	gb := &GameBoy{}
 
 	// Create the components.
-	gb.cpu = NewCpu(gb)
-	gb.ppu = NewPpu(gb)
+	gb.cpu = NewCPU(gb)
+	gb.ppu = NewPPU(gb)
 	gb.mem = NewMemory(gb)
 	gb.clk = NewClock(BaseClock)
 
@@ -50,7 +50,7 @@ func (gb *GameBoy) Run() {
 		select {
 
 		case <-gb.clk.C:
-			cycleDebt = gb.RunCycles(CpuClock/BaseClock - cycleDebt)
+			cycleDebt = gb.RunCycles(CPUClock/BaseClock - cycleDebt)
 
 		}
 	}

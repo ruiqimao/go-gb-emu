@@ -14,7 +14,7 @@ const (
 )
 
 // Handle interrupts. Returns how many cycles were used.
-func (c *Cpu) handleInterrupts(ime bool) int {
+func (c *CPU) handleInterrupts(ime bool) int {
 	iE := c.gb.mem.Read(AddrIE)
 	iF := c.gb.mem.Read(AddrIF)
 	ief := iE & iF
@@ -55,14 +55,14 @@ func (c *Cpu) handleInterrupts(ime bool) int {
 }
 
 // Request an interrupt.
-func (c *Cpu) RequestInterrupt(interrupt int) {
+func (c *CPU) RequestInterrupt(interrupt int) {
 	iF := c.gb.mem.Read(AddrIF)
 	iF = utils.SetBit(iF, interrupt, true)
 	c.gb.mem.Write(AddrIF, iF)
 }
 
 // Update timers for the given number of cycles.
-func (c *Cpu) updateTimers(cycles int) {
+func (c *CPU) updateTimers(cycles int) {
 	// Increment the internal counter. We keep track of the initial counter for per cycle processing
 	// later.
 	ic := c.IC()

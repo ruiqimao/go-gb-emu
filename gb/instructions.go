@@ -10,7 +10,7 @@ type Instruction func() int
 // Instruction set taken from https://www.pastraiser.com/cpu/gameboy/gameboy_opcodes.html.
 // The CB prefix table is appended to the end, e.g. 0xcb 0x14 would be 0x114 in the table.
 // The BIT b,(HL) cycle count has been fixed in this implementation (16 cycles -> 12 cycles).
-func (c *Cpu) CreateInstructionSet() {
+func (c *CPU) CreateInstructionSet() {
 	cpu := c
 	mem := c.gb.mem
 
@@ -2043,7 +2043,7 @@ func (c *Cpu) CreateInstructionSet() {
 }
 
 // Perform an add, update flags, and return the result.
-func (c *Cpu) opAdd(a uint8, b uint8, carry bool) uint8 {
+func (c *CPU) opAdd(a uint8, b uint8, carry bool) uint8 {
 	cy := uint8(0)
 	if carry {
 		cy = 1
@@ -2061,7 +2061,7 @@ func (c *Cpu) opAdd(a uint8, b uint8, carry bool) uint8 {
 }
 
 // Perform a subtract, update flags, and return the result.
-func (c *Cpu) opSub(a uint8, b uint8, borrow bool) uint8 {
+func (c *CPU) opSub(a uint8, b uint8, borrow bool) uint8 {
 	bw := uint8(0)
 	if borrow {
 		bw = 1
@@ -2078,7 +2078,7 @@ func (c *Cpu) opSub(a uint8, b uint8, borrow bool) uint8 {
 }
 
 // Perform a signed add, update flags, and return the result.
-func (c *Cpu) opSignedAdd(a uint16, b uint8) uint16 {
+func (c *CPU) opSignedAdd(a uint16, b uint8) uint16 {
 	r := uint16(int32(a) + int32(int8(b)))
 
 	// Get the flags from doing an ordinary add.
@@ -2090,7 +2090,7 @@ func (c *Cpu) opSignedAdd(a uint16, b uint8) uint16 {
 }
 
 // Perform an increment, update flags, and return the result.
-func (c *Cpu) opInc(v uint8) uint8 {
+func (c *CPU) opInc(v uint8) uint8 {
 	// Do not update the carry flag.
 	cy := c.FlagC()
 	r := c.opAdd(v, 1, false)
@@ -2099,7 +2099,7 @@ func (c *Cpu) opInc(v uint8) uint8 {
 }
 
 // Perform a decrement, update flags, and return the result.
-func (c *Cpu) opDec(v uint8) uint8 {
+func (c *CPU) opDec(v uint8) uint8 {
 	// Do not update the carry flag.
 	cy := c.FlagC()
 	r := c.opSub(v, 1, false)
@@ -2108,7 +2108,7 @@ func (c *Cpu) opDec(v uint8) uint8 {
 }
 
 // Perform decimal adjust on register A, update flags, and return the result.
-func (c *Cpu) opDaa() uint8 {
+func (c *CPU) opDaa() uint8 {
 	a := c.A()
 
 	// Stolen from https://forums.nesdev.com/viewtopic.php?t=15944#p196282.
@@ -2137,7 +2137,7 @@ func (c *Cpu) opDaa() uint8 {
 }
 
 // Perform an AND operation, update flags, and return the result.
-func (c *Cpu) opAnd(a uint8, b uint8) uint8 {
+func (c *CPU) opAnd(a uint8, b uint8) uint8 {
 	r := a & b
 
 	c.SetFlagZ(r == 0)
@@ -2149,7 +2149,7 @@ func (c *Cpu) opAnd(a uint8, b uint8) uint8 {
 }
 
 // Perform an XOR operation, update flags, and return the result.
-func (c *Cpu) opXor(a uint8, b uint8) uint8 {
+func (c *CPU) opXor(a uint8, b uint8) uint8 {
 	r := a ^ b
 
 	c.SetFlagZ(r == 0)
@@ -2161,7 +2161,7 @@ func (c *Cpu) opXor(a uint8, b uint8) uint8 {
 }
 
 // Perform an OR operation, update flags, and return the result.
-func (c *Cpu) opOr(a uint8, b uint8) uint8 {
+func (c *CPU) opOr(a uint8, b uint8) uint8 {
 	r := a | b
 
 	c.SetFlagZ(r == 0)
@@ -2173,7 +2173,7 @@ func (c *Cpu) opOr(a uint8, b uint8) uint8 {
 }
 
 // Perform a CP operation, update flags, and return the result.
-func (c *Cpu) opCp(a uint8, b uint8) uint8 {
+func (c *CPU) opCp(a uint8, b uint8) uint8 {
 	r := a - b
 
 	c.SetFlagZ(r == 0)
@@ -2185,7 +2185,7 @@ func (c *Cpu) opCp(a uint8, b uint8) uint8 {
 }
 
 // Perform a 16 bit add, update flags, and return the result.
-func (c *Cpu) opAdd16(a uint16, b uint16) uint16 {
+func (c *CPU) opAdd16(a uint16, b uint16) uint16 {
 	r32 := uint32(a) + uint32(b)
 	r := uint16(r32)
 
@@ -2197,7 +2197,7 @@ func (c *Cpu) opAdd16(a uint16, b uint16) uint16 {
 }
 
 // Perform a rotate left, update flags, and return the result.
-func (c *Cpu) opRl(a uint8, thruC bool) uint8 {
+func (c *CPU) opRl(a uint8, thruC bool) uint8 {
 	r := a << 1
 	if !thruC {
 		r |= a >> 7
@@ -2214,7 +2214,7 @@ func (c *Cpu) opRl(a uint8, thruC bool) uint8 {
 }
 
 // Perform a rotate right, update flags, and return the result.
-func (c *Cpu) opRr(a uint8, thruC bool) uint8 {
+func (c *CPU) opRr(a uint8, thruC bool) uint8 {
 	r := a >> 1
 	if !thruC {
 		r |= (a & 0x1) << 7
@@ -2231,7 +2231,7 @@ func (c *Cpu) opRr(a uint8, thruC bool) uint8 {
 }
 
 // Perform a relative jump if the given condition is true. Returns how many cycles it took.
-func (c *Cpu) opJr(cond bool, r uint8) int {
+func (c *CPU) opJr(cond bool, r uint8) int {
 	if cond {
 		c.SetPC(c.PC() + uint16(int8(r)))
 		return 12
@@ -2240,7 +2240,7 @@ func (c *Cpu) opJr(cond bool, r uint8) int {
 }
 
 // Perform a return if the given condition is true. Returns how many cycles it took.
-func (c *Cpu) opRet(cond bool) int {
+func (c *CPU) opRet(cond bool) int {
 	if cond {
 		c.SetPC(c.PopSP())
 		return 20
@@ -2249,7 +2249,7 @@ func (c *Cpu) opRet(cond bool) int {
 }
 
 // Perform a jump if the given condition is true. Returns how many cycles it took.
-func (c *Cpu) opJp(cond bool, a uint16) int {
+func (c *CPU) opJp(cond bool, a uint16) int {
 	if cond {
 		c.SetPC(a)
 		return 16
@@ -2258,7 +2258,7 @@ func (c *Cpu) opJp(cond bool, a uint16) int {
 }
 
 // Perform a call if the given condition is true. Returns how many cycles it took.
-func (c *Cpu) opCall(cond bool, a uint16) int {
+func (c *CPU) opCall(cond bool, a uint16) int {
 	if cond {
 		c.PushSP(c.PC())
 		c.SetPC(a)
@@ -2269,7 +2269,7 @@ func (c *Cpu) opCall(cond bool, a uint16) int {
 
 // Perform a halt. Handles HALT bug, documented in section 4.10 of
 // https://github.com/AntonioND/giibiiadvance/blob/master/docs/TCAGBD.pdf.
-func (c *Cpu) opHalt(ime bool, iE uint8, iF uint8) {
+func (c *CPU) opHalt(ime bool, iE uint8, iF uint8) {
 	if ime {
 		// HALT is executed normally.
 		c.SetHalt(true)
@@ -2286,7 +2286,7 @@ func (c *Cpu) opHalt(ime bool, iE uint8, iF uint8) {
 }
 
 // Perform a shift left, update flags, and return the result.
-func (c *Cpu) opSl(a uint8) uint8 {
+func (c *CPU) opSl(a uint8) uint8 {
 	r := a << 1
 
 	c.SetFlagZ(r == 0)
@@ -2298,7 +2298,7 @@ func (c *Cpu) opSl(a uint8) uint8 {
 }
 
 // Perform a shift right, update flags, and return the result.
-func (c *Cpu) opSr(a uint8, keepMSB bool) uint8 {
+func (c *CPU) opSr(a uint8, keepMSB bool) uint8 {
 	r := a >> 1
 	if keepMSB {
 		r = utils.SetBit(r, 7, utils.GetBit(a, 7))
@@ -2313,7 +2313,7 @@ func (c *Cpu) opSr(a uint8, keepMSB bool) uint8 {
 }
 
 // Perform a swap, update flags, and return the result.
-func (c *Cpu) opSwap(a uint8) uint8 {
+func (c *CPU) opSwap(a uint8) uint8 {
 	r := (a&0x0f)<<4 | (a&0xf0)>>4
 
 	c.SetFlagZ(r == 0)
@@ -2325,7 +2325,7 @@ func (c *Cpu) opSwap(a uint8) uint8 {
 }
 
 // Perform a bit test and update flags.
-func (c *Cpu) opBit(a uint8, b int) {
+func (c *CPU) opBit(a uint8, b int) {
 	c.SetFlagZ(!utils.GetBit(a, b))
 	c.SetFlagN(false)
 	c.SetFlagH(true)

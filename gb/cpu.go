@@ -6,7 +6,7 @@ import (
 	"github.com/ruiqimao/go-gb-emu/utils"
 )
 
-type Cpu struct {
+type CPU struct {
 	gb *GameBoy
 
 	// Instruction set.
@@ -43,8 +43,8 @@ type Cpu struct {
 
 }
 
-func NewCpu(gb *GameBoy) *Cpu {
-	c := &Cpu{
+func NewCPU(gb *GameBoy) *CPU {
+	c := &CPU{
 		gb: gb,
 		ic: 0xabcc, // Initial value of internal counter.
 	}
@@ -53,7 +53,7 @@ func NewCpu(gb *GameBoy) *Cpu {
 }
 
 // Perform a step and return how many cycles were used.
-func (c *Cpu) Step() (int, error) {
+func (c *CPU) Step() (int, error) {
 	// Get whether interrupts will be handled this cycle. This gives us the behavior of EI taking
 	// effect in the following cycle.
 	ime := c.ime
@@ -84,167 +84,167 @@ func (c *Cpu) Step() (int, error) {
 }
 
 // Getters/setters for registers.
-func (c *Cpu) B() uint8 {
+func (c *CPU) B() uint8 {
 	return c.b
 }
 
-func (c *Cpu) SetB(v uint8) {
+func (c *CPU) SetB(v uint8) {
 	c.b = v
 }
 
-func (c *Cpu) C() uint8 {
+func (c *CPU) C() uint8 {
 	return c.c
 }
 
-func (c *Cpu) SetC(v uint8) {
+func (c *CPU) SetC(v uint8) {
 	c.c = v
 }
 
-func (c *Cpu) D() uint8 {
+func (c *CPU) D() uint8 {
 	return c.d
 }
 
-func (c *Cpu) SetD(v uint8) {
+func (c *CPU) SetD(v uint8) {
 	c.d = v
 }
 
-func (c *Cpu) E() uint8 {
+func (c *CPU) E() uint8 {
 	return c.e
 }
 
-func (c *Cpu) SetE(v uint8) {
+func (c *CPU) SetE(v uint8) {
 	c.e = v
 }
 
-func (c *Cpu) H() uint8 {
+func (c *CPU) H() uint8 {
 	return c.h
 }
 
-func (c *Cpu) SetH(v uint8) {
+func (c *CPU) SetH(v uint8) {
 	c.h = v
 }
 
-func (c *Cpu) L() uint8 {
+func (c *CPU) L() uint8 {
 	return c.l
 }
 
-func (c *Cpu) SetL(v uint8) {
+func (c *CPU) SetL(v uint8) {
 	c.l = v
 }
 
-func (c *Cpu) A() uint8 {
+func (c *CPU) A() uint8 {
 	return c.a
 }
 
-func (c *Cpu) SetA(v uint8) {
+func (c *CPU) SetA(v uint8) {
 	c.a = v
 }
 
-func (c *Cpu) F() uint8 {
+func (c *CPU) F() uint8 {
 	return c.f
 }
 
-func (c *Cpu) SetF(v uint8) {
+func (c *CPU) SetF(v uint8) {
 	// Last 4 bits of F must be 0.
 	c.f = v & 0xf0
 }
 
-func (c *Cpu) BC() uint16 {
+func (c *CPU) BC() uint16 {
 	return utils.CombineBytes(c.b, c.c)
 }
 
-func (c *Cpu) SetBC(v uint16) {
+func (c *CPU) SetBC(v uint16) {
 	c.b, c.c = utils.SplitShort(v)
 }
 
-func (c *Cpu) DE() uint16 {
+func (c *CPU) DE() uint16 {
 	return utils.CombineBytes(c.d, c.e)
 }
 
-func (c *Cpu) SetDE(v uint16) {
+func (c *CPU) SetDE(v uint16) {
 	c.d, c.e = utils.SplitShort(v)
 }
 
-func (c *Cpu) HL() uint16 {
+func (c *CPU) HL() uint16 {
 	return utils.CombineBytes(c.h, c.l)
 }
 
-func (c *Cpu) SetHL(v uint16) {
+func (c *CPU) SetHL(v uint16) {
 	c.h, c.l = utils.SplitShort(v)
 }
 
-func (c *Cpu) AF() uint16 {
+func (c *CPU) AF() uint16 {
 	return utils.CombineBytes(c.a, c.f)
 }
 
-func (c *Cpu) SetAF(v uint16) {
+func (c *CPU) SetAF(v uint16) {
 	// Last 4 bits of F must be 0.
 	c.a, c.f = utils.SplitShort(v & 0xfff0)
 }
 
 // Getters/setters for flags.
-func (c *Cpu) FlagZ() bool {
+func (c *CPU) FlagZ() bool {
 	return utils.GetBit(c.f, 7)
 }
 
-func (c *Cpu) SetFlagZ(v bool) {
+func (c *CPU) SetFlagZ(v bool) {
 	c.f = utils.SetBit(c.f, 7, v)
 }
 
-func (c *Cpu) FlagN() bool {
+func (c *CPU) FlagN() bool {
 	return utils.GetBit(c.f, 6)
 }
 
-func (c *Cpu) SetFlagN(v bool) {
+func (c *CPU) SetFlagN(v bool) {
 	c.f = utils.SetBit(c.f, 6, v)
 }
 
-func (c *Cpu) FlagH() bool {
+func (c *CPU) FlagH() bool {
 	return utils.GetBit(c.f, 5)
 }
 
-func (c *Cpu) SetFlagH(v bool) {
+func (c *CPU) SetFlagH(v bool) {
 	c.f = utils.SetBit(c.f, 5, v)
 }
 
-func (c *Cpu) FlagC() bool {
+func (c *CPU) FlagC() bool {
 	return utils.GetBit(c.f, 4)
 }
 
-func (c *Cpu) SetFlagC(v bool) {
+func (c *CPU) SetFlagC(v bool) {
 	c.f = utils.SetBit(c.f, 4, v)
 }
 
 // Get the stack pointer.
-func (c *Cpu) SP() uint16 {
+func (c *CPU) SP() uint16 {
 	return c.sp
 }
 
 // Push a value to the stack.
-func (c *Cpu) PushSP(v uint16) {
+func (c *CPU) PushSP(v uint16) {
 	c.sp -= 2
 	c.gb.mem.Write16(c.sp, v)
 }
 
 // Pop a value from the stack.
-func (c *Cpu) PopSP() uint16 {
+func (c *CPU) PopSP() uint16 {
 	v := c.gb.mem.Read16(c.sp)
 	c.sp += 2
 	return v
 }
 
 // Set the stack pointer.
-func (c *Cpu) SetSP(v uint16) {
+func (c *CPU) SetSP(v uint16) {
 	c.sp = v
 }
 
 // Get the program counter.
-func (c *Cpu) PC() uint16 {
+func (c *CPU) PC() uint16 {
 	return c.pc
 }
 
 // Increment the program counter by a byte and return the read value.
-func (c *Cpu) IncPC() uint8 {
+func (c *CPU) IncPC() uint8 {
 	v := c.gb.mem.Read(c.pc)
 
 	// If the halt bug is active, the program counter is not incremented.
@@ -256,48 +256,48 @@ func (c *Cpu) IncPC() uint8 {
 }
 
 // Increment the program counter by a short and return the read value.
-func (c *Cpu) IncPC16() uint16 {
+func (c *CPU) IncPC16() uint16 {
 	lo := c.IncPC()
 	hi := c.IncPC()
 	return utils.CombineBytes(hi, lo)
 }
 
 // Set the program counter.
-func (c *Cpu) SetPC(v uint16) {
+func (c *CPU) SetPC(v uint16) {
 	c.pc = v
 }
 
 // Get the internal counter.
-func (c *Cpu) IC() uint16 {
+func (c *CPU) IC() uint16 {
 	return c.ic
 }
 
 // Set the internal counter.
-func (c *Cpu) SetIC(v uint16) {
+func (c *CPU) SetIC(v uint16) {
 	c.ic = v
 }
 
 // Get interrupt master.
-func (c *Cpu) IME() bool {
+func (c *CPU) IME() bool {
 	return c.ime
 }
 
 // Set interrupt master.
-func (c *Cpu) SetIME(v bool) {
+func (c *CPU) SetIME(v bool) {
 	c.ime = v
 }
 
 // Get the halt flag.
-func (c *Cpu) Halted() bool {
+func (c *CPU) Halted() bool {
 	return c.halt
 }
 
 // Set the halt flag.
-func (c *Cpu) SetHalt(v bool) {
+func (c *CPU) SetHalt(v bool) {
 	c.halt = v
 }
 
 // Trigger the halt bug.
-func (c *Cpu) TriggerHaltBug() {
+func (c *CPU) TriggerHaltBug() {
 	c.haltBug = true
 }

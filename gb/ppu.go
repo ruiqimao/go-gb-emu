@@ -26,7 +26,7 @@ const (
 )
 
 // Pixel processing unit.
-type Ppu struct {
+type PPU struct {
 	gb *GameBoy
 
 	sc uint16 // Scanline counter.
@@ -36,15 +36,15 @@ type Ppu struct {
 	stat uint8 // LCD status.
 }
 
-func NewPpu(gb *GameBoy) *Ppu {
-	p := &Ppu{
+func NewPPU(gb *GameBoy) *PPU {
+	p := &PPU{
 		gb: gb,
 	}
 	return p
 }
 
 // Catch the PPU up to the CPU.
-func (p *Ppu) Update(cycles int) {
+func (p *PPU) Update(cycles int) {
 	// Process 4 cycles at a time.
 	for cycles > 0 {
 
@@ -80,47 +80,47 @@ func (p *Ppu) Update(cycles int) {
 }
 
 // Execute a step of OAM searching.
-func (p *Ppu) stepOAM() {
+func (p *PPU) stepOAM() {
 	// TODO.
 }
 
 // Execute a step of pixel transfer.
-func (p *Ppu) stepTransfer() {
+func (p *PPU) stepTransfer() {
 	// TODO.
 }
 
 // Set the mode.
-func (p *Ppu) setMode(m uint8) {
+func (p *PPU) setMode(m uint8) {
 	p.stat = p.stat & 0xf8 | m & 0x03
 }
 
 // Get the value of LCDC.
-func (p *Ppu) LCDC() uint8 {
+func (p *PPU) LCDC() uint8 {
 	return p.lcdc
 }
 
 // Set the value of LCDC.
-func (p *Ppu) SetLCDC(v uint8) {
+func (p *PPU) SetLCDC(v uint8) {
 	p.lcdc = v
 }
 
 // Get the value of STAT.
-func (p *Ppu) STAT() uint8 {
+func (p *PPU) STAT() uint8 {
 	return p.lcdc
 }
 
 // Set the value of STAT.
-func (p *Ppu) SetSTAT(v uint8) {
+func (p *PPU) SetSTAT(v uint8) {
 	// Only set writable values.
 	p.stat = p.stat & 0x0f | v & 0xf0
 }
 
 // Get the mode.
-func (p *Ppu) Mode() uint8 {
+func (p *PPU) Mode() uint8 {
 	return p.stat & 0x03
 }
 
 // Get the value of LY.
-func (p *Ppu) LY() uint8 {
+func (p *PPU) LY() uint8 {
 	return p.ly
 }
