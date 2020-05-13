@@ -20,12 +20,17 @@ type GameBoy struct {
 	// Boot ROM.
 	boot [0x100]uint8
 
+	// Latest rendered frame.
+	F chan []byte
+
 	// Debug.
 	dbgRom []uint8
 }
 
 func NewGameBoy() (*GameBoy, error) {
-	gb := &GameBoy{}
+	gb := &GameBoy{
+		F: make(chan []uint8, 1),
+	}
 
 	// Create the components.
 	gb.cpu = NewCPU(gb)

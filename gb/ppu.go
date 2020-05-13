@@ -25,6 +25,18 @@ const (
 	ModeTransfer      = 3
 )
 
+// Timing constants.
+const (
+	HSteps = 114
+	VLines = 154
+)
+
+// Buffer constants.
+const (
+	FrameWidth = 160
+	FrameHeight = 144
+)
+
 // Pixel processing unit.
 type PPU struct {
 	gb *GameBoy
@@ -34,6 +46,9 @@ type PPU struct {
 
 	lcdc uint8 // LCD control.
 	stat uint8 // LCD status.
+
+	// Current frame.
+	frame [FrameWidth*FrameHeight]uint8
 }
 
 func NewPPU(gb *GameBoy) *PPU {
@@ -55,10 +70,10 @@ func (p *PPU) Update(cycles int) {
 			p.setMode(ModeOAM)
 		case p.ly < 144 && p.sc == 20:
 			p.setMode(ModeTransfer)
-		case p.ly < 144 && p.sc == 63:
-			p.setMode(ModeHBlank)
 		case p.ly == 144 && p.sc == 0:
 			p.setMode(ModeVBlank)
+			p.pushFrame()
+			p.gb.cpu.RequestInterrupt(IntVBlank)
 		}
 
 		// If the PPU is not in a blanking mode, execute a step.
@@ -71,11 +86,12 @@ func (p *PPU) Update(cycles int) {
 		}
 
 		// Increment the scanline counter and scanline.
-		p.sc = (p.sc + 1) % 114
+		p.sc = (p.sc + 1) % HSteps
 		if p.sc == 0 {
-			p.ly = (p.ly + 1) % 154
+			p.ly = (p.ly + 1) % VLines
 		}
 
+		cycles -= 4
 	}
 }
 
@@ -87,6 +103,19 @@ func (p *PPU) stepOAM() {
 // Execute a step of pixel transfer.
 func (p *PPU) stepTransfer() {
 	// TODO.
+}
+
+// Push the current frame into the channel.
+func (p *PPU) pushFrame() {
+	// Make a copy of the frame.
+	frame := make([]byte, len(p.frame))
+	copy(frame, p.frame[:])
+
+	// Try to push the frame. If the channel is full, drop the frame.
+	select {
+	case p.gb.F <- frame:
+	default:
+	}
 }
 
 // Set the mode.

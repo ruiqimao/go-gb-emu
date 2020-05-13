@@ -67,5 +67,14 @@ func NewEmulator(bootPath string) (*Emulator, error) {
 }
 
 func (e *Emulator) mainLoop() {
-	// TODO.
+	// Handle communication between the display and the gameboy.
+	for {
+		select {
+
+		// Receive frame from gameboy.
+		case frame := <-e.gb.F:
+			e.dp.Draw(frame)
+
+		}
+	}
 }
