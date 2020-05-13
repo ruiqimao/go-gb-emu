@@ -31,6 +31,20 @@ import (
 //   High RAM.
 // FFFF
 //   Interrupts enable register.
+const (
+	AddrBoot = 0x0000
+	AddrCartROM0 = 0x0000
+	AddrCartROMN = 0x4000
+	AddrVRAM = 0x8000
+	AddrCartRAM = 0xa000
+	AddrWRAM0 = 0xc000
+	AddrWRAMN = 0xd000
+	AddrEcho = 0xe000
+	AddrOAM = 0xfe00
+	AddrEmpty = 0xfea0
+	AddrIO = 0xff00
+	AddrHRAM = 0xff80
+)
 
 type Memory struct {
 	gb *GameBoy
@@ -63,50 +77,50 @@ func (m *Memory) Read(addr uint16) uint8 {
 		return m.gb.boot[addr]
 
 	// Cartridge ROM bank 0.
-	case addr < 0x4000:
+	case addr < AddrCartROMN:
 		// TODO.
 		return 0x00
 
 	// Cartridge ROM bank 1 - N.
-	case addr < 0x8000:
+	case addr < AddrVRAM:
 		// TODO.
 		return 0x00
 
 	// Video RAM.
-	case addr < 0xa000:
-		return m.vram[addr-0x8000]
+	case addr < AddrCartRAM:
+		return m.vram[addr-AddrVRAM]
 
 	// Cartridge RAM.
-	case addr < 0xc000:
+	case addr < AddrWRAM0:
 		// TODO.
 		return 0x00
 
 	// Work RAM banks 0 and 1.
-	case addr < 0xe000:
-		return m.wram[addr-0xc000]
+	case addr < AddrEcho:
+		return m.wram[addr-AddrWRAM0]
 
 	// Mirror of C000 - DDFF.
-	case addr < 0xfe00:
+	case addr < AddrOAM:
 		return m.Read(addr - 0x2000)
 
 	// Sprite attribute table.
-	case addr < 0xfea0:
-		return m.oam[addr-0xfe00]
+	case addr < AddrEmpty:
+		return m.oam[addr-AddrOAM]
 
 	// Empty.
-	case addr < 0xff00:
+	case addr < AddrIO:
 		return 0x00
 
 	// I/O registers.
-	case addr < 0xff80:
+	case addr < AddrHRAM:
 		return m.ReadIO(addr)
 
 	// High RAM.
-	case addr < 0xffff:
-		return m.hram[addr-0xff80]
+	case addr < AddrIE:
+		return m.hram[addr-AddrIO]
 
 	// Interrupt enable register.
-	case addr == 0xffff:
+	case addr == AddrIE:
 		return m.ie
 
 	}
@@ -120,35 +134,35 @@ func (m *Memory) Write(addr uint16, v uint8) {
 	switch {
 
 	// Video RAM.
-	case addr >= 0x8000 && addr < 0xa000:
-		m.vram[addr-0x8000] = v
+	case addr >= AddrVRAM && addr < AddrCartRAM:
+		m.vram[addr-AddrVRAM] = v
 
 	// Cartridge RAM.
-	case addr >= 0xa000 && addr < 0xc000:
+	case addr >= AddrCartRAM && addr < AddrWRAM0:
 		// TODO.
 
 	// Work RAM banks 0 and 1.
-	case addr >= 0xc000 && addr < 0xe000:
-		m.wram[addr-0xc000] = v
+	case addr >= AddrWRAM0 && addr < AddrEcho:
+		m.wram[addr-AddrWRAM0] = v
 
 	// Mirror of C000 - DDFF.
-	case addr >= 0xe000 && addr < 0xfe00:
+	case addr >= AddrEcho && addr < AddrOAM:
 		m.Write(addr-0x2000, v)
 
 	// Sprite attribute table.
-	case addr >= 0xfe00 && addr < 0xfea0:
-		m.oam[addr-0xfe00] = v
+	case addr >= AddrOAM && addr < AddrIO:
+		m.oam[addr-AddrOAM] = v
 
 	// I/O registers.
-	case addr >= 0xff00 && addr < 0xff80:
+	case addr >= AddrIO && addr < AddrHRAM:
 		m.WriteIO(addr, v)
 
 	// High RAM.
-	case addr >= 0xff80 && addr < 0xffff:
-		m.hram[addr-0xff80] = v
+	case addr >= AddrHRAM && addr < AddrIE:
+		m.hram[addr-AddrHRAM] = v
 
 	// Interrupt enable register.
-	case addr == 0xffff:
+	case addr == AddrIE:
 		m.ie = v
 
 	}

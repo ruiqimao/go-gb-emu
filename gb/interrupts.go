@@ -97,6 +97,7 @@ func (c *Cpu) updateTimers(cycles int) {
 		tima := c.gb.mem.Read(AddrTIMA)
 
 		// If there was an overflow last cycle, reset TIMA.
+		// This ignores any writes to TIMA that may have occurred during this cycle.
 		if c.of {
 			// Reset TIMA to TMA.
 			tima = c.gb.mem.Read(AddrTMA)

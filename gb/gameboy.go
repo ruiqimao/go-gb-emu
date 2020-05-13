@@ -12,6 +12,7 @@ const (
 
 type GameBoy struct {
 	cpu *Cpu
+	ppu *Ppu
 	mem *Memory
 
 	clk *Clock
@@ -28,6 +29,7 @@ func NewGameBoy() (*GameBoy, error) {
 
 	// Create the components.
 	gb.cpu = NewCpu(gb)
+	gb.ppu = NewPpu(gb)
 	gb.mem = NewMemory(gb)
 	gb.clk = NewClock(BaseClock)
 
@@ -63,6 +65,9 @@ func (gb *GameBoy) RunCycles(limit int) int {
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		// Catch the PPU up to the CPU.
+		gb.ppu.Update(cycles)
 
 		limit -= cycles
 	}

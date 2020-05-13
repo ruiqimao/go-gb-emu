@@ -80,10 +80,22 @@ func (m *Memory) ReadIO(addr uint16) uint8 {
 
 	case AddrIF:
 		// Upper 3 bits are always high.
-		return m.io[addr-0xff00] | 0xe0
+		return m.io[addr-AddrIO] | 0xe0
+
+	case AddrLCDC:
+		// Retrieve from PPU.
+		return m.gb.ppu.LCDC()
+
+	case AddrSTAT:
+		// Retrieve from PPU.
+		return m.gb.ppu.STAT()
+
+	case AddrLY:
+		// Retrieve from PPU.
+		return m.gb.ppu.LY()
 
 	default:
-		return m.io[addr-0xff00]
+		return m.io[addr-AddrIO]
 
 	}
 }
@@ -107,10 +119,21 @@ func (m *Memory) WriteIO(addr uint16, v uint8) {
 
 	case AddrTAC:
 		// Only lower 3 bits are writable.
-		m.io[addr-0xff00] = v & 0x07
+		m.io[addr-AddrIO] = v & 0x07
+
+	case AddrLCDC:
+		// Redirect to PPU.
+		m.gb.ppu.SetLCDC(v)
+
+	case AddrSTAT:
+		// Redirect to PPU.
+		m.gb.ppu.SetSTAT(v)
+
+	case AddrLY:
+		// Read only.
 
 	default:
-		m.io[addr-0xff00] = v
+		m.io[addr-AddrIO] = v
 
 	}
 }
