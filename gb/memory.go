@@ -88,6 +88,11 @@ func (m *Memory) Read(addr uint16) uint8 {
 
 	// Video RAM.
 	case addr < AddrCartRAM:
+		// Make sure VRAM is currently accessible.
+		mode := m.gb.ppu.Mode()
+		if mode == ModeTransfer {
+			return 0x00
+		}
 		return m.vram[addr-AddrVRAM]
 
 	// Cartridge RAM.
@@ -105,6 +110,11 @@ func (m *Memory) Read(addr uint16) uint8 {
 
 	// Sprite attribute table.
 	case addr < AddrEmpty:
+		// Make sure the OAM is currently accessible.
+		mode := m.gb.ppu.Mode()
+		if mode == ModeTransfer || mode == ModeOAM {
+			return 0x00
+		}
 		return m.oam[addr-AddrOAM]
 
 	// Empty.
@@ -135,6 +145,11 @@ func (m *Memory) Write(addr uint16, v uint8) {
 
 	// Video RAM.
 	case addr >= AddrVRAM && addr < AddrCartRAM:
+		// Make sure VRAM is currently accessible.
+		mode := m.gb.ppu.Mode()
+		if mode == ModeTransfer {
+			break
+		}
 		m.vram[addr-AddrVRAM] = v
 
 	// Cartridge RAM.
@@ -151,6 +166,11 @@ func (m *Memory) Write(addr uint16, v uint8) {
 
 	// Sprite attribute table.
 	case addr >= AddrOAM && addr < AddrIO:
+		// Make sure the OAM is currently accessible.
+		mode := m.gb.ppu.Mode()
+		if mode == ModeTransfer || mode == ModeOAM {
+			break
+		}
 		m.oam[addr-AddrOAM] = v
 
 	// I/O registers.
