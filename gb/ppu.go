@@ -60,13 +60,13 @@ type PPU struct {
 	statSignal uint8
 
 	// Register snapshot.
-	snapSCX uint8
-	snapSCY uint8
-	snapBGP uint8
+	snapSCX  uint8
+	snapSCY  uint8
+	snapBGP  uint8
 	snapOBP0 uint8
 	snapOBP1 uint8
-	snapWX uint8
-	snapWY uint8
+	snapWX   uint8
+	snapWY   uint8
 
 	// Pixel fetcher.
 	fetcher *Fetcher
@@ -255,10 +255,10 @@ func (p *PPU) WindowEnabled() bool {
 func (p *PPU) Tile(id uint8, offset uint8) uint8 {
 	if utils.GetBit(p.lcdc, FlagTileset) {
 		// Unsigned addressing mode.
-		return p.vram[0x8000 - AddrVRAM + uint16(id) * 16 + uint16(offset)]
+		return p.vram[0x8000-AddrVRAM+uint16(id)*16+uint16(offset)]
 	} else {
 		// Signed addressing mode.
-		return p.vram[uint16(0x8800 - AddrVRAM + int32(int8(id)) * 16) + uint16(offset)]
+		return p.vram[uint16(0x8800-AddrVRAM+int32(int8(id))*16)+uint16(offset)]
 	}
 }
 

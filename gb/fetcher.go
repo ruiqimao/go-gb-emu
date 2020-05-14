@@ -35,11 +35,11 @@ type Fetcher struct {
 	fifo []Pixel
 
 	// Fetcher state.
-	state  uint8
-	bgMap  uint16
+	state uint8
+	bgMap uint16
 
-	tileX uint8
-	tileY uint8
+	tileX       uint8
+	tileY       uint8
 	tileDiscard uint8
 	tileOffset  uint8
 
@@ -101,7 +101,7 @@ func (f *Fetcher) Step() {
 
 	case FetcherTile:
 		// Fetch the tile number.
-		f.tileN = f.ppu.vram[f.bgMap + uint16(f.tileY) * 32 + uint16(f.tileX)]
+		f.tileN = f.ppu.vram[f.bgMap+uint16(f.tileY)*32+uint16(f.tileX)]
 		f.state = FetcherData0
 
 	case FetcherData0:
@@ -111,7 +111,7 @@ func (f *Fetcher) Step() {
 
 	case FetcherData1:
 		// Fetch the second byte of data.
-		f.data1 = f.ppu.Tile(f.tileN, f.tileOffset + 1)
+		f.data1 = f.ppu.Tile(f.tileN, f.tileOffset+1)
 
 		// Try to load the data into the FIFO.
 		if f.load() {
@@ -141,7 +141,7 @@ func (f *Fetcher) load() bool {
 		lo := (f.data0 >> i) & 0x1
 		hi := (f.data1 >> i) & 0x1
 
-		data := lo | hi << 1
+		data := lo | hi<<1
 		src := PixelSrcBG
 
 		f.fifo = append(f.fifo, Pixel{data, src})

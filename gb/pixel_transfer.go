@@ -14,7 +14,7 @@ func (p *PPU) startPixelTransfer() {
 	p.snapWY = p.gb.mem.Read(AddrWY)
 
 	// Reset fetcher.
-	p.fetcher.Reset(p.snapSCX, p.ly + p.snapSCY, p.BgTileMap())
+	p.fetcher.Reset(p.snapSCX, p.ly+p.snapSCY, p.BgTileMap())
 
 	// Reset the x position.
 	p.lx = 0
@@ -25,7 +25,7 @@ func (p *PPU) stepPixelTransfer() {
 	for c := 0; c < 4; c++ {
 		// Check for a window.
 		if p.WindowEnabled() && p.lx == p.snapWX && p.ly >= p.snapWY {
-			p.fetcher.Reset(0, p.ly - p.snapWY, p.WindowTileMap())
+			p.fetcher.Reset(0, p.ly-p.snapWY, p.WindowTileMap())
 		}
 
 		// Check for a sprite.
@@ -34,7 +34,7 @@ func (p *PPU) stepPixelTransfer() {
 		// Try to pop a pixel off the fetcher.
 		if color, ok := p.fetcher.Pop(); ok {
 			// Put the color in the frame.
-			p.frame[int(p.ly) * FrameWidth + int(p.lx)] = color
+			p.frame[int(p.ly)*FrameWidth+int(p.lx)] = color
 
 			// Move to the next pixel.
 			p.lx++
@@ -47,7 +47,7 @@ func (p *PPU) stepPixelTransfer() {
 		}
 
 		// Step the fetcher every 2 cycles.
-		if c % 2 == 0 {
+		if c%2 == 0 {
 			p.fetcher.Step()
 		}
 	}
