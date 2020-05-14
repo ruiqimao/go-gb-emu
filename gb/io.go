@@ -94,6 +94,9 @@ func (m *Memory) ReadIO(addr uint16) uint8 {
 	case AddrLY:
 		return gb.ppu.LY()
 
+	case AddrDMA:
+		return gb.ppu.DMA()
+
 	default:
 		return m.IO[addr-AddrIO]
 
@@ -128,6 +131,9 @@ func (m *Memory) WriteIO(addr uint16, v uint8) {
 
 	case AddrSTAT:
 		gb.ppu.SetSTAT(v)
+
+	case AddrDMA:
+		gb.ppu.SetDMA(v)
 
 	default:
 		m.IO[addr-AddrIO] = v

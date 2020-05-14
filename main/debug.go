@@ -102,18 +102,19 @@ func (e *Emulator) debugExec(input []string) {
 	// Display a tile.
 	case "tile", "t":
 		if len(input) < 2 {
-			fmt.Printf("Usage: tile <id>\n")
+			fmt.Printf("Usage: tile <id> [is_sprite]\n")
 			break
 		}
 		id, err := hexToUint8(input[1])
 		if err != nil {
 			break
 		}
+		sprite := len(input) < 3 || input[2] == "1"
 
 		// Get the pixel data.
 		for i := 0; i < 16; i += 2 {
-			line0 := ppu.Tile(id, uint8(i))
-			line1 := ppu.Tile(id, uint8(i+1))
+			line0 := ppu.Tile(id, uint8(i), sprite)
+			line1 := ppu.Tile(id, uint8(i+1), sprite)
 
 			for j := 7; j >= 0; j-- {
 				lo := (line0 >> j) & 0x1

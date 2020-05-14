@@ -113,12 +113,12 @@ func (f *Fetcher) Step() {
 
 	case FetcherData0:
 		// Fetch the first byte of data.
-		f.data0 = f.ppu.Tile(f.tileN, f.tileOffset)
+		f.data0 = f.ppu.Tile(f.tileN, f.tileOffset, false)
 		f.state = FetcherData1
 
 	case FetcherData1:
 		// Fetch the second byte of data.
-		f.data1 = f.ppu.Tile(f.tileN, f.tileOffset+1)
+		f.data1 = f.ppu.Tile(f.tileN, f.tileOffset+1, false)
 
 		// Try to load the data into the FIFO.
 		if f.load() {

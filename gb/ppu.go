@@ -29,6 +29,11 @@ const (
 	ModeTransfer      = 3
 )
 
+// DMA constants.
+const (
+	DMACycles = 644
+)
+
 // Timing constants.
 const (
 	HSteps = 114
@@ -59,6 +64,13 @@ type PPU struct {
 	// Internal STAT signal.
 	statSignal uint8
 
+	// DMA address and remaining cycles.
+	dmaAddr uint16
+	dmaCycles uint16
+
+	// OAM cache for OAM searching and pixel transfer.
+	oamCache []Sprite
+
 	// Register snapshot.
 	snapSCX  uint8
 	snapSCY  uint8
@@ -87,6 +99,11 @@ func NewPPU(gb *GameBoy) *PPU {
 func (p *PPU) Update(cycles int) {
 	// Process 4 cycles at a time.
 	for cycles > 0 {
+
+		// If DMA is being done, update the number of cycles left.
+		if p.dmaCycles > 0 {
+			p.dmaCycles -= 4
+		}
 
 		// If the LCD is off, reset LY and exit.
 		if !p.LCDPower() {
@@ -241,6 +258,31 @@ func (p *PPU) LY() uint8 {
 	return p.ly
 }
 
+// Get the value of DMA.
+func (p *PPU) DMA() uint8 {
+	return uint8(p.dmaAddr / 0x100)
+}
+
+// Set the value of DMA.
+func (p *PPU) SetDMA(v uint8) {
+	p.dmaAddr = uint16(v) * 0x100
+
+	// Perform the entire DMA in one go. We can do this because the CPU should not write any changes
+	// to memory other than HRAM during DMA, so it is safe to consider memory to be static during the
+	// entire duration of DMA.
+	for i := 0; i < 0x100; i ++ {
+		p.oam[i] = p.gb.mem.Read(p.dmaAddr + uint16(i))
+	}
+
+	// Start the DMA duration.
+	p.dmaCycles = DMACycles
+}
+
+// Get whether DMA is being run.
+func (p *PPU) InDMA() bool {
+	return p.dmaCycles > 0
+}
+
 // Get whether the LCD is on.
 func (p *PPU) LCDPower() bool {
 	return utils.GetBit(p.lcdc, FlagLCDPower)
@@ -261,9 +303,10 @@ func (p *PPU) WindowEnabled() bool {
 }
 
 // Get the data of a tile given the tile id and offset.
+// If the tile is a sprite tile, unsigned addressing mode will be forced.
 // The offset must be in the range [0, 16).
-func (p *PPU) Tile(id uint8, offset uint8) uint8 {
-	if utils.GetBit(p.lcdc, FlagTileset) {
+func (p *PPU) Tile(id uint8, offset uint8, sprite bool) uint8 {
+	if utils.GetBit(p.lcdc, FlagTileset) || sprite {
 		// Unsigned addressing mode.
 		return p.vram[0x8000-AddrVRAM+uint16(id)*16+uint16(offset)]
 	} else {
