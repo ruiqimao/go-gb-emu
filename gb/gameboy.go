@@ -3,6 +3,8 @@ package gb
 import (
 	"fmt"
 	"log"
+
+	"github.com/ruiqimao/go-gb-emu/cart"
 )
 
 const (
@@ -14,6 +16,7 @@ type GameBoy struct {
 	cpu *CPU
 	ppu *PPU
 	mem *Memory
+	cart *cart.Cartridge
 
 	clk *Clock
 
@@ -86,6 +89,11 @@ func (gb *GameBoy) LoadBootRom(rom []byte) error {
 	}
 	copy(gb.boot[:], rom)
 	return nil
+}
+
+// Load a cartridge.
+func (gb *GameBoy) LoadCartridge(cartridge *cart.Cartridge) {
+	gb.cart = cartridge
 }
 
 // Get the CPU.

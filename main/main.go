@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/ruiqimao/go-gb-emu/cart"
 	"github.com/ruiqimao/go-gb-emu/gb"
 	"github.com/ruiqimao/go-gfx/gfx"
 )
@@ -22,7 +23,7 @@ func main() {
 	}
 
 	// Create and run the emulator.
-	_, err := NewEmulator(os.Args[1])
+	_, err := NewEmulator(os.Args[1], os.Args[2])
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -31,7 +32,7 @@ func main() {
 	gfx.Run()
 }
 
-func NewEmulator(bootPath string) (*Emulator, error) {
+func NewEmulator(bootPath string, cartPath string) (*Emulator, error) {
 	e := &Emulator{}
 	var err error
 
@@ -56,6 +57,17 @@ func NewEmulator(bootPath string) (*Emulator, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// Load the cartridge.
+	cartData, err := ioutil.ReadFile(cartPath)
+	if err != nil {
+		return nil, err
+	}
+	cart, err := cart.NewCartridge(cartData)
+	if err != nil {
+		return nil, err
+	}
+	e.gb.LoadCartridge(cart)
 
 	// Run the main loop.
 	go e.mainLoop()

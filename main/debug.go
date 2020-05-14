@@ -60,6 +60,10 @@ func (e *Emulator) debugExec(input []string) {
 
 	// Read memory.
 	case "print", "p":
+		if len(input) < 2 {
+			fmt.Printf("Usage: print <address>\n")
+			break
+		}
 		addrBytes, err := hex.DecodeString(fmt.Sprintf("%04s", input[1]))
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "%v\n", err)

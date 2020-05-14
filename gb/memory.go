@@ -76,24 +76,21 @@ func (m *Memory) Read(addr uint16) uint8 {
 	case addr < 0x0100 && m.BootRomEnabled():
 		return m.gb.boot[addr]
 
-	// Cartridge ROM bank 0.
-	case addr < AddrCartROMN:
-		// TODO.
-		return 0x00
-
-	// Cartridge ROM bank 1 - N.
+	// Cartridge ROM banks.
 	case addr < AddrVRAM:
-		// TODO.
-		return 0x00
+		if m.gb.cart != nil {
+			return m.gb.cart.ReadROM(addr)
+		}
 
 	// Video RAM.
 	case addr < AddrCartRAM:
-		return m.gb.ppu.ReadVRAM(addr - AddrVRAM)
+		if m.gb.cart != nil {
+			return m.gb.ppu.ReadVRAM(addr - AddrVRAM)
+		}
 
 	// Cartridge RAM.
 	case addr < AddrWRAM0:
-		// TODO.
-		return 0x00
+		return m.gb.cart.ReadRAM(addr - AddrCartRAM)
 
 	// Work RAM banks 0 and 1.
 	case addr < AddrEcho:
@@ -125,7 +122,6 @@ func (m *Memory) Read(addr uint16) uint8 {
 
 	}
 
-	// This line will never be reached.
 	return 0x00
 }
 
@@ -133,13 +129,21 @@ func (m *Memory) Read(addr uint16) uint8 {
 func (m *Memory) Write(addr uint16, v uint8) {
 	switch {
 
+	// Cartridge ROM.
+	case addr < AddrVRAM:
+		if m.gb.cart != nil {
+			m.gb.cart.WriteROM(addr, v)
+		}
+
 	// Video RAM.
 	case addr >= AddrVRAM && addr < AddrCartRAM:
 		m.gb.ppu.WriteVRAM(addr-AddrVRAM, v)
 
 	// Cartridge RAM.
 	case addr >= AddrCartRAM && addr < AddrWRAM0:
-		// TODO.
+		if m.gb.cart != nil {
+			m.gb.cart.WriteROM(addr - AddrCartRAM, v)
+		}
 
 	// Work RAM banks 0 and 1.
 	case addr >= AddrWRAM0 && addr < AddrEcho:
