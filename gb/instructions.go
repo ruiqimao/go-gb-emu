@@ -2274,7 +2274,7 @@ func (c *CPU) opHalt(ime bool, iE uint8, iF uint8) {
 		// HALT is executed normally.
 		c.SetHalt(true)
 	} else {
-		if iE&iF == 0 {
+		if iE&iF&0x1f == 0x0 {
 			// HALT is executed normally.
 			c.SetHalt(true)
 		} else {
