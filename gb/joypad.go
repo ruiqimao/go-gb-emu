@@ -6,16 +6,17 @@ import (
 
 // Joypad flags.
 const (
-	JoypadSelectButton = 5
 	JoypadSelectDPad   = 4
-	JoypadDown         = 7
-	JoypadUp           = 6
-	JoypadLeft         = 5
-	JoypadRight        = 4
-	JoypadStart        = 3
-	JoypadSelect       = 2
-	JoypadB            = 1
+	JoypadSelectButton = 5
+
 	JoypadA            = 0
+	JoypadB            = 1
+	JoypadSelect       = 2
+	JoypadStart        = 3
+	JoypadRight        = 4
+	JoypadLeft         = 5
+	JoypadUp           = 6
+	JoypadDown         = 7
 )
 
 // Input is an input event for the joypad.
@@ -78,12 +79,12 @@ func (j *Joypad) update() {
 	j.joyp |= 0x0f
 
 	// Turn off bits depending on the select lines.
-	if !utils.GetBit(j.joyp, JoypadSelectButton) {
-		j.joyp &= j.input & 0x0f
-	}
 	if !utils.GetBit(j.joyp, JoypadSelectDPad) {
 		// D-Pad lines need to be shifted down 4 bits.
 		j.joyp &= j.input >> 4
+	}
+	if !utils.GetBit(j.joyp, JoypadSelectButton) {
+		j.joyp &= j.input & 0x0f
 	}
 
 	// Look for a falling edge in the input line bits.
