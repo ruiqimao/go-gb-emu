@@ -48,6 +48,12 @@ func NewDisplay() (*Display, error) {
 // Draw a frame.
 func (d *Display) Draw(frame []uint8) {
 	gfx.Do(func() {
+		// If the frame is nil, turn off the display.
+		if frame == nil {
+			// TODO.
+			return
+		}
+
 		// Update the texture.
 		if d.texture != nil {
 			d.texture.SetData(gl.Ptr(frame), gl.RED, gl.UNSIGNED_BYTE)
