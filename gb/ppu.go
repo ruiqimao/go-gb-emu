@@ -268,7 +268,7 @@ func (p *PPU) Tile(id uint8, offset uint8) uint8 {
 		return p.vram[0x8000-AddrVRAM+uint16(id)*16+uint16(offset)]
 	} else {
 		// Signed addressing mode.
-		return p.vram[uint16(0x8800-AddrVRAM+int32(int8(id))*16)+uint16(offset)]
+		return p.vram[uint16(0x9000-AddrVRAM+int32(int8(id))*16)+uint16(offset)]
 	}
 }
 
