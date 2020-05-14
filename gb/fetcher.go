@@ -60,8 +60,8 @@ func (f *Fetcher) Reset(x uint8, y uint8, mapAddr uint16) {
 	f.fifo = nil
 
 	// Keep the upper 5 bits to get tiles from the map.
-	f.tileX = (x & 0xf8) >> 3
-	f.tileY = (y & 0xf8) >> 3
+	f.tileX = x / 8
+	f.tileY = y / 8
 
 	// Use the lower 3 bits to determine how many pixels to discard.
 	f.tileDiscard = x & 0x03
@@ -71,6 +71,9 @@ func (f *Fetcher) Reset(x uint8, y uint8, mapAddr uint16) {
 
 	// Set the map address.
 	f.bgMap = mapAddr
+
+	// Reset the state.
+	f.state = FetcherTile
 }
 
 // Pop an element off the FIFO. Returns the color and whether the pop was successful.

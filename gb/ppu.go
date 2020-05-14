@@ -168,6 +168,11 @@ func (p *PPU) updateSTAT() {
 	p.statSignal = statSignal
 }
 
+// Get the raw contents of the VRAM.
+func (p *PPU) VRAM() []uint8 {
+	return p.vram[:]
+}
+
 // Read a byte from the VRAM.
 func (p *PPU) ReadVRAM(addr uint16) uint8 {
 	if p.LCDPower() && p.Mode() == ModeTransfer {
@@ -182,6 +187,11 @@ func (p *PPU) WriteVRAM(addr uint16, v uint8) {
 		return
 	}
 	p.vram[addr] = v
+}
+
+// Get the raw contents of the OAM.
+func (p *PPU) OAM() []uint8 {
+	return p.oam[:]
 }
 
 // Read a byte from the OAM.

@@ -30,6 +30,7 @@ func (e *Emulator) debugLoop() {
 
 func (e *Emulator) debugExec(input []string) {
 	cpu := e.gb.CPU()
+	ppu := e.gb.PPU()
 	mem := e.gb.Memory()
 
 	var err error
@@ -38,7 +39,6 @@ func (e *Emulator) debugExec(input []string) {
 
 	// Dump CPU.
 	case "dump", "d":
-
 		// Print registers.
 		fmt.Printf("B  C   D  E   H  L   A  F\n")
 		fmt.Printf("%02x %02x  %02x %02x  %02x %02x  %02x %02x\n",
@@ -69,6 +69,18 @@ func (e *Emulator) debugExec(input []string) {
 
 		// Read both a byte and a short at the address.
 		fmt.Printf("%02x %04x\n", mem.Read(addr), mem.Read16(addr))
+
+	// Dump the background.
+	case "background", "bg":
+		vram := ppu.VRAM()
+		bgMap := ppu.BgTileMap()
+		for i := 0; i < 32; i++ {
+			for j := 0; j < 32; j++ {
+				id := vram[bgMap+uint16(i)*32+uint16(j)]
+				fmt.Printf("%02x ", id)
+			}
+			fmt.Printf("\n")
+		}
 
 	// Step forward.
 	case "step", "s":
