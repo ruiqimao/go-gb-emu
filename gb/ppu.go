@@ -97,13 +97,13 @@ func (p *PPU) Update(cycles int) {
 		// Update the mode.
 		// This is done at the beginning of the step because mode changes are delayed by a step.
 		switch {
-		case p.ly < 144 && p.sc == 0:
+		case p.ly < FrameHeight && p.sc == 0:
 			p.setMode(ModeOAM)
 			p.startOAMSearch()
-		case p.ly < 144 && p.sc == 20:
+		case p.ly < FrameHeight && p.sc == 20:
 			p.setMode(ModeTransfer)
 			p.startPixelTransfer()
-		case p.ly == 144 && p.sc == 0:
+		case p.ly == FrameHeight && p.sc == 0:
 			p.setMode(ModeVBlank)
 			p.pushFrame()
 			p.gb.cpu.RequestInterrupt(IntVBlank)
