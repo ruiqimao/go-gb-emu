@@ -48,6 +48,10 @@ type Fetcher struct {
 	data1 uint8
 }
 
+func NewPixel(data uint8, src int) Pixel {
+	return Pixel{data, src}
+}
+
 func NewFetcher(ppu *PPU) *Fetcher {
 	f := &Fetcher{
 		ppu: ppu,
@@ -147,7 +151,7 @@ func (f *Fetcher) load() bool {
 		data := lo | hi<<1
 		src := PixelSrcBG
 
-		f.fifo = append(f.fifo, Pixel{data, src})
+		f.fifo = append(f.fifo, NewPixel(data, src))
 	}
 
 	// Increment the tile X position.
