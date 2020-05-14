@@ -79,6 +79,9 @@ func NewEmulator(bootPath string, cartPath string) (*Emulator, error) {
 }
 
 func (e *Emulator) mainLoop() {
+	// Start the gameboy.
+	e.gb.Resume()
+
 	// Handle communication between the display and the gameboy.
 	for {
 		select {
@@ -86,6 +89,10 @@ func (e *Emulator) mainLoop() {
 		// Receive frame from gameboy.
 		case frame := <-e.gb.F:
 			e.dp.Draw(frame)
+
+		// Receive input from display.
+		case event := <-e.dp.I:
+			e.gb.Input(event)
 
 		}
 	}

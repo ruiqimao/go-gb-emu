@@ -76,6 +76,9 @@ func (m *Memory) ReadIO(addr uint16) uint8 {
 
 	// TODO.
 
+	case AddrJOYP:
+		return gb.jp.JOYP()
+
 	case AddrDIV:
 		return gb.cpu.DIV()
 
@@ -110,6 +113,9 @@ func (m *Memory) WriteIO(addr uint16, v uint8) {
 	switch addr {
 
 	// TODO.
+
+	case AddrJOYP:
+		gb.jp.SetJOYP(v)
 
 	case AddrDIV:
 		gb.cpu.SetDIV(v)

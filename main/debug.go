@@ -115,7 +115,7 @@ func (e *Emulator) debugExec(input []string) {
 			line0 := ppu.Tile(id, uint8(i))
 			line1 := ppu.Tile(id, uint8(i+1))
 
-			for j := 7; j >= 0; j -- {
+			for j := 7; j >= 0; j-- {
 				lo := (line0 >> j) & 0x1
 				hi := (line1 >> j) & 0x1
 				data := lo | hi<<1

@@ -19,11 +19,16 @@ type Display struct {
 	program *gfx.Program   // Shader program.
 	quad    *gfx.Vao       // Quad shape.
 	texture *gfx.Texture2D // Display texture.
+
+	// Input event channel.
+	I chan gb.Input
 }
 
 // Create a new Display.
 func NewDisplay() (*Display, error) {
-	d := &Display{}
+	d := &Display{
+		I: make(chan gb.Input, 16),
+	}
 
 	// Initialize the window.
 	var err error
@@ -117,6 +122,49 @@ func (d *Display) run() {
 }
 
 // Key callback.
+// Keys are mapped:
+//   W -> Up
+//   A -> Left
+//   S -> Down
+//   D -> Right
+//   J -> A
+//   K -> B
+//   B -> Start
+//   N -> Select
 func (d *Display) keyCallback(window *glfw.Window, key glfw.Key, scrollCount int, action glfw.Action, mod glfw.ModifierKey) {
-	// TODO.
+	// Ignore repeat events.
+	if action == glfw.Repeat {
+		return
+	}
+
+	// Create an input event.
+	var button int
+	state := action == glfw.Press
+	switch key {
+	case glfw.KeyW:
+		button = gb.JoypadUp
+	case glfw.KeyA:
+		button = gb.JoypadLeft
+	case glfw.KeyS:
+		button = gb.JoypadDown
+	case glfw.KeyD:
+		button = gb.JoypadRight
+	case glfw.KeyJ:
+		button = gb.JoypadA
+	case glfw.KeyK:
+		button = gb.JoypadB
+	case glfw.KeyB:
+		button = gb.JoypadStart
+	case glfw.KeyN:
+		button = gb.JoypadSelect
+	default:
+		return
+	}
+	event := gb.NewInput(button, state)
+
+	// Try to push the event to the channel.
+	select {
+	case d.I <- event:
+	default:
+	}
 }

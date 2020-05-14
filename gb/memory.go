@@ -142,7 +142,7 @@ func (m *Memory) Write(addr uint16, v uint8) {
 	// Cartridge RAM.
 	case addr >= AddrCartRAM && addr < AddrWRAM0:
 		if m.gb.cart != nil {
-			m.gb.cart.WriteROM(addr - AddrCartRAM, v)
+			m.gb.cart.WriteROM(addr-AddrCartRAM, v)
 		}
 
 	// Work RAM banks 0 and 1.

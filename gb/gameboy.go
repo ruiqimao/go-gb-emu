@@ -13,15 +13,19 @@ const (
 )
 
 type GameBoy struct {
-	cpu *CPU
-	ppu *PPU
-	mem *Memory
+	cpu  *CPU
+	ppu  *PPU
+	mem  *Memory
+	jp   *Joypad
 	cart *cart.Cartridge
 
 	clk *Clock
 
 	// Boot ROM.
 	boot [0x100]uint8
+
+	// Input events.
+	events chan Input
 
 	// Latest rendered frame.
 	F chan []byte
@@ -32,13 +36,15 @@ type GameBoy struct {
 
 func NewGameBoy() (*GameBoy, error) {
 	gb := &GameBoy{
-		F: make(chan []uint8, 1),
+		events: make(chan Input, 16), // Allow a buffer of input events.
+		F:      make(chan []uint8, 1),
 	}
 
 	// Create the components.
 	gb.cpu = NewCPU(gb)
 	gb.ppu = NewPPU(gb)
 	gb.mem = NewMemory(gb)
+	gb.jp = NewJoypad(gb)
 	gb.clk = NewClock(BaseClock)
 
 	// Initialize the instruction set.
@@ -59,6 +65,9 @@ func (gb *GameBoy) Run() {
 
 		case <-gb.clk.C:
 			cycleDebt = gb.RunCycles(CPUClock/BaseClock - cycleDebt)
+
+		case event := <-gb.events:
+			gb.jp.Handle(event)
 
 		}
 	}
@@ -114,4 +123,9 @@ func (gb *GameBoy) Memory() *Memory {
 // Get the clock.
 func (gb *GameBoy) Clock() *Clock {
 	return gb.clk
+}
+
+// Register input.
+func (gb *GameBoy) Input(event Input) {
+	gb.events <- event
 }
