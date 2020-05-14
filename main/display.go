@@ -127,10 +127,10 @@ func (d *Display) run() {
 //   A -> Left
 //   S -> Down
 //   D -> Right
-//   J -> A
-//   K -> B
-//   B -> Start
-//   N -> Select
+//   K -> A
+//   J -> B
+//   N -> Start
+//   B -> Select
 func (d *Display) keyCallback(window *glfw.Window, key glfw.Key, scrollCount int, action glfw.Action, mod glfw.ModifierKey) {
 	// Ignore repeat events.
 	if action == glfw.Repeat {
@@ -149,13 +149,13 @@ func (d *Display) keyCallback(window *glfw.Window, key glfw.Key, scrollCount int
 		button = gb.JoypadDown
 	case glfw.KeyD:
 		button = gb.JoypadRight
-	case glfw.KeyJ:
-		button = gb.JoypadA
 	case glfw.KeyK:
+		button = gb.JoypadA
+	case glfw.KeyJ:
 		button = gb.JoypadB
-	case glfw.KeyB:
-		button = gb.JoypadStart
 	case glfw.KeyN:
+		button = gb.JoypadStart
+	case glfw.KeyB:
 		button = gb.JoypadSelect
 	default:
 		return
