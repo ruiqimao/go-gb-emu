@@ -65,7 +65,7 @@ type PPU struct {
 	statSignal uint8
 
 	// DMA address and remaining cycles.
-	dmaAddr uint16
+	dmaAddr   uint16
 	dmaCycles uint16
 
 	// OAM cache for OAM searching and pixel transfer.
@@ -185,11 +185,6 @@ func (p *PPU) updateSTAT() {
 	p.statSignal = statSignal
 }
 
-// Get the raw contents of the VRAM.
-func (p *PPU) VRAM() []uint8 {
-	return p.vram[:]
-}
-
 // Read a byte from the VRAM.
 func (p *PPU) ReadVRAM(addr uint16) uint8 {
 	if p.LCDPower() && p.Mode() == ModeTransfer {
@@ -204,11 +199,6 @@ func (p *PPU) WriteVRAM(addr uint16, v uint8) {
 		return
 	}
 	p.vram[addr] = v
-}
-
-// Get the raw contents of the OAM.
-func (p *PPU) OAM() []uint8 {
-	return p.oam[:]
 }
 
 // Read a byte from the OAM.
@@ -270,7 +260,7 @@ func (p *PPU) SetDMA(v uint8) {
 	// Perform the entire DMA in one go. We can do this because the CPU should not write any changes
 	// to memory other than HRAM during DMA, so it is safe to consider memory to be static during the
 	// entire duration of DMA.
-	for i := 0; i < 0x100; i ++ {
+	for i := 0; i < 0x100; i++ {
 		p.oam[i] = p.gb.mem.Read(p.dmaAddr + uint16(i))
 	}
 

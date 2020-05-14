@@ -9,14 +9,14 @@ const (
 	JoypadSelectDPad   = 4
 	JoypadSelectButton = 5
 
-	JoypadA            = 0
-	JoypadB            = 1
-	JoypadSelect       = 2
-	JoypadStart        = 3
-	JoypadRight        = 4
-	JoypadLeft         = 5
-	JoypadUp           = 6
-	JoypadDown         = 7
+	JoypadA      = 0
+	JoypadB      = 1
+	JoypadSelect = 2
+	JoypadStart  = 3
+	JoypadRight  = 4
+	JoypadLeft   = 5
+	JoypadUp     = 6
+	JoypadDown   = 7
 )
 
 // Input is an input event for the joypad.
@@ -45,7 +45,7 @@ func NewInput(button int, state bool) Input {
 
 func NewJoypad(gb *GameBoy) *Joypad {
 	j := &Joypad{
-		gb: gb,
+		gb:    gb,
 		input: 0xff, // Input is all pulled high by default.
 	}
 	return j
