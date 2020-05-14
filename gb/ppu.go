@@ -100,8 +100,13 @@ func (p *PPU) Update(cycles int) {
 	// Process 4 cycles at a time.
 	for cycles > 0 {
 
-		// If DMA is being done, update the number of cycles left.
+		// Perform DMA.
 		if p.dmaCycles > 0 {
+			// Do nothing for the first 4 cycles of DMA.
+			if p.dmaCycles != DMACycles {
+				i := (DMACycles - p.dmaCycles - 4) / 4
+				p.oam[i] = p.gb.mem.Read(p.dmaAddr + uint16(i))
+			}
 			p.dmaCycles -= 4
 		}
 
@@ -257,14 +262,7 @@ func (p *PPU) DMA() uint8 {
 func (p *PPU) SetDMA(v uint8) {
 	p.dmaAddr = uint16(v) * 0x100
 
-	// Perform the entire DMA in one go. We can do this because the CPU should not write any changes
-	// to memory other than HRAM during DMA, so it is safe to consider memory to be static during the
-	// entire duration of DMA.
-	for i := 0; i < 0x100; i++ {
-		p.oam[i] = p.gb.mem.Read(p.dmaAddr + uint16(i))
-	}
-
-	// Start the DMA duration.
+	// Start DMA.
 	p.dmaCycles = DMACycles
 }
 
