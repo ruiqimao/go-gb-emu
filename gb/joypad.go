@@ -29,7 +29,6 @@ type Joypad struct {
 
 	// Input lines.
 	// Lower 4 bits are for buttons. Higher 4 bits are for the D-Pad.
-	// These are pulled low rather than high for simplicity in implementation.
 	input uint8
 
 	// JOYP register.
@@ -46,13 +45,14 @@ func NewInput(button int, state bool) Input {
 func NewJoypad(gb *GameBoy) *Joypad {
 	j := &Joypad{
 		gb: gb,
+		input: 0xff, // Input is all pulled high by default.
 	}
 	return j
 }
 
 // Handle an input event.
 func (j *Joypad) Handle(input Input) {
-	j.input = utils.SetBit(j.input, input.button, input.state)
+	j.input = utils.SetBit(j.input, input.button, !input.state)
 	j.update()
 }
 
@@ -64,12 +64,12 @@ func (j *Joypad) JOYP() uint8 {
 // Set the JOYP register.
 func (j *Joypad) SetJOYP(v uint8) {
 	// Set the select bits.
-	j.joyp = utils.CopyBit(j.joyp, v, JoypadSelectButton)
-	j.joyp = utils.CopyBit(j.joyp, v, JoypadSelectDPad)
+	j.joyp = utils.CopyBit(v, j.joyp, JoypadSelectButton)
+	j.joyp = utils.CopyBit(v, j.joyp, JoypadSelectDPad)
 	j.update()
 }
 
-// Update the JOYP register and signals.
+// Update the JOYP register.
 func (j *Joypad) update() {
 	// Save the old JOYP input line bits.
 	oldBits := j.joyp & 0x0f
@@ -78,12 +78,12 @@ func (j *Joypad) update() {
 	j.joyp |= 0x0f
 
 	// Turn off bits depending on the select lines.
-	if utils.GetBit(j.joyp, JoypadSelectButton) {
-		j.joyp ^= j.input & 0x0f
+	if !utils.GetBit(j.joyp, JoypadSelectButton) {
+		j.joyp &= j.input & 0x0f
 	}
-	if utils.GetBit(j.joyp, JoypadSelectDPad) {
+	if !utils.GetBit(j.joyp, JoypadSelectDPad) {
 		// D-Pad lines need to be shifted down 4 bits.
-		j.joyp ^= (j.input >> 4) & 0x0f
+		j.joyp &= j.input >> 4
 	}
 
 	// Look for a falling edge in the input line bits.

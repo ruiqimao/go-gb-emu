@@ -40,5 +40,5 @@ func SetBit16(v uint16, i int, on bool) uint16 {
 
 // Copy a bit from one byte to another.
 func CopyBit(src uint8, dst uint8, i int) uint8 {
-	return SetBit(src, i, GetBit(dst, i))
+	return SetBit(dst, i, GetBit(src, i))
 }
