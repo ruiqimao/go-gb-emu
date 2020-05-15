@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/ruiqimao/go-gb-emu/cart"
+	"github.com/ruiqimao/go-gb-emu/gb/cpu"
 )
 
 const (
@@ -18,6 +19,9 @@ type GameBoy struct {
 	mem  *Memory
 	jp   *Joypad
 	cart *cart.Cartridge
+
+	// TODO: Replace CPU with new CPU.
+	newCpu *cpu.CPU
 
 	clk *Clock
 
