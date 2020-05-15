@@ -141,7 +141,7 @@ func (c *CPU) initInstructionSet() {
 		0x31: opLD16(opSetSP(), opImmediate16()),
 
 		0xf9: opLD16(opSetSP(), opLoad16(RegisterHL)),
-		0xf8: opLD16(opStore16(RegisterHL), opSADD(opSP(), opLoad(RegisterHL))),
+		0xf8: opLD16(opStore16(RegisterHL), opSAdd(opSP(), opLoad(RegisterHL))),
 		0x08: opLD16(opWrite16(opImmediate16()), opSP()),
 
 		0xc5: opPUSH(opLoad16(RegisterBC)),
@@ -153,6 +153,105 @@ func (c *CPU) initInstructionSet() {
 		0xd1: opPOP(opStore16(RegisterDE)),
 		0xe1: opPOP(opStore16(RegisterHL)),
 		0xf1: opPOP(opStore16(RegisterAF)),
+
+		// 8-bit arithmetic.
+		0x80: opADD(opLoad(RegisterB), false),
+		0x81: opADD(opLoad(RegisterC), false),
+		0x82: opADD(opLoad(RegisterD), false),
+		0x83: opADD(opLoad(RegisterE), false),
+		0x84: opADD(opLoad(RegisterH), false),
+		0x85: opADD(opLoad(RegisterL), false),
+		0x86: opADD(opRead(opLoad16(RegisterHL)), false),
+		0x87: opADD(opLoad(RegisterA), false),
+		0xc6: opADD(opImmediate(), false),
+
+		0x88: opADD(opLoad(RegisterB), true),
+		0x89: opADD(opLoad(RegisterC), true),
+		0x8a: opADD(opLoad(RegisterD), true),
+		0x8b: opADD(opLoad(RegisterE), true),
+		0x8c: opADD(opLoad(RegisterH), true),
+		0x8d: opADD(opLoad(RegisterL), true),
+		0x8e: opADD(opRead(opLoad16(RegisterHL)), true),
+		0x8f: opADD(opLoad(RegisterA), true),
+		0xce: opADD(opImmediate(), true),
+
+		0x90: opSUB(opLoad(RegisterB), false),
+		0x91: opSUB(opLoad(RegisterC), false),
+		0x92: opSUB(opLoad(RegisterD), false),
+		0x93: opSUB(opLoad(RegisterE), false),
+		0x94: opSUB(opLoad(RegisterH), false),
+		0x95: opSUB(opLoad(RegisterL), false),
+		0x96: opSUB(opRead(opLoad16(RegisterHL)), false),
+		0x97: opSUB(opLoad(RegisterA), false),
+		0xd6: opSUB(opImmediate(), false),
+
+		0x98: opSUB(opLoad(RegisterB), true),
+		0x99: opSUB(opLoad(RegisterC), true),
+		0x9a: opSUB(opLoad(RegisterD), true),
+		0x9b: opSUB(opLoad(RegisterE), true),
+		0x9c: opSUB(opLoad(RegisterH), true),
+		0x9d: opSUB(opLoad(RegisterL), true),
+		0x9e: opSUB(opRead(opLoad16(RegisterHL)), true),
+		0x9f: opSUB(opLoad(RegisterA), true),
+		0xde: opSUB(opImmediate(), true),
+
+		0xa0: opAND(opLoad(RegisterB)),
+		0xa1: opAND(opLoad(RegisterC)),
+		0xa2: opAND(opLoad(RegisterD)),
+		0xa3: opAND(opLoad(RegisterE)),
+		0xa4: opAND(opLoad(RegisterH)),
+		0xa5: opAND(opLoad(RegisterL)),
+		0xa6: opAND(opRead(opLoad16(RegisterHL))),
+		0xa7: opAND(opLoad(RegisterA)),
+		0xe6: opAND(opImmediate()),
+
+		0xa8: opXOR(opLoad(RegisterB)),
+		0xa9: opXOR(opLoad(RegisterC)),
+		0xaa: opXOR(opLoad(RegisterD)),
+		0xab: opXOR(opLoad(RegisterE)),
+		0xac: opXOR(opLoad(RegisterH)),
+		0xad: opXOR(opLoad(RegisterL)),
+		0xae: opXOR(opRead(opLoad16(RegisterHL))),
+		0xaf: opXOR(opLoad(RegisterA)),
+		0xee: opXOR(opImmediate()),
+
+		0xb0: opOR(opLoad(RegisterB)),
+		0xb1: opOR(opLoad(RegisterC)),
+		0xb2: opOR(opLoad(RegisterD)),
+		0xb3: opOR(opLoad(RegisterE)),
+		0xb4: opOR(opLoad(RegisterH)),
+		0xb5: opOR(opLoad(RegisterL)),
+		0xb6: opOR(opRead(opLoad16(RegisterHL))),
+		0xb7: opOR(opLoad(RegisterA)),
+		0xf6: opOR(opImmediate()),
+
+		0xb8: opCP(opLoad(RegisterB)),
+		0xb9: opCP(opLoad(RegisterC)),
+		0xba: opCP(opLoad(RegisterD)),
+		0xbb: opCP(opLoad(RegisterE)),
+		0xbc: opCP(opLoad(RegisterH)),
+		0xbd: opCP(opLoad(RegisterL)),
+		0xbe: opCP(opRead(opLoad16(RegisterHL))),
+		0xbf: opCP(opLoad(RegisterA)),
+		0xfe: opCP(opImmediate()),
+
+		0x04: opINC(opStore(RegisterB), opLoad(RegisterB)),
+		0x0c: opINC(opStore(RegisterC), opLoad(RegisterC)),
+		0x14: opINC(opStore(RegisterD), opLoad(RegisterD)),
+		0x1c: opINC(opStore(RegisterE), opLoad(RegisterE)),
+		0x24: opINC(opStore(RegisterH), opLoad(RegisterH)),
+		0x2c: opINC(opStore(RegisterL), opLoad(RegisterL)),
+		0x34: opINC(opWrite(opLoad16(RegisterHL)), opRead(opLoad16(RegisterHL))),
+		0x3c: opINC(opStore(RegisterA), opLoad(RegisterA)),
+
+		0x05: opDEC(opStore(RegisterB), opLoad(RegisterB)),
+		0x0d: opDEC(opStore(RegisterC), opLoad(RegisterC)),
+		0x15: opDEC(opStore(RegisterD), opLoad(RegisterD)),
+		0x1d: opDEC(opStore(RegisterE), opLoad(RegisterE)),
+		0x25: opDEC(opStore(RegisterH), opLoad(RegisterH)),
+		0x2d: opDEC(opStore(RegisterL), opLoad(RegisterL)),
+		0x35: opDEC(opWrite(opLoad16(RegisterHL)), opRead(opLoad16(RegisterHL))),
+		0x3d: opDEC(opStore(RegisterA), opLoad(RegisterA)),
 	}
 }
 
@@ -195,8 +294,140 @@ func opPUSH(src OpSrc16) Instruction {
 	}
 }
 
+// Generate an ADD/ADC instruction.
+func opADD(src OpSrc, useCarry bool) Instruction {
+	return func(io InstructionIO) {
+		a := io.Load(RegisterA)
+		b := src(io)
+		c := uint8(0)
+		if useCarry && io.GetFlag(FlagC) {
+			c = 1
+		}
+		r16 := uint16(a) + uint16(b) + uint16(c)
+		r := uint8(r16)
+
+		io.SetFlag(FlagZ, r == 0)
+		io.SetFlag(FlagN, false)
+		io.SetFlag(FlagH, (a&0xf)+(b&0xf)+(c&0xf) > 0xf)
+		io.SetFlag(FlagC, r16 > 0xff)
+
+		io.Store(RegisterA, r)
+	}
+}
+
+// Generate a SUB/SBC instruction.
+func opSUB(src OpSrc, useBorrow bool) Instruction {
+	return func(io InstructionIO) {
+		a := io.Load(RegisterA)
+		b := src(io)
+		c := uint8(0)
+		if useBorrow && io.GetFlag(FlagC) {
+			c = 1
+		}
+		r16 := uint16(a) - uint16(b) - uint16(c)
+		r := uint8(r16)
+
+		io.SetFlag(FlagZ, r == 0)
+		io.SetFlag(FlagN, true)
+		io.SetFlag(FlagH, (a&0xf)-(b&0xf)-(c&0xf) > 0xf)
+		io.SetFlag(FlagC, r16 > 0xff)
+
+		io.Store(RegisterA, r)
+	}
+}
+
+// Generate an AND instruction.
+func opAND(src OpSrc) Instruction {
+	return func(io InstructionIO) {
+		a := io.Load(RegisterA)
+		b := src(io)
+		r := a & b
+
+		io.SetFlag(FlagZ, r == 0)
+		io.SetFlag(FlagN, false)
+		io.SetFlag(FlagH, true)
+		io.SetFlag(FlagC, false)
+
+		io.Store(RegisterA, r)
+	}
+}
+
+// Generate an XOR instruction.
+func opXOR(src OpSrc) Instruction {
+	return func(io InstructionIO) {
+		a := io.Load(RegisterA)
+		b := src(io)
+		r := a ^ b
+
+		io.SetFlag(FlagZ, r == 0)
+		io.SetFlag(FlagN, false)
+		io.SetFlag(FlagH, false)
+		io.SetFlag(FlagC, false)
+
+		io.Store(RegisterA, r)
+	}
+}
+
+// Generate an OR instruction.
+func opOR(src OpSrc) Instruction {
+	return func(io InstructionIO) {
+		a := io.Load(RegisterA)
+		b := src(io)
+		r := a | b
+
+		io.SetFlag(FlagZ, r == 0)
+		io.SetFlag(FlagN, false)
+		io.SetFlag(FlagH, false)
+		io.SetFlag(FlagC, false)
+
+		io.Store(RegisterA, r)
+	}
+}
+
+// Generate a CP instruction.
+func opCP(src OpSrc) Instruction {
+	return func(io InstructionIO) {
+		a := io.Load(RegisterA)
+		b := src(io)
+		r := a - b
+
+		io.SetFlag(FlagZ, r == 0)
+		io.SetFlag(FlagN, true)
+		io.SetFlag(FlagH, a&0xf < b&0xf)
+		io.SetFlag(FlagC, a < b)
+	}
+}
+
+// Generate an INC instruction.
+func opINC(dst OpDst, src OpSrc) Instruction {
+	return func(io InstructionIO) {
+		a := src(io)
+		r := a + 1
+
+		io.SetFlag(FlagZ, r == 0)
+		io.SetFlag(FlagN, false)
+		io.SetFlag(FlagH, a&0xf > 0xe)
+
+		dst(io, r)
+	}
+}
+
+// Generate a DEC instruction.
+func opDEC(dst OpDst, src OpSrc) Instruction {
+	return func(io InstructionIO) {
+		a := src(io)
+		r := a - 1
+
+		io.SetFlag(FlagZ, r == 0)
+		io.SetFlag(FlagN, true)
+		io.SetFlag(FlagH, a&0xf == 0x0)
+
+		dst(io, r)
+	}
+}
+
 // Generate a signed add instruction.
-func opSADD(srcA OpSrc16, srcB OpSrc) OpSrc16 {
+func opSAdd(srcA OpSrc16, srcB OpSrc) OpSrc16 {
 	return func(io InstructionIO) uint16 {
 		a := srcA(io)
 		b := srcB(io)
