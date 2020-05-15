@@ -4,3 +4,8 @@ package cpu
 func (c *CPU) setIME(v bool) {
 	c.ime = v
 }
+
+// Halt the CPU.
+func (c *CPU) triggerHalt() {
+	// TODO.
+}

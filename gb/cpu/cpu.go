@@ -48,6 +48,7 @@ func NewCPU() *CPU {
 		SetSP: c.setSP,
 
 		SetIME: c.setIME,
+		Halt:   c.triggerHalt,
 
 		Nop: c.incrementMCycle,
 	}

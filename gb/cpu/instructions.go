@@ -26,8 +26,9 @@ type InstructionIO struct {
 	SP    func() uint16
 	SetSP func(v uint16)
 
-	// Interrupt master enable access.
+	// Interrupt access.
 	SetIME func(v bool)
+	Halt   func()
 
 	// No-op used for cycle counting.
 	Nop func()
@@ -295,6 +296,15 @@ func (c *CPU) initInstructionSet() {
 		0xd4: opCALL(opNotFlag(FlagC)),
 		0xdc: opCALL(opFlag(FlagC)),
 
+		0xc7: opRST(0x0000),
+		0xcf: opRST(0x0008),
+		0xd7: opRST(0x0010),
+		0xdf: opRST(0x0018),
+		0xe7: opRST(0x0020),
+		0xef: opRST(0x0028),
+		0xf7: opRST(0x0030),
+		0xff: opRST(0x0038),
+
 		0xc9: opRET(opTrue()),
 		0xc0: opRET(opNotFlag(FlagZ)),
 		0xc8: opRET(opFlag(FlagZ)),
@@ -302,6 +312,17 @@ func (c *CPU) initInstructionSet() {
 		0xd8: opRET(opFlag(FlagC)),
 
 		0xd9: opRETI(),
+
+		// Miscellaneous.
+		0x27: opDAA(),
+		0x2f: opCPL(),
+		0x3f: opCCF(),
+		0x37: opSCF(),
+		0x00: opNOP(),
+		0x76: opHALT(),
+		0x10: opSTOP(),
+		0xf3: opDI(),
+		0xfb: opEI(),
 	}
 }
 
@@ -540,6 +561,19 @@ func opCALL(flag OpFlagSrc) Instruction {
 	}
 }
 
+// Generate a RST instruction.
+func opRST(addr uint16) Instruction {
+	return func(io InstructionIO) {
+		opPUSH(opPC())(io)
+		io.Nop()
+		io.Nop()
+		io.Nop()
+		io.Nop()
+		io.Nop()
+		io.SetPC(addr)
+	}
+}
+
 // Generate a RET instruction.
 func opRET(flag OpFlagSrc) Instruction {
 	return func(io InstructionIO) {
@@ -556,6 +590,101 @@ func opRETI() Instruction {
 	return func(io InstructionIO) {
 		io.Nop()
 		opPOP(opSetPC())(io)
+		io.SetIME(true)
+	}
+}
+
+// Generate a DAA instruction.
+func opDAA() Instruction {
+	return func(io InstructionIO) {
+		a := io.Load(RegisterA)
+
+		// Stolen from https://forums.nesdev.com/viewtopic.php?t=15944#p196282.
+		if !io.GetFlag(FlagN) {
+			if io.GetFlag(FlagC) || a > 0x99 {
+				a += 0x60
+				io.SetFlag(FlagC, true)
+			}
+			if io.GetFlag(FlagH) || (a&0xf) > 0x09 {
+				a += 0x06
+			}
+		} else {
+			if io.GetFlag(FlagC) {
+				a -= 0x60
+				io.SetFlag(FlagC, true)
+			}
+			if io.GetFlag(FlagH) {
+				a -= 0x06
+			}
+		}
+
+		io.SetFlag(FlagZ, a == 0)
+		io.SetFlag(FlagH, false)
+
+		io.Store(RegisterA, a)
+	}
+}
+
+// Generate a CPL instruction.
+func opCPL() Instruction {
+	return func(io InstructionIO) {
+		io.Store(RegisterA, ^io.Load(RegisterA))
+		io.SetFlag(FlagN, true)
+		io.SetFlag(FlagH, true)
+	}
+}
+
+// Generate a CCF instruction.
+func opCCF() Instruction {
+	return func(io InstructionIO) {
+		io.SetFlag(FlagN, true)
+		io.SetFlag(FlagH, true)
+		io.SetFlag(FlagC, !io.GetFlag(FlagC))
+	}
+}
+
+// Generate a SCF instruction.
+func opSCF() Instruction {
+	return func(io InstructionIO) {
+		io.SetFlag(FlagN, false)
+		io.SetFlag(FlagH, false)
+		io.SetFlag(FlagC, true)
+	}
+}
+
+// Generate a NOP instruction.
+func opNOP() Instruction {
+	return func(io InstructionIO) {
+		// Do nothing.
+	}
+}
+
+// Generate a HALT instruction.
+func opHALT() Instruction {
+	return func(io InstructionIO) {
+		io.Halt()
+	}
+}
+
+// Generate a STOP instruction.
+func opSTOP() Instruction {
+	return func(io InstructionIO) {
+		// TODO: Properly implement.
+		io.Halt()
+		io.SetPC(io.PC() + 1)
+	}
+}
+
+// Generate a DI instruction.
+func opDI() Instruction {
+	return func(io InstructionIO) {
+		io.SetIME(false)
+	}
+}
+
+// Generate a EI instruction.
+func opEI() Instruction {
+	return func(io InstructionIO) {
 		io.SetIME(true)
 	}
 }
