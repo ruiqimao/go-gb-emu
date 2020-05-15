@@ -1,5 +1,9 @@
 package cpu
 
+import (
+	"github.com/ruiqimao/go-gb-emu/utils"
+)
+
 // InstructionIO is the set of functions an Instruction can use to interface with the CPU and MMU.
 type InstructionIO struct {
 	// Register access.
@@ -130,6 +134,25 @@ func (c *CPU) initInstructionSet() {
 		0xf0: opLD(opStore(RegisterA), opRead(opHigh(opImmediate()))),
 		0xf2: opLD(opStore(RegisterA), opRead(opHigh(opLoad(RegisterC)))),
 
+		// 16-bit loads.
+		0x01: opLD16(opStore16(RegisterBC), opImmediate16()),
+		0x11: opLD16(opStore16(RegisterDE), opImmediate16()),
+		0x21: opLD16(opStore16(RegisterHL), opImmediate16()),
+		0x31: opLD16(opSetSP(), opImmediate16()),
+
+		0xf9: opLD16(opSetSP(), opLoad16(RegisterHL)),
+		0xf8: opLD16(opStore16(RegisterHL), opSADD(opSP(), opLoad(RegisterHL))),
+		0x08: opLD16(opWrite16(opImmediate16()), opSP()),
+
+		0xc5: opPUSH(opLoad16(RegisterBC)),
+		0xd5: opPUSH(opLoad16(RegisterDE)),
+		0xe5: opPUSH(opLoad16(RegisterHL)),
+		0xf5: opPUSH(opLoad16(RegisterAF)),
+
+		0xc1: opPOP(opStore16(RegisterBC)),
+		0xd1: opPOP(opStore16(RegisterDE)),
+		0xe1: opPOP(opStore16(RegisterHL)),
+		0xf1: opPOP(opStore16(RegisterAF)),
 	}
 }
 
@@ -138,5 +161,53 @@ func opLD(dst OpDst, src OpSrc) Instruction {
 	return func(io InstructionIO) {
 		// Store the source in the destination.
 		dst(io, src(io))
+	}
+}
+
+// Generate a 16-bit LD instruction.
+func opLD16(dst OpDst16, src OpSrc16) Instruction {
+	return func(io InstructionIO) {
+		// Store the source in the destination.
+		dst(io, src(io))
+	}
+}
+
+// Generate a POP instruction.
+func opPOP(dst OpDst16) Instruction {
+	return func(io InstructionIO) {
+		sp := io.SP()
+		hi := io.Read(sp)
+		lo := io.Read(sp+1)
+		io.SetSP(sp + 2)
+		dst(io, utils.CombineBytes(hi, lo))
+	}
+}
+
+// Generate a PUSH instruction.
+func opPUSH(src OpSrc16) Instruction {
+	return func(io InstructionIO) {
+		sp := io.SP()
+		io.SetSP(sp - 2)
+		hi, lo := utils.SplitShort(src(io))
+		io.Nop()
+		io.Write(sp - 2, hi)
+		io.Write(sp - 1, lo)
+	}
+}
+
+// Generate a signed add instruction.
+func opSADD(srcA OpSrc16, srcB OpSrc) OpSrc16 {
+	return func(io InstructionIO) uint16 {
+		a := srcA(io)
+		b := srcB(io)
+		r := int32(a) + int32(int8(b))
+
+		io.SetFlag(FlagZ, false)
+		io.SetFlag(FlagN, false)
+		io.SetFlag(FlagH, (uint8(a)&0xf)-(b&0xf) > 0xf)
+		io.SetFlag(FlagC, r > 0xff)
+
+		io.Nop()
+		return uint16(r)
 	}
 }

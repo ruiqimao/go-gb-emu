@@ -61,10 +61,30 @@ func opRead(addr OpSrc16) OpSrc {
 	}
 }
 
+// Generate a micro-op that reads 16 bits from memory.
+func opRead16(addr OpSrc16) OpSrc16 {
+	return func(io InstructionIO) uint16 {
+		a := addr(io)
+		hi := io.Read(a)
+		lo := io.Read(a+1)
+		return utils.CombineBytes(hi, lo)
+	}
+}
+
 // Generate a micro-op that stores into memory.
 func opWrite(addr OpSrc16) OpDst {
 	return func(io InstructionIO, v uint8) {
 		io.Write(addr(io), v)
+	}
+}
+
+// Generate a micro-op that stores 16 bits into memory.
+func opWrite16(addr OpSrc16) OpDst16 {
+	return func(io InstructionIO, v uint16) {
+		a := addr(io)
+		hi, lo := utils.SplitShort(v)
+		io.Write(a, hi)
+		io.Write(a+1, lo)
 	}
 }
 
@@ -114,28 +134,6 @@ func opSP() OpSrc16 {
 func opSetSP() OpDst16 {
 	return func(io InstructionIO, v uint16) {
 		io.SetSP(v)
-	}
-}
-
-// Generate a micro-op that pops a value from the stack.
-func opPop() OpSrc16 {
-	return func(io InstructionIO) uint16 {
-		sp := io.SP()
-		hi := io.Read(sp)
-		lo := io.Read(sp+1)
-		io.SetSP(sp + 2)
-		return utils.CombineBytes(hi, lo)
-	}
-}
-
-// Generate a micro-op that pushes a value into the stack.
-func opPush() OpDst16 {
-	return func(io InstructionIO, v uint16) {
-		sp := io.SP()
-		io.SetSP(sp - 2)
-		hi, lo := utils.SplitShort(v)
-		io.Write(sp - 2, hi)
-		io.Write(sp - 1, lo)
 	}
 }
 

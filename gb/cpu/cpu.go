@@ -53,5 +53,36 @@ func NewCPU() *CPU {
 	// Initialize the instruction set.
 	c.initInstructionSet()
 
+	println("  0 1 2 3 4 5 6 7 8 9 A B C D E F")
+	for k := 0; k < 2; k++ {
+		for i := 0; i < 16; i++ {
+			switch i {
+			case 10:
+				print("A ")
+			case 11:
+				print("B ")
+			case 12:
+				print("C ")
+			case 13:
+				print("D ")
+			case 14:
+				print("E ")
+			case 15:
+				print("F ")
+			default:
+				print(i)
+				print(" ")
+			}
+			for j := 0; j < 16; j++ {
+				if c.instructions[i*16+j+k*256] != nil {
+					print("X ")
+				} else {
+					print("- ")
+				}
+			}
+			println()
+		}
+	}
+
 	return c
 }
