@@ -51,6 +51,8 @@ func NewGameBoy() (*GameBoy, error) {
 	gb.jp = NewJoypad(gb)
 	gb.clk = NewClock(BaseClock)
 
+	gb.newCpu = cpu.NewCPU()
+
 	// Initialize the instruction set.
 	gb.cpu.CreateInstructionSet()
 

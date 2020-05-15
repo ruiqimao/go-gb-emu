@@ -26,7 +26,7 @@ type CPU struct {
 }
 
 // Create a new CPU.
-func NewCPU() (*CPU, error) {
+func NewCPU() *CPU {
 	c := &CPU{}
 
 	// Create the InstructionIO.
@@ -53,5 +53,5 @@ func NewCPU() (*CPU, error) {
 	// Initialize the instruction set.
 	c.initInstructionSet()
 
-	return c, nil
+	return c
 }

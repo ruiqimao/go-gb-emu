@@ -40,29 +40,31 @@ func opStore16(reg Register16) OpDst16 {
 	}
 }
 
+// Generate a micro-op that reads the value of a flag.
 func opFlag(flag Flag) OpFlagSrc {
 	return func(io InstructionIO) bool {
 		return io.GetFlag(flag)
 	}
 }
 
+// Generate a micro-op that sets the value of a flag.
 func opSetFlag(flag Flag) OpFlagDst {
 	return func(io InstructionIO, v bool) {
 		io.SetFlag(flag, v)
 	}
 }
 
-// Generate a micro-op that reads from memory at the value in the register.
-func opRead(reg Register16) OpSrc {
+// Generate a micro-op that reads from memory.
+func opRead(addr OpSrc16) OpSrc {
 	return func(io InstructionIO) uint8 {
-		return io.Read(io.Load16(reg))
+		return io.Read(addr(io))
 	}
 }
 
-// Generate a micro-op that stores into memory at the value in the register.
-func opWrite(reg Register16) OpDst {
+// Generate a micro-op that stores into memory.
+func opWrite(addr OpSrc16) OpDst {
 	return func(io InstructionIO, v uint8) {
-		io.Write(io.Load16(reg), v)
+		io.Write(addr(io), v)
 	}
 }
 
@@ -134,5 +136,50 @@ func opPush() OpDst16 {
 		hi, lo := utils.SplitShort(v)
 		io.Write(sp - 2, hi)
 		io.Write(sp - 1, lo)
+	}
+}
+
+// Generate a micro-op that reads from memory at the value in HL, then increments HL.
+func opReadHLI() OpSrc {
+	return func(io InstructionIO) uint8 {
+		hl := io.Load16(RegisterHL)
+		v := io.Read(hl)
+		io.Store16(RegisterHL, hl+1)
+		return v
+	}
+}
+
+// Generate a micro-op that reads from memory at the value in HL, then decrements HL.
+func opReadHLD() OpSrc {
+	return func(io InstructionIO) uint8 {
+		hl := io.Load16(RegisterHL)
+		v := io.Read(hl)
+		io.Store16(RegisterHL, hl-1)
+		return v
+	}
+}
+
+// Generate a micro-op that writes to memory at the value in HL, then increments HL.
+func opWriteHLI() OpDst {
+	return func(io InstructionIO, v uint8) {
+		hl := io.Load16(RegisterHL)
+		io.Write(hl, v)
+		io.Store16(RegisterHL, hl+1)
+	}
+}
+
+// Generate a micro-op that writes to memory at the value in HL, then decrements HL.
+func opWriteHLD() OpDst {
+	return func(io InstructionIO, v uint8) {
+		hl := io.Load16(RegisterHL)
+		io.Write(hl, v)
+		io.Store16(RegisterHL, hl-1)
+	}
+}
+
+// Generate a micro-op that adds 0xFF00 to the value.
+func opHigh(src OpSrc) OpSrc16 {
+	return func(io InstructionIO) uint16 {
+		return 0xff00 + uint16(src(io))
 	}
 }
