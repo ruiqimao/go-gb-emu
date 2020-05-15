@@ -141,7 +141,7 @@ func (c *CPU) initInstructionSet() {
 		0x31: opLD16(opSetSP(), opImmediate16()),
 
 		0xf9: opLD16(opSetSP(), opLoad16(RegisterHL)),
-		0xf8: opLD16(opStore16(RegisterHL), opSAdd(opSP(), opLoad(RegisterHL))),
+		0xf8: opLD16(opStore16(RegisterHL), opSAdd(opSP(), opLoad(RegisterHL), false)),
 		0x08: opLD16(opWrite16(opImmediate16()), opSP()),
 
 		0xc5: opPUSH(opLoad16(RegisterBC)),
@@ -252,6 +252,24 @@ func (c *CPU) initInstructionSet() {
 		0x2d: opDEC(opStore(RegisterL), opLoad(RegisterL)),
 		0x35: opDEC(opWrite(opLoad16(RegisterHL)), opRead(opLoad16(RegisterHL))),
 		0x3d: opDEC(opStore(RegisterA), opLoad(RegisterA)),
+
+		// 16-bit arithmetic.
+		0x09: opADD16(opLoad16(RegisterBC)),
+		0x19: opADD16(opLoad16(RegisterDE)),
+		0x29: opADD16(opLoad16(RegisterHL)),
+		0x39: opADD16(opSP()),
+
+		0xe8: opLD16(opSetSP(), opSAdd(opSP(), opImmediate(), true)),
+
+		0x03: opINC16(opStore16(RegisterBC), opLoad16(RegisterBC)),
+		0x13: opINC16(opStore16(RegisterDE), opLoad16(RegisterDE)),
+		0x23: opINC16(opStore16(RegisterHL), opLoad16(RegisterHL)),
+		0x33: opINC16(opSetSP(), opSP()),
+
+		0x0b: opDEC16(opStore16(RegisterBC), opLoad16(RegisterBC)),
+		0x1b: opDEC16(opStore16(RegisterDE), opLoad16(RegisterDE)),
+		0x2b: opDEC16(opStore16(RegisterHL), opLoad16(RegisterHL)),
+		0x3b: opDEC16(opSetSP(), opSP()),
 	}
 }
 
@@ -426,19 +444,36 @@ func opDEC(dst OpDst, src OpSrc) Instruction {
 	}
 }
 
-// Generate a signed add instruction.
-func opSAdd(srcA OpSrc16, srcB OpSrc) OpSrc16 {
-	return func(io InstructionIO) uint16 {
-		a := srcA(io)
-		b := srcB(io)
-		r := int32(a) + int32(int8(b))
+// Generate a 16-bit ADD instruction.
+func opADD16(src OpSrc16) Instruction {
+	return func(io InstructionIO) {
+		a := io.Load16(RegisterHL)
+		b := src(io)
+		r32 := uint32(a) + uint32(b)
 
-		io.SetFlag(FlagZ, false)
 		io.SetFlag(FlagN, false)
-		io.SetFlag(FlagH, (uint8(a)&0xf)-(b&0xf) > 0xf)
-		io.SetFlag(FlagC, r > 0xff)
+		io.SetFlag(FlagH, uint32(a&0x0fff) > r32&0xfff)
+		io.SetFlag(FlagC, r32 > 0xffff)
 
 		io.Nop()
-		return uint16(r)
+		io.Store16(RegisterHL, uint16(r32))
+	}
+}
+
+// Generate a 16-bit INC instruction.
+func opINC16(dst OpDst16, src OpSrc16) Instruction {
+	return func(io InstructionIO) {
+		a := src(io)
+		io.Nop()
+		dst(io, a+1)
+	}
+}
+
+// Generate a 16-bit DEC instruction.
+func opDEC16(dst OpDst16, src OpSrc16) Instruction {
+	return func(io InstructionIO) {
+		a := src(io)
+		io.Nop()
+		dst(io, a-1)
 	}
 }

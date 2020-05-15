@@ -181,3 +181,23 @@ func opHigh(src OpSrc) OpSrc16 {
 		return 0xff00 + uint16(src(io))
 	}
 }
+
+// Generate a micro-op that performs a signed add.
+func opSAdd(srcA OpSrc16, srcB OpSrc, extraNop bool) OpSrc16 {
+	return func(io InstructionIO) uint16 {
+		a := srcA(io)
+		b := srcB(io)
+		r := int32(a) + int32(int8(b))
+
+		io.SetFlag(FlagZ, false)
+		io.SetFlag(FlagN, false)
+		io.SetFlag(FlagH, (uint8(a)&0xf)-(b&0xf) > 0xf)
+		io.SetFlag(FlagC, r > 0xff)
+
+		if extraNop {
+			io.Nop()
+		}
+		io.Nop()
+		return uint16(r)
+	}
+}
