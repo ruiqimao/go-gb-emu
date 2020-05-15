@@ -20,6 +20,8 @@ type CPU struct {
 	ic uint16
 	of bool
 
+	// Instruction set.
+	instructions [0x200]Instruction
 	iio InstructionIO
 }
 
@@ -36,10 +38,14 @@ func NewCPU() (*CPU, error) {
 		GetFlag: c.getFlag,
 		SetFlag: c.setFlag,
 
-		Read:    c.readMemory,
-		Read16:  c.readMemory16,
-		Write:   c.writeMemory,
-		Write16: c.writeMemory16,
+		Read:  c.readMemory,
+		Write: c.writeMemory,
+
+		PC:    c.getPC,
+		SetPC: c.setPC,
+
+		SP:    c.getSP,
+		SetSP: c.setSP,
 
 		Nop: c.incrementMCycle,
 	}

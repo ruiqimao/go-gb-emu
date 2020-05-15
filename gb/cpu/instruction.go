@@ -11,10 +11,16 @@ type InstructionIO struct {
 	SetFlag func(flag Flag, v bool)
 
 	// Memory access.
-	Read    func(addr uint16) uint8
-	Read16  func(addr uint16) uint16
-	Write   func(addr uint16, v uint8)
-	Write16 func(addr uint16, v uint16)
+	Read  func(addr uint16) uint8
+	Write func(addr uint16, v uint8)
+
+	// Immediate value access.
+	PC    func() uint16
+	SetPC func(v uint16)
+
+	// Stack access.
+	SP    func() uint16
+	SetSP func(v uint16)
 
 	// No-op used for cycle counting.
 	Nop func()
