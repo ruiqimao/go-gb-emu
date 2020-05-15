@@ -22,7 +22,7 @@ type CPU struct {
 
 	// Instruction set.
 	instructions [0x200]Instruction
-	iio InstructionIO
+	iio          InstructionIO
 }
 
 // Create a new CPU.
@@ -46,6 +46,8 @@ func NewCPU() *CPU {
 
 		SP:    c.getSP,
 		SetSP: c.setSP,
+
+		SetIME: c.setIME,
 
 		Nop: c.incrementMCycle,
 	}

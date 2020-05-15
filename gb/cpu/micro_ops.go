@@ -47,10 +47,24 @@ func opFlag(flag Flag) OpFlagSrc {
 	}
 }
 
+// Generate a micro-op that inverts the value of a flag.
+func opNotFlag(flag Flag) OpFlagSrc {
+	return func(io InstructionIO) bool {
+		return !io.GetFlag(flag)
+	}
+}
+
 // Generate a micro-op that sets the value of a flag.
 func opSetFlag(flag Flag) OpFlagDst {
 	return func(io InstructionIO, v bool) {
 		io.SetFlag(flag, v)
+	}
+}
+
+// Generate a micro-op that always resolves to true.
+func opTrue() OpFlagSrc {
+	return func(io InstructionIO) bool {
+		return true
 	}
 }
 
@@ -66,7 +80,7 @@ func opRead16(addr OpSrc16) OpSrc16 {
 	return func(io InstructionIO) uint16 {
 		a := addr(io)
 		hi := io.Read(a)
-		lo := io.Read(a+1)
+		lo := io.Read(a + 1)
 		return utils.CombineBytes(hi, lo)
 	}
 }
@@ -117,7 +131,7 @@ func opImmediate16() OpSrc16 {
 	return func(io InstructionIO) uint16 {
 		pc := io.PC()
 		hi := io.Read(pc)
-		lo := io.Read(pc+1)
+		lo := io.Read(pc + 1)
 		io.SetPC(pc + 2)
 		return utils.CombineBytes(hi, lo)
 	}
@@ -183,7 +197,7 @@ func opHigh(src OpSrc) OpSrc16 {
 }
 
 // Generate a micro-op that performs a signed add.
-func opSAdd(srcA OpSrc16, srcB OpSrc, extraNop bool) OpSrc16 {
+func opSAdd(srcA OpSrc16, srcB OpSrc) OpSrc16 {
 	return func(io InstructionIO) uint16 {
 		a := srcA(io)
 		b := srcB(io)
@@ -194,10 +208,6 @@ func opSAdd(srcA OpSrc16, srcB OpSrc, extraNop bool) OpSrc16 {
 		io.SetFlag(FlagH, (uint8(a)&0xf)-(b&0xf) > 0xf)
 		io.SetFlag(FlagC, r > 0xff)
 
-		if extraNop {
-			io.Nop()
-		}
-		io.Nop()
 		return uint16(r)
 	}
 }

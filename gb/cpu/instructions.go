@@ -26,6 +26,9 @@ type InstructionIO struct {
 	SP    func() uint16
 	SetSP func(v uint16)
 
+	// Interrupt master enable access.
+	SetIME func(v bool)
+
 	// No-op used for cycle counting.
 	Nop func()
 }
@@ -140,8 +143,8 @@ func (c *CPU) initInstructionSet() {
 		0x21: opLD16(opStore16(RegisterHL), opImmediate16()),
 		0x31: opLD16(opSetSP(), opImmediate16()),
 
-		0xf9: opLD16(opSetSP(), opLoad16(RegisterHL)),
-		0xf8: opLD16(opStore16(RegisterHL), opSAdd(opSP(), opLoad(RegisterHL), false)),
+		0xf9: opPAD(opLD16(opSetSP(), opLoad16(RegisterHL))),
+		0xf8: opPAD(opLD16(opStore16(RegisterHL), opSAdd(opSP(), opLoad(RegisterHL)))),
 		0x08: opLD16(opWrite16(opImmediate16()), opSP()),
 
 		0xc5: opPUSH(opLoad16(RegisterBC)),
@@ -259,7 +262,7 @@ func (c *CPU) initInstructionSet() {
 		0x29: opADD16(opLoad16(RegisterHL)),
 		0x39: opADD16(opSP()),
 
-		0xe8: opLD16(opSetSP(), opSAdd(opSP(), opImmediate(), true)),
+		0xe8: opPAD(opPAD(opLD16(opSetSP(), opSAdd(opSP(), opImmediate())))),
 
 		0x03: opINC16(opStore16(RegisterBC), opLoad16(RegisterBC)),
 		0x13: opINC16(opStore16(RegisterDE), opLoad16(RegisterDE)),
@@ -270,6 +273,35 @@ func (c *CPU) initInstructionSet() {
 		0x1b: opDEC16(opStore16(RegisterDE), opLoad16(RegisterDE)),
 		0x2b: opDEC16(opStore16(RegisterHL), opLoad16(RegisterHL)),
 		0x3b: opDEC16(opSetSP(), opSP()),
+
+		// Jumps.
+		0xc3: opJP(opImmediate16(), opTrue()),
+		0xc2: opJP(opImmediate16(), opNotFlag(FlagZ)),
+		0xca: opJP(opImmediate16(), opFlag(FlagZ)),
+		0xd2: opJP(opImmediate16(), opNotFlag(FlagC)),
+		0xda: opJP(opImmediate16(), opFlag(FlagC)),
+
+		0xe9: opJPHL(),
+
+		0x18: opJP(opSAdd(opPC(), opImmediate()), opTrue()),
+		0x20: opJP(opSAdd(opPC(), opImmediate()), opNotFlag(FlagZ)),
+		0x28: opJP(opSAdd(opPC(), opImmediate()), opFlag(FlagZ)),
+		0x30: opJP(opSAdd(opPC(), opImmediate()), opNotFlag(FlagC)),
+		0x38: opJP(opSAdd(opPC(), opImmediate()), opFlag(FlagC)),
+
+		0xcd: opCALL(opTrue()),
+		0xc4: opCALL(opNotFlag(FlagZ)),
+		0xcc: opCALL(opFlag(FlagZ)),
+		0xd4: opCALL(opNotFlag(FlagC)),
+		0xdc: opCALL(opFlag(FlagC)),
+
+		0xc9: opRET(opTrue()),
+		0xc0: opRET(opNotFlag(FlagZ)),
+		0xc8: opRET(opFlag(FlagZ)),
+		0xd0: opRET(opNotFlag(FlagC)),
+		0xd8: opRET(opFlag(FlagC)),
+
+		0xd9: opRETI(),
 	}
 }
 
@@ -294,7 +326,7 @@ func opPOP(dst OpDst16) Instruction {
 	return func(io InstructionIO) {
 		sp := io.SP()
 		hi := io.Read(sp)
-		lo := io.Read(sp+1)
+		lo := io.Read(sp + 1)
 		io.SetSP(sp + 2)
 		dst(io, utils.CombineBytes(hi, lo))
 	}
@@ -307,8 +339,8 @@ func opPUSH(src OpSrc16) Instruction {
 		io.SetSP(sp - 2)
 		hi, lo := utils.SplitShort(src(io))
 		io.Nop()
-		io.Write(sp - 2, hi)
-		io.Write(sp - 1, lo)
+		io.Write(sp-2, hi)
+		io.Write(sp-1, lo)
 	}
 }
 
@@ -475,5 +507,63 @@ func opDEC16(dst OpDst16, src OpSrc16) Instruction {
 		a := src(io)
 		io.Nop()
 		dst(io, a-1)
+	}
+}
+
+// Generate a JP instruction.
+func opJP(src OpSrc16, flag OpFlagSrc) Instruction {
+	return func(io InstructionIO) {
+		a := src(io)
+		if flag(io) {
+			io.Nop()
+			io.SetPC(a)
+		}
+	}
+}
+
+// Generate a JP,HL instruction.
+func opJPHL() Instruction {
+	return func(io InstructionIO) {
+		io.SetPC(io.Load16(RegisterHL))
+	}
+}
+
+// Generate a CALL instruction.
+func opCALL(flag OpFlagSrc) Instruction {
+	return func(io InstructionIO) {
+		a := opImmediate16()(io)
+		if flag(io) {
+			io.Nop()
+			opPUSH(opPC())(io)
+			io.SetPC(a)
+		}
+	}
+}
+
+// Generate a RET instruction.
+func opRET(flag OpFlagSrc) Instruction {
+	return func(io InstructionIO) {
+		io.Nop()
+		if flag(io) {
+			io.Nop()
+			opPOP(opSetPC())(io)
+		}
+	}
+}
+
+// Generate a RETI instruction.
+func opRETI() Instruction {
+	return func(io InstructionIO) {
+		io.Nop()
+		opPOP(opSetPC())(io)
+		io.SetIME(true)
+	}
+}
+
+// Pad an instruction with an extra no-op at the beginning.
+func opPAD(inst Instruction) Instruction {
+	return func(io InstructionIO) {
+		io.Nop()
+		inst(io)
 	}
 }
