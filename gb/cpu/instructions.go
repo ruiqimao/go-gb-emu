@@ -323,6 +323,301 @@ func (c *CPU) initInstructionSet() {
 		0x10: opSTOP(),
 		0xf3: opDI(),
 		0xfb: opEI(),
+
+		// Bit operations.
+		0x07: opRLCA(),
+		0x17: opRLA(),
+		0x0f: opRRCA(),
+		0x1f: opRRA(),
+
+		// CB extensions.
+		0x100: opRL(opLoad(RegisterB), opStore(RegisterB), true),
+		0x101: opRL(opLoad(RegisterC), opStore(RegisterC), true),
+		0x102: opRL(opLoad(RegisterD), opStore(RegisterD), true),
+		0x103: opRL(opLoad(RegisterE), opStore(RegisterE), true),
+		0x104: opRL(opLoad(RegisterH), opStore(RegisterH), true),
+		0x105: opRL(opLoad(RegisterL), opStore(RegisterL), true),
+		0x106: opRL(opRead(opLoad16(RegisterHL)), opWrite(opLoad16(RegisterHL)), true),
+		0x107: opRL(opLoad(RegisterA), opStore(RegisterA), true),
+
+		0x108: opRR(opLoad(RegisterB), opStore(RegisterB), true),
+		0x109: opRR(opLoad(RegisterC), opStore(RegisterC), true),
+		0x10a: opRR(opLoad(RegisterD), opStore(RegisterD), true),
+		0x10b: opRR(opLoad(RegisterE), opStore(RegisterE), true),
+		0x10c: opRR(opLoad(RegisterH), opStore(RegisterH), true),
+		0x10d: opRR(opLoad(RegisterL), opStore(RegisterL), true),
+		0x10e: opRR(opRead(opLoad16(RegisterHL)), opWrite(opLoad16(RegisterHL)), true),
+		0x10f: opRR(opLoad(RegisterA), opStore(RegisterA), true),
+
+		0x110: opRL(opLoad(RegisterB), opStore(RegisterB), false),
+		0x111: opRL(opLoad(RegisterC), opStore(RegisterC), false),
+		0x112: opRL(opLoad(RegisterD), opStore(RegisterD), false),
+		0x113: opRL(opLoad(RegisterE), opStore(RegisterE), false),
+		0x114: opRL(opLoad(RegisterH), opStore(RegisterH), false),
+		0x115: opRL(opLoad(RegisterL), opStore(RegisterL), false),
+		0x116: opRL(opRead(opLoad16(RegisterHL)), opWrite(opLoad16(RegisterHL)), false),
+		0x117: opRL(opLoad(RegisterA), opStore(RegisterA), false),
+
+		0x118: opRR(opLoad(RegisterB), opStore(RegisterB), false),
+		0x119: opRR(opLoad(RegisterC), opStore(RegisterC), false),
+		0x11a: opRR(opLoad(RegisterD), opStore(RegisterD), false),
+		0x11b: opRR(opLoad(RegisterE), opStore(RegisterE), false),
+		0x11c: opRR(opLoad(RegisterH), opStore(RegisterH), false),
+		0x11d: opRR(opLoad(RegisterL), opStore(RegisterL), false),
+		0x11e: opRR(opRead(opLoad16(RegisterHL)), opWrite(opLoad16(RegisterHL)), false),
+		0x11f: opRR(opLoad(RegisterA), opStore(RegisterA), false),
+
+		0x120: opSLA(opLoad(RegisterB), opStore(RegisterB)),
+		0x121: opSLA(opLoad(RegisterC), opStore(RegisterC)),
+		0x122: opSLA(opLoad(RegisterD), opStore(RegisterD)),
+		0x123: opSLA(opLoad(RegisterE), opStore(RegisterE)),
+		0x124: opSLA(opLoad(RegisterH), opStore(RegisterH)),
+		0x125: opSLA(opLoad(RegisterL), opStore(RegisterL)),
+		0x126: opSLA(opRead(opLoad16(RegisterHL)), opWrite(opLoad16(RegisterHL))),
+		0x127: opSLA(opLoad(RegisterA), opStore(RegisterA)),
+
+		0x128: opSR(opLoad(RegisterB), opStore(RegisterB), true),
+		0x129: opSR(opLoad(RegisterC), opStore(RegisterC), true),
+		0x12a: opSR(opLoad(RegisterD), opStore(RegisterD), true),
+		0x12b: opSR(opLoad(RegisterE), opStore(RegisterE), true),
+		0x12c: opSR(opLoad(RegisterH), opStore(RegisterH), true),
+		0x12d: opSR(opLoad(RegisterL), opStore(RegisterL), true),
+		0x12e: opSR(opRead(opLoad16(RegisterHL)), opWrite(opLoad16(RegisterHL)), true),
+		0x12f: opSR(opLoad(RegisterA), opStore(RegisterA), true),
+
+		0x130: opSWAP(opLoad(RegisterB), opStore(RegisterB)),
+		0x131: opSWAP(opLoad(RegisterC), opStore(RegisterC)),
+		0x132: opSWAP(opLoad(RegisterD), opStore(RegisterD)),
+		0x133: opSWAP(opLoad(RegisterE), opStore(RegisterE)),
+		0x134: opSWAP(opLoad(RegisterH), opStore(RegisterH)),
+		0x135: opSWAP(opLoad(RegisterL), opStore(RegisterL)),
+		0x136: opSWAP(opRead(opLoad16(RegisterHL)), opWrite(opLoad16(RegisterHL))),
+		0x137: opSWAP(opLoad(RegisterA), opStore(RegisterA)),
+
+		0x138: opSR(opLoad(RegisterB), opStore(RegisterB), false),
+		0x139: opSR(opLoad(RegisterC), opStore(RegisterC), false),
+		0x13a: opSR(opLoad(RegisterD), opStore(RegisterD), false),
+		0x13b: opSR(opLoad(RegisterE), opStore(RegisterE), false),
+		0x13c: opSR(opLoad(RegisterH), opStore(RegisterH), false),
+		0x13d: opSR(opLoad(RegisterL), opStore(RegisterL), false),
+		0x13e: opSR(opRead(opLoad16(RegisterHL)), opWrite(opLoad16(RegisterHL)), false),
+		0x13f: opSR(opLoad(RegisterA), opStore(RegisterA), false),
+
+		0x140: opBIT(opLoad(RegisterB), 0),
+		0x141: opBIT(opLoad(RegisterC), 0),
+		0x142: opBIT(opLoad(RegisterD), 0),
+		0x143: opBIT(opLoad(RegisterE), 0),
+		0x144: opBIT(opLoad(RegisterH), 0),
+		0x145: opBIT(opLoad(RegisterL), 0),
+		0x146: opBIT(opRead(opLoad16(RegisterHL)), 0),
+		0x147: opBIT(opLoad(RegisterA), 0),
+
+		0x148: opBIT(opLoad(RegisterB), 1),
+		0x149: opBIT(opLoad(RegisterC), 1),
+		0x14a: opBIT(opLoad(RegisterD), 1),
+		0x14b: opBIT(opLoad(RegisterE), 1),
+		0x14c: opBIT(opLoad(RegisterH), 1),
+		0x14d: opBIT(opLoad(RegisterL), 1),
+		0x14e: opBIT(opRead(opLoad16(RegisterHL)), 1),
+		0x14f: opBIT(opLoad(RegisterA), 1),
+
+		0x150: opBIT(opLoad(RegisterB), 2),
+		0x151: opBIT(opLoad(RegisterC), 2),
+		0x152: opBIT(opLoad(RegisterD), 2),
+		0x153: opBIT(opLoad(RegisterE), 2),
+		0x154: opBIT(opLoad(RegisterH), 2),
+		0x155: opBIT(opLoad(RegisterL), 2),
+		0x156: opBIT(opRead(opLoad16(RegisterHL)), 2),
+		0x157: opBIT(opLoad(RegisterA), 2),
+
+		0x158: opBIT(opLoad(RegisterB), 3),
+		0x159: opBIT(opLoad(RegisterC), 3),
+		0x15a: opBIT(opLoad(RegisterD), 3),
+		0x15b: opBIT(opLoad(RegisterE), 3),
+		0x15c: opBIT(opLoad(RegisterH), 3),
+		0x15d: opBIT(opLoad(RegisterL), 3),
+		0x15e: opBIT(opRead(opLoad16(RegisterHL)), 3),
+		0x15f: opBIT(opLoad(RegisterA), 3),
+
+		0x160: opBIT(opLoad(RegisterB), 4),
+		0x161: opBIT(opLoad(RegisterC), 4),
+		0x162: opBIT(opLoad(RegisterD), 4),
+		0x163: opBIT(opLoad(RegisterE), 4),
+		0x164: opBIT(opLoad(RegisterH), 4),
+		0x165: opBIT(opLoad(RegisterL), 4),
+		0x166: opBIT(opRead(opLoad16(RegisterHL)), 4),
+		0x167: opBIT(opLoad(RegisterA), 4),
+
+		0x168: opBIT(opLoad(RegisterB), 5),
+		0x169: opBIT(opLoad(RegisterC), 5),
+		0x16a: opBIT(opLoad(RegisterD), 5),
+		0x16b: opBIT(opLoad(RegisterE), 5),
+		0x16c: opBIT(opLoad(RegisterH), 5),
+		0x16d: opBIT(opLoad(RegisterL), 5),
+		0x16e: opBIT(opRead(opLoad16(RegisterHL)), 5),
+		0x16f: opBIT(opLoad(RegisterA), 5),
+
+		0x170: opBIT(opLoad(RegisterB), 6),
+		0x171: opBIT(opLoad(RegisterC), 6),
+		0x172: opBIT(opLoad(RegisterD), 6),
+		0x173: opBIT(opLoad(RegisterE), 6),
+		0x174: opBIT(opLoad(RegisterH), 6),
+		0x175: opBIT(opLoad(RegisterL), 6),
+		0x176: opBIT(opRead(opLoad16(RegisterHL)), 6),
+		0x177: opBIT(opLoad(RegisterA), 6),
+
+		0x178: opBIT(opLoad(RegisterB), 7),
+		0x179: opBIT(opLoad(RegisterC), 7),
+		0x17a: opBIT(opLoad(RegisterD), 7),
+		0x17b: opBIT(opLoad(RegisterE), 7),
+		0x17c: opBIT(opLoad(RegisterH), 7),
+		0x17d: opBIT(opLoad(RegisterL), 7),
+		0x17e: opBIT(opRead(opLoad16(RegisterHL)), 7),
+		0x17f: opBIT(opLoad(RegisterA), 7),
+
+		0x180: opSET(opStore(RegisterB), opLoad(RegisterB), 0, false),
+		0x181: opSET(opStore(RegisterC), opLoad(RegisterC), 0, false),
+		0x182: opSET(opStore(RegisterD), opLoad(RegisterD), 0, false),
+		0x183: opSET(opStore(RegisterE), opLoad(RegisterE), 0, false),
+		0x184: opSET(opStore(RegisterH), opLoad(RegisterH), 0, false),
+		0x185: opSET(opStore(RegisterL), opLoad(RegisterL), 0, false),
+		0x186: opSET(opWrite(opLoad16(RegisterHL)), opRead(opLoad16(RegisterHL)), 0, false),
+		0x187: opSET(opStore(RegisterA), opLoad(RegisterA), 0, false),
+
+		0x188: opSET(opStore(RegisterB), opLoad(RegisterB), 1, false),
+		0x189: opSET(opStore(RegisterC), opLoad(RegisterC), 1, false),
+		0x18a: opSET(opStore(RegisterD), opLoad(RegisterD), 1, false),
+		0x18b: opSET(opStore(RegisterE), opLoad(RegisterE), 1, false),
+		0x18c: opSET(opStore(RegisterH), opLoad(RegisterH), 1, false),
+		0x18d: opSET(opStore(RegisterL), opLoad(RegisterL), 1, false),
+		0x18e: opSET(opWrite(opLoad16(RegisterHL)), opRead(opLoad16(RegisterHL)), 1, false),
+		0x18f: opSET(opStore(RegisterA), opLoad(RegisterA), 1, false),
+
+		0x190: opSET(opStore(RegisterB), opLoad(RegisterB), 2, false),
+		0x191: opSET(opStore(RegisterC), opLoad(RegisterC), 2, false),
+		0x192: opSET(opStore(RegisterD), opLoad(RegisterD), 2, false),
+		0x193: opSET(opStore(RegisterE), opLoad(RegisterE), 2, false),
+		0x194: opSET(opStore(RegisterH), opLoad(RegisterH), 2, false),
+		0x195: opSET(opStore(RegisterL), opLoad(RegisterL), 2, false),
+		0x196: opSET(opWrite(opLoad16(RegisterHL)), opRead(opLoad16(RegisterHL)), 2, false),
+		0x197: opSET(opStore(RegisterA), opLoad(RegisterA), 2, false),
+
+		0x198: opSET(opStore(RegisterB), opLoad(RegisterB), 3, false),
+		0x199: opSET(opStore(RegisterC), opLoad(RegisterC), 3, false),
+		0x19a: opSET(opStore(RegisterD), opLoad(RegisterD), 3, false),
+		0x19b: opSET(opStore(RegisterE), opLoad(RegisterE), 3, false),
+		0x19c: opSET(opStore(RegisterH), opLoad(RegisterH), 3, false),
+		0x19d: opSET(opStore(RegisterL), opLoad(RegisterL), 3, false),
+		0x19e: opSET(opWrite(opLoad16(RegisterHL)), opRead(opLoad16(RegisterHL)), 3, false),
+		0x19f: opSET(opStore(RegisterA), opLoad(RegisterA), 3, false),
+
+		0x1a0: opSET(opStore(RegisterB), opLoad(RegisterB), 4, false),
+		0x1a1: opSET(opStore(RegisterC), opLoad(RegisterC), 4, false),
+		0x1a2: opSET(opStore(RegisterD), opLoad(RegisterD), 4, false),
+		0x1a3: opSET(opStore(RegisterE), opLoad(RegisterE), 4, false),
+		0x1a4: opSET(opStore(RegisterH), opLoad(RegisterH), 4, false),
+		0x1a5: opSET(opStore(RegisterL), opLoad(RegisterL), 4, false),
+		0x1a6: opSET(opWrite(opLoad16(RegisterHL)), opRead(opLoad16(RegisterHL)), 4, false),
+		0x1a7: opSET(opStore(RegisterA), opLoad(RegisterA), 4, false),
+
+		0x1a8: opSET(opStore(RegisterB), opLoad(RegisterB), 5, false),
+		0x1a9: opSET(opStore(RegisterC), opLoad(RegisterC), 5, false),
+		0x1aa: opSET(opStore(RegisterD), opLoad(RegisterD), 5, false),
+		0x1ab: opSET(opStore(RegisterE), opLoad(RegisterE), 5, false),
+		0x1ac: opSET(opStore(RegisterH), opLoad(RegisterH), 5, false),
+		0x1ad: opSET(opStore(RegisterL), opLoad(RegisterL), 5, false),
+		0x1ae: opSET(opWrite(opLoad16(RegisterHL)), opRead(opLoad16(RegisterHL)), 5, false),
+		0x1af: opSET(opStore(RegisterA), opLoad(RegisterA), 5, false),
+
+		0x1b0: opSET(opStore(RegisterB), opLoad(RegisterB), 6, false),
+		0x1b1: opSET(opStore(RegisterC), opLoad(RegisterC), 6, false),
+		0x1b2: opSET(opStore(RegisterD), opLoad(RegisterD), 6, false),
+		0x1b3: opSET(opStore(RegisterE), opLoad(RegisterE), 6, false),
+		0x1b4: opSET(opStore(RegisterH), opLoad(RegisterH), 6, false),
+		0x1b5: opSET(opStore(RegisterL), opLoad(RegisterL), 6, false),
+		0x1b6: opSET(opWrite(opLoad16(RegisterHL)), opRead(opLoad16(RegisterHL)), 6, false),
+		0x1b7: opSET(opStore(RegisterA), opLoad(RegisterA), 6, false),
+
+		0x1b8: opSET(opStore(RegisterB), opLoad(RegisterB), 7, false),
+		0x1b9: opSET(opStore(RegisterC), opLoad(RegisterC), 7, false),
+		0x1ba: opSET(opStore(RegisterD), opLoad(RegisterD), 7, false),
+		0x1bb: opSET(opStore(RegisterE), opLoad(RegisterE), 7, false),
+		0x1bc: opSET(opStore(RegisterH), opLoad(RegisterH), 7, false),
+		0x1bd: opSET(opStore(RegisterL), opLoad(RegisterL), 7, false),
+		0x1be: opSET(opWrite(opLoad16(RegisterHL)), opRead(opLoad16(RegisterHL)), 7, false),
+		0x1bf: opSET(opStore(RegisterA), opLoad(RegisterA), 7, false),
+
+		0x1c0: opSET(opStore(RegisterB), opLoad(RegisterB), 0, true),
+		0x1c1: opSET(opStore(RegisterC), opLoad(RegisterC), 0, true),
+		0x1c2: opSET(opStore(RegisterD), opLoad(RegisterD), 0, true),
+		0x1c3: opSET(opStore(RegisterE), opLoad(RegisterE), 0, true),
+		0x1c4: opSET(opStore(RegisterH), opLoad(RegisterH), 0, true),
+		0x1c5: opSET(opStore(RegisterL), opLoad(RegisterL), 0, true),
+		0x1c6: opSET(opWrite(opLoad16(RegisterHL)), opRead(opLoad16(RegisterHL)), 0, true),
+		0x1c7: opSET(opStore(RegisterA), opLoad(RegisterA), 0, true),
+
+		0x1c8: opSET(opStore(RegisterB), opLoad(RegisterB), 1, true),
+		0x1c9: opSET(opStore(RegisterC), opLoad(RegisterC), 1, true),
+		0x1ca: opSET(opStore(RegisterD), opLoad(RegisterD), 1, true),
+		0x1cb: opSET(opStore(RegisterE), opLoad(RegisterE), 1, true),
+		0x1cc: opSET(opStore(RegisterH), opLoad(RegisterH), 1, true),
+		0x1cd: opSET(opStore(RegisterL), opLoad(RegisterL), 1, true),
+		0x1ce: opSET(opWrite(opLoad16(RegisterHL)), opRead(opLoad16(RegisterHL)), 1, true),
+		0x1cf: opSET(opStore(RegisterA), opLoad(RegisterA), 1, true),
+
+		0x1d0: opSET(opStore(RegisterB), opLoad(RegisterB), 2, true),
+		0x1d1: opSET(opStore(RegisterC), opLoad(RegisterC), 2, true),
+		0x1d2: opSET(opStore(RegisterD), opLoad(RegisterD), 2, true),
+		0x1d3: opSET(opStore(RegisterE), opLoad(RegisterE), 2, true),
+		0x1d4: opSET(opStore(RegisterH), opLoad(RegisterH), 2, true),
+		0x1d5: opSET(opStore(RegisterL), opLoad(RegisterL), 2, true),
+		0x1d6: opSET(opWrite(opLoad16(RegisterHL)), opRead(opLoad16(RegisterHL)), 2, true),
+		0x1d7: opSET(opStore(RegisterA), opLoad(RegisterA), 2, true),
+
+		0x1d8: opSET(opStore(RegisterB), opLoad(RegisterB), 3, true),
+		0x1d9: opSET(opStore(RegisterC), opLoad(RegisterC), 3, true),
+		0x1da: opSET(opStore(RegisterD), opLoad(RegisterD), 3, true),
+		0x1db: opSET(opStore(RegisterE), opLoad(RegisterE), 3, true),
+		0x1dc: opSET(opStore(RegisterH), opLoad(RegisterH), 3, true),
+		0x1dd: opSET(opStore(RegisterL), opLoad(RegisterL), 3, true),
+		0x1de: opSET(opWrite(opLoad16(RegisterHL)), opRead(opLoad16(RegisterHL)), 3, true),
+		0x1df: opSET(opStore(RegisterA), opLoad(RegisterA), 3, true),
+
+		0x1e0: opSET(opStore(RegisterB), opLoad(RegisterB), 4, true),
+		0x1e1: opSET(opStore(RegisterC), opLoad(RegisterC), 4, true),
+		0x1e2: opSET(opStore(RegisterD), opLoad(RegisterD), 4, true),
+		0x1e3: opSET(opStore(RegisterE), opLoad(RegisterE), 4, true),
+		0x1e4: opSET(opStore(RegisterH), opLoad(RegisterH), 4, true),
+		0x1e5: opSET(opStore(RegisterL), opLoad(RegisterL), 4, true),
+		0x1e6: opSET(opWrite(opLoad16(RegisterHL)), opRead(opLoad16(RegisterHL)), 4, true),
+		0x1e7: opSET(opStore(RegisterA), opLoad(RegisterA), 4, true),
+
+		0x1e8: opSET(opStore(RegisterB), opLoad(RegisterB), 5, true),
+		0x1e9: opSET(opStore(RegisterC), opLoad(RegisterC), 5, true),
+		0x1ea: opSET(opStore(RegisterD), opLoad(RegisterD), 5, true),
+		0x1eb: opSET(opStore(RegisterE), opLoad(RegisterE), 5, true),
+		0x1ec: opSET(opStore(RegisterH), opLoad(RegisterH), 5, true),
+		0x1ed: opSET(opStore(RegisterL), opLoad(RegisterL), 5, true),
+		0x1ee: opSET(opWrite(opLoad16(RegisterHL)), opRead(opLoad16(RegisterHL)), 5, true),
+		0x1ef: opSET(opStore(RegisterA), opLoad(RegisterA), 5, true),
+
+		0x1f0: opSET(opStore(RegisterB), opLoad(RegisterB), 6, true),
+		0x1f1: opSET(opStore(RegisterC), opLoad(RegisterC), 6, true),
+		0x1f2: opSET(opStore(RegisterD), opLoad(RegisterD), 6, true),
+		0x1f3: opSET(opStore(RegisterE), opLoad(RegisterE), 6, true),
+		0x1f4: opSET(opStore(RegisterH), opLoad(RegisterH), 6, true),
+		0x1f5: opSET(opStore(RegisterL), opLoad(RegisterL), 6, true),
+		0x1f6: opSET(opWrite(opLoad16(RegisterHL)), opRead(opLoad16(RegisterHL)), 6, true),
+		0x1f7: opSET(opStore(RegisterA), opLoad(RegisterA), 6, true),
+
+		0x1f8: opSET(opStore(RegisterB), opLoad(RegisterB), 7, true),
+		0x1f9: opSET(opStore(RegisterC), opLoad(RegisterC), 7, true),
+		0x1fa: opSET(opStore(RegisterD), opLoad(RegisterD), 7, true),
+		0x1fb: opSET(opStore(RegisterE), opLoad(RegisterE), 7, true),
+		0x1fc: opSET(opStore(RegisterH), opLoad(RegisterH), 7, true),
+		0x1fd: opSET(opStore(RegisterL), opLoad(RegisterL), 7, true),
+		0x1fe: opSET(opWrite(opLoad16(RegisterHL)), opRead(opLoad16(RegisterHL)), 7, true),
+		0x1ff: opSET(opStore(RegisterA), opLoad(RegisterA), 7, true),
 	}
 }
 
@@ -686,6 +981,180 @@ func opDI() Instruction {
 func opEI() Instruction {
 	return func(io InstructionIO) {
 		io.SetIME(true)
+	}
+}
+
+// Generate an RLCA instruction.
+func opRLCA() Instruction {
+	return func(io InstructionIO) {
+		a := io.Load(RegisterA)
+		r := a<<1 | a>>7
+
+		io.SetFlag(FlagZ, false)
+		io.SetFlag(FlagN, false)
+		io.SetFlag(FlagH, false)
+		io.SetFlag(FlagC, a>>7 == 0x1)
+
+		io.Store(RegisterA, r)
+	}
+}
+
+// Generate an RLA instruction.
+func opRLA() Instruction {
+	return func(io InstructionIO) {
+		a := io.Load(RegisterA)
+		r := a << 1
+		if io.GetFlag(FlagC) {
+			r |= 0x1
+		}
+
+		io.SetFlag(FlagZ, false)
+		io.SetFlag(FlagN, false)
+		io.SetFlag(FlagH, false)
+		io.SetFlag(FlagC, a>>7 == 0x1)
+
+		io.Store(RegisterA, r)
+	}
+}
+
+// Generate an RRCA instruction.
+func opRRCA() Instruction {
+	return func(io InstructionIO) {
+		a := io.Load(RegisterA)
+		r := a>>1 | (a&0x1)<<7
+
+		io.SetFlag(FlagZ, false)
+		io.SetFlag(FlagN, false)
+		io.SetFlag(FlagH, false)
+		io.SetFlag(FlagC, a&0x1 == 0x1)
+
+		io.Store(RegisterA, r)
+	}
+}
+
+// Generate an RRA instruction.
+func opRRA() Instruction {
+	return func(io InstructionIO) {
+		a := io.Load(RegisterA)
+		r := a >> 1
+		if io.GetFlag(FlagC) {
+			r |= 0x80
+		}
+
+		io.SetFlag(FlagZ, false)
+		io.SetFlag(FlagN, false)
+		io.SetFlag(FlagH, false)
+		io.SetFlag(FlagC, a&0x1 == 0x1)
+
+		io.Store(RegisterA, r)
+	}
+}
+
+// Generate an RL/RLC instruction.
+func opRL(src OpSrc, dst OpDst, c bool) Instruction {
+	return func(io InstructionIO) {
+		a := src(io)
+		r := a << 1
+		if c {
+			r |= a << 1
+		} else if io.GetFlag(FlagC) {
+			r |= 0x1
+		}
+
+		io.SetFlag(FlagZ, r == 0)
+		io.SetFlag(FlagN, false)
+		io.SetFlag(FlagH, false)
+		io.SetFlag(FlagC, a>>7 == 0x1)
+
+		dst(io, a)
+	}
+}
+
+// Generate an RR/RRC instruction.
+func opRR(src OpSrc, dst OpDst, c bool) Instruction {
+	return func(io InstructionIO) {
+		a := src(io)
+		r := a >> 1
+		if c {
+			r |= (a & 0x1) << 7
+		} else if io.GetFlag(FlagC) {
+			r |= 0x80
+		}
+
+		io.SetFlag(FlagZ, r == 0)
+		io.SetFlag(FlagN, false)
+		io.SetFlag(FlagH, false)
+		io.SetFlag(FlagC, a&0x1 == 0x1)
+
+		dst(io, a)
+	}
+}
+
+// Generate an SLA instruction.
+func opSLA(src OpSrc, dst OpDst) Instruction {
+	return func(io InstructionIO) {
+		a := src(io)
+		r := a << 1
+
+		io.SetFlag(FlagZ, r == 0)
+		io.SetFlag(FlagN, false)
+		io.SetFlag(FlagH, false)
+		io.SetFlag(FlagC, a>>7 == 0x1)
+
+		dst(io, a)
+	}
+}
+
+// Generate an SRA/SRL instruction.
+func opSR(src OpSrc, dst OpDst, keepMSB bool) Instruction {
+	return func(io InstructionIO) {
+		a := src(io)
+		r := a >> 1
+		if keepMSB {
+			r = utils.SetBit(r, 7, utils.GetBit(a, 7))
+		}
+
+		io.SetFlag(FlagZ, r == 0)
+		io.SetFlag(FlagN, false)
+		io.SetFlag(FlagH, false)
+		io.SetFlag(FlagC, a&0x1 == 0x1)
+
+		dst(io, a)
+	}
+}
+
+// Generate a SWAP instruction.
+func opSWAP(src OpSrc, dst OpDst) Instruction {
+	return func(io InstructionIO) {
+		a := src(io)
+		r := (a&0x0f)<<4 | (a&0xf0)>>4
+
+		io.SetFlag(FlagZ, r == 0)
+		io.SetFlag(FlagN, false)
+		io.SetFlag(FlagH, false)
+		io.SetFlag(FlagC, false)
+
+		dst(io, a)
+	}
+}
+
+// Generate a BIT instruction.
+func opBIT(src OpSrc, bit int) Instruction {
+	return func(io InstructionIO) {
+		a := src(io)
+
+		io.SetFlag(FlagZ, !utils.GetBit(a, bit))
+		io.SetFlag(FlagN, false)
+		io.SetFlag(FlagH, true)
+	}
+}
+
+// Generate a SET/RST instruction.
+func opSET(dst OpDst, src OpSrc, bit int, set bool) Instruction {
+	return func(io InstructionIO) {
+		a := src(io)
+		r := utils.SetBit(a, bit, set)
+		dst(io, r)
 	}
 }
 
