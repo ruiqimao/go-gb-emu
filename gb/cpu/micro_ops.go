@@ -1,9 +1,5 @@
 package cpu
 
-import (
-	"github.com/ruiqimao/go-gb-emu/utils"
-)
-
 // Fundamental micro-ops that retrieve and store data.
 type OpSrc func(InstructionIO) uint8
 type OpSrc16 func(InstructionIO) uint16
@@ -78,10 +74,7 @@ func opRead(addr OpSrc16) OpSrc {
 // Generate a micro-op that reads 16 bits from memory.
 func opRead16(addr OpSrc16) OpSrc16 {
 	return func(io InstructionIO) uint16 {
-		a := addr(io)
-		hi := io.Read(a)
-		lo := io.Read(a + 1)
-		return utils.CombineBytes(hi, lo)
+		return io.Read16(addr(io))
 	}
 }
 
@@ -95,10 +88,7 @@ func opWrite(addr OpSrc16) OpDst {
 // Generate a micro-op that stores 16 bits into memory.
 func opWrite16(addr OpSrc16) OpDst16 {
 	return func(io InstructionIO, v uint16) {
-		a := addr(io)
-		hi, lo := utils.SplitShort(v)
-		io.Write(a, hi)
-		io.Write(a+1, lo)
+		io.Write16(addr(io), v)
 	}
 }
 
@@ -119,21 +109,14 @@ func opSetPC() OpDst16 {
 // Generate a micro-op that reads an immediate value.
 func opImmediate() OpSrc {
 	return func(io InstructionIO) uint8 {
-		pc := io.PC()
-		v := io.Read(pc)
-		io.SetPC(pc + 1)
-		return v
+		return io.PopPC()
 	}
 }
 
 // Generate a micro-op that reads an immediate 16-bit value.
 func opImmediate16() OpSrc16 {
 	return func(io InstructionIO) uint16 {
-		pc := io.PC()
-		hi := io.Read(pc)
-		lo := io.Read(pc + 1)
-		io.SetPC(pc + 2)
-		return utils.CombineBytes(hi, lo)
+		return io.PopPC16()
 	}
 }
 
@@ -148,6 +131,20 @@ func opSP() OpSrc16 {
 func opSetSP() OpDst16 {
 	return func(io InstructionIO, v uint16) {
 		io.SetSP(v)
+	}
+}
+
+// Generate a micro-op that pops a value off the stack.
+func opPopSP() OpSrc16 {
+	return func(io InstructionIO) uint16 {
+		return io.PopSP()
+	}
+}
+
+// Generate a micro-op that pushes a value onto the stack.
+func opPushSP() OpDst16 {
+	return func(io InstructionIO, v uint16) {
+		io.PushSP(v)
 	}
 }
 

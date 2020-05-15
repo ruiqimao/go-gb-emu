@@ -16,15 +16,21 @@ type InstructionIO struct {
 
 	// Memory access.
 	Read  func(addr uint16) uint8
+	Read16 func(addr uint16) uint16
 	Write func(addr uint16, v uint8)
+	Write16 func(addr uint16, v uint16)
 
 	// Immediate value access.
 	PC    func() uint16
 	SetPC func(v uint16)
+	PopPC func() uint8
+	PopPC16 func() uint16
 
 	// Stack access.
 	SP    func() uint16
 	SetSP func(v uint16)
+	PopSP func() uint16
+	PushSP func(uint16)
 
 	// Interrupt access.
 	SetIME func(v bool)
@@ -640,23 +646,15 @@ func opLD16(dst OpDst16, src OpSrc16) Instruction {
 // Generate a POP instruction.
 func opPOP(dst OpDst16) Instruction {
 	return func(io InstructionIO) {
-		sp := io.SP()
-		hi := io.Read(sp)
-		lo := io.Read(sp + 1)
-		io.SetSP(sp + 2)
-		dst(io, utils.CombineBytes(hi, lo))
+		dst(io, io.PopSP())
 	}
 }
 
 // Generate a PUSH instruction.
 func opPUSH(src OpSrc16) Instruction {
 	return func(io InstructionIO) {
-		sp := io.SP()
-		io.SetSP(sp - 2)
-		hi, lo := utils.SplitShort(src(io))
 		io.Nop()
-		io.Write(sp-2, hi)
-		io.Write(sp-1, lo)
+		io.PushSP(src(io))
 	}
 }
 
@@ -850,7 +848,7 @@ func opCALL(flag OpFlagSrc) Instruction {
 		a := opImmediate16()(io)
 		if flag(io) {
 			io.Nop()
-			opPUSH(opPC())(io)
+			io.PushSP(io.PC())
 			io.SetPC(a)
 		}
 	}
@@ -859,12 +857,12 @@ func opCALL(flag OpFlagSrc) Instruction {
 // Generate a RST instruction.
 func opRST(addr uint16) Instruction {
 	return func(io InstructionIO) {
-		opPUSH(opPC())(io)
 		io.Nop()
 		io.Nop()
 		io.Nop()
 		io.Nop()
 		io.Nop()
+		io.PushSP(io.PC())
 		io.SetPC(addr)
 	}
 }
@@ -875,7 +873,7 @@ func opRET(flag OpFlagSrc) Instruction {
 		io.Nop()
 		if flag(io) {
 			io.Nop()
-			opPOP(opSetPC())(io)
+			io.SetPC(io.PopSP())
 		}
 	}
 }
@@ -884,7 +882,7 @@ func opRET(flag OpFlagSrc) Instruction {
 func opRETI() Instruction {
 	return func(io InstructionIO) {
 		io.Nop()
-		opPOP(opSetPC())(io)
+		io.SetPC(io.PopSP())
 		io.SetIME(true)
 	}
 }

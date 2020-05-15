@@ -12,9 +12,10 @@ type CPU struct {
 	halt    bool
 	haltBug bool
 
-	// Interrupt enable flags.
+	// Interrupt flags.
 	ime bool
-	ie  bool
+	iE  uint8
+	iF  uint8
 
 	// Timer counter and overflow flag.
 	ic uint16
@@ -38,14 +39,20 @@ func NewCPU() *CPU {
 		GetFlag: c.getFlag,
 		SetFlag: c.setFlag,
 
-		Read:  c.readMemory,
-		Write: c.writeMemory,
+		Read:    c.readMemory,
+		Read16:  c.readMemory16,
+		Write:   c.writeMemory,
+		Write16: c.writeMemory16,
 
-		PC:    c.getPC,
-		SetPC: c.setPC,
+		PC:      c.getPC,
+		SetPC:   c.setPC,
+		PopPC:   c.popPC,
+		PopPC16: c.popPC16,
 
-		SP:    c.getSP,
-		SetSP: c.setSP,
+		SP:     c.getSP,
+		SetSP:  c.setSP,
+		PopSP:  c.popSP,
+		PushSP: c.pushSP,
 
 		SetIME: c.setIME,
 		Halt:   c.triggerHalt,
