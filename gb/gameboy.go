@@ -42,11 +42,14 @@ func NewGameBoy() (*GameBoy, error) {
 	}
 
 	// Create the components.
-	gb.mem = NewMemory(gb)
-	gb.cpu = cpu.NewCPU(gb.mem)
+	gb.cpu = cpu.NewCPU()
 	gb.ppu = NewPPU(gb)
+	gb.mem = NewMemory(gb)
 	gb.jp = NewJoypad(gb)
 	gb.clk = NewClock(BaseClock)
+
+	// Attach components together.
+	gb.cpu.AttachMMU(gb.mem)
 
 	go gb.Run()
 

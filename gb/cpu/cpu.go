@@ -5,8 +5,7 @@ import (
 )
 
 type CPU struct {
-	// Memory bus.
-	mmu MemoryIO
+	mmu MMU
 
 	// Registers.
 	rg [0x8]uint8
@@ -40,10 +39,8 @@ type CPU struct {
 }
 
 // Create a new CPU.
-func NewCPU(mmu MemoryIO) *CPU {
-	c := &CPU{
-		mmu: mmu,
-	}
+func NewCPU() *CPU {
+	c := &CPU{}
 
 	// Create the InstructionIO.
 	c.iio = InstructionIO{
@@ -108,4 +105,9 @@ func (c *CPU) Step() (int, error) {
 	c.handleInterrupts(ime)
 
 	return c.clocks, nil
+}
+
+// Attach an MMU.
+func (c *CPU) AttachMMU(mmu MMU) {
+	c.mmu = mmu
 }

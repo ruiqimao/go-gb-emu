@@ -4,8 +4,8 @@ import (
 	"github.com/ruiqimao/go-gb-emu/utils"
 )
 
-// Memory interface for the CPU.
-type MemoryIO interface {
+// MMU interface.
+type MMU interface {
 	Read(uint16) uint8
 	Write(uint16, uint8)
 }
@@ -13,13 +13,18 @@ type MemoryIO interface {
 // Read a byte from memory.
 func (c *CPU) readMemory(addr uint16) uint8 {
 	c.incrementMCycle()
-	return c.mmu.Read(addr)
+	if c.mmu != nil {
+		return c.mmu.Read(addr)
+	}
+	return 0x00
 }
 
 // Write a byte to memory.
 func (c *CPU) writeMemory(addr uint16, v uint8) {
 	c.incrementMCycle()
-	c.mmu.Write(addr, v)
+	if c.mmu != nil {
+		c.mmu.Write(addr, v)
+	}
 }
 
 // Read a short from memory.
