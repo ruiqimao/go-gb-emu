@@ -68,7 +68,6 @@ func NewEmulator(bootPath string, cartPath string) (*Emulator, error) {
 		return nil, err
 	}
 	e.gb.LoadCartridge(cart)
-	e.gb.LoadDebugRom(cartData)
 
 	// Run the main loop.
 	go e.mainLoop()

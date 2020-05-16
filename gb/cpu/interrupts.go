@@ -7,11 +7,8 @@ import (
 type Interrupt int
 
 const (
-	InterruptVBlank = 0
-	InterruptStat   = 1
 	InterruptTimer  = 2
-	InterruptSerial = 3
-	InterruptJoypad = 4
+	InterruptSerial = 3 // TODO: Move this out.
 )
 
 // Handle interrupts.

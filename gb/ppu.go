@@ -46,6 +46,12 @@ const (
 	FrameHeight = 144
 )
 
+// Interrupts.
+const (
+	InterruptVBlank = 0
+	InterruptStat   = 1
+)
+
 // Pixel processing unit.
 type PPU struct {
 	gb *GameBoy
@@ -128,7 +134,7 @@ func (p *PPU) Update(cycles int) {
 		case p.ly == FrameHeight && p.sc == 0:
 			p.setMode(ModeVBlank)
 			p.pushFrame()
-			p.gb.cpu.RequestInterrupt(IntVBlank)
+			p.gb.cpu.RequestInterrupt(InterruptVBlank)
 		}
 
 		// Update the STAT signal.
@@ -184,7 +190,7 @@ func (p *PPU) updateSTAT() {
 
 	// If there is a rising edge, trigger the STAT interrupt.
 	if p.statSignal == 0x0 && statSignal == 0x1 {
-		p.gb.cpu.RequestInterrupt(IntStat)
+		p.gb.cpu.RequestInterrupt(InterruptStat)
 	}
 
 	p.statSignal = statSignal

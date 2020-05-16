@@ -19,6 +19,11 @@ const (
 	JoypadDown   = 7
 )
 
+// Joypad interrupt.
+const (
+	InterruptJoypad = 4
+)
+
 // Input is an input event for the joypad.
 type Input struct {
 	button int
@@ -91,6 +96,6 @@ func (j *Joypad) update() {
 	newBits := j.joyp & 0x0f
 	if newBits^(oldBits|newBits) != 0x0 {
 		// Trigger a joypad interrupt.
-		j.gb.cpu.RequestInterrupt(IntJoypad)
+		j.gb.cpu.RequestInterrupt(InterruptJoypad)
 	}
 }
