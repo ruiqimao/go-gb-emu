@@ -4,8 +4,6 @@ import (
 	"github.com/ruiqimao/go-gb-emu/utils"
 )
 
-type Interrupt int
-
 const (
 	InterruptTimer  = 2
 	InterruptSerial = 3 // TODO: Move this out.
@@ -76,8 +74,8 @@ func (c *CPU) setIME(v bool) {
 }
 
 // Request an interrupt.
-func (c *CPU) RequestInterrupt(interrupt Interrupt) {
-	c.iF = utils.SetBit(c.iF, int(interrupt), true)
+func (c *CPU) RequestInterrupt(interrupt int) {
+	c.iF = utils.SetBit(c.iF, interrupt, true)
 }
 
 // Get the interrupt enable register.

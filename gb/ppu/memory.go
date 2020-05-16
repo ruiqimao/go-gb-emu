@@ -4,6 +4,8 @@ package ppu
 type MMU interface {
 	Read(uint16) uint8
 	Write(uint16, uint8)
+
+	RequestInterrupt(int)
 }
 
 // Reads from the VRAM. The address is in the range [0x0000, 0x4000).

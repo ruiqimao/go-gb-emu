@@ -1,11 +1,21 @@
 package ppu
 
+// Start pixel transfer.
+func (p *PPU) startPixelTransfer() {
+	// TODO.
+}
+
+// Run a step of pixel transfer.
+func (p *PPU) stepPixelTransfer() {
+	// TODO.
+}
+
 func (p *PPU) SCY() uint8 {
 	return p.scy
 }
 
 func (p *PPU) SetSCY(v uint8) {
-	// TODO.
+	p.scy = v
 }
 
 func (p *PPU) SCX() uint8 {
@@ -13,7 +23,7 @@ func (p *PPU) SCX() uint8 {
 }
 
 func (p *PPU) SetSCX(v uint8) {
-	// TODO.
+	p.scx = v
 }
 
 func (p *PPU) WY() uint8 {
@@ -21,7 +31,7 @@ func (p *PPU) WY() uint8 {
 }
 
 func (p *PPU) SetWY(v uint8) {
-	// TODO.
+	p.wy = v
 }
 
 func (p *PPU) WX() uint8 {
@@ -29,5 +39,5 @@ func (p *PPU) WX() uint8 {
 }
 
 func (p *PPU) SetWX(v uint8) {
-	// TODO.
+	p.wx = v
 }

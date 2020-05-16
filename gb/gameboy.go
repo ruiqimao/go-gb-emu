@@ -6,6 +6,7 @@ import (
 
 	"github.com/ruiqimao/go-gb-emu/cart"
 	"github.com/ruiqimao/go-gb-emu/gb/cpu"
+	"github.com/ruiqimao/go-gb-emu/gb/ppu"
 )
 
 const (
@@ -19,6 +20,8 @@ type GameBoy struct {
 	mem  *Memory
 	jp   *Joypad
 	cart *cart.Cartridge
+
+	newPPU *ppu.PPU
 
 	clk *Clock
 

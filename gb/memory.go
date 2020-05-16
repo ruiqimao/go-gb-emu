@@ -182,3 +182,8 @@ func (m *Memory) Write16(addr uint16, v uint16) {
 	m.Write(addr, lo)
 	m.Write(addr+1, hi)
 }
+
+// Request an interrupt with the CPU.
+func (m *Memory) RequestInterrupt(interrupt int) {
+	m.gb.cpu.RequestInterrupt(interrupt)
+}
