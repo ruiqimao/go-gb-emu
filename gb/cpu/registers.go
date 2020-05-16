@@ -81,14 +81,18 @@ func (c *CPU) setPC(v uint16) {
 // Pop a value off the program counter.
 func (c *CPU) popPC() uint8 {
 	v := c.readMemory(c.pc)
-	c.pc++
+	if !c.haltBug {
+		// If the halt bug is active, the program counter does not increment.
+		c.pc++
+	}
+	c.haltBug = false
 	return v
 }
 
 // Pop a 16-bit value off the program counter.
 func (c *CPU) popPC16() uint16 {
-	hi := c.popPC()
 	lo := c.popPC()
+	hi := c.popPC()
 	return utils.CombineBytes(hi, lo)
 }
 

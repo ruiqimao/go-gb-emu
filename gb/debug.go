@@ -3,6 +3,8 @@ package gb
 import (
 	"fmt"
 	"strings"
+
+	"github.com/ruiqimao/go-gb-emu/gb/cpu"
 )
 
 // Load a debug ROM.
@@ -13,10 +15,10 @@ func (gb *GameBoy) LoadDebugRom(r []uint8) {
 	// Initialize manually due to no Boot ROM.
 	gb.cpu.SetSP(0xfffe)
 	gb.cpu.SetPC(0x0100)
-	gb.cpu.SetBC(0x0013)
-	gb.cpu.SetDE(0x00d8)
-	gb.cpu.SetHL(0x014d)
-	gb.cpu.SetAF(0x01b0)
+	gb.cpu.SetRegister16(cpu.RegisterBC, 0x0013)
+	gb.cpu.SetRegister16(cpu.RegisterDE, 0x00d8)
+	gb.cpu.SetRegister16(cpu.RegisterHL, 0x014d)
+	gb.cpu.SetRegister16(cpu.RegisterAF, 0x01b0)
 }
 
 // Whether debug is enabled.
@@ -43,7 +45,7 @@ func (gb *GameBoy) Step() int {
 func (gb *GameBoy) InstructionName() string {
 	opCode := uint16(gb.mem.Read(gb.cpu.PC()))
 	if opCode == 0xcb {
-		opCode = uint16(gb.mem.Read(gb.cpu.PC())+1) + 0x100
+		opCode = uint16(gb.mem.Read(gb.cpu.PC()+1)) + 0x100
 	}
 	name := InstructionNames[opCode]
 

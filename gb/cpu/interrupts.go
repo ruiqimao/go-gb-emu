@@ -5,6 +5,7 @@ import (
 )
 
 type Interrupt int
+
 const (
 	InterruptVBlank = 0
 	InterruptStat   = 1

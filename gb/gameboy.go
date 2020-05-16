@@ -14,14 +14,11 @@ const (
 )
 
 type GameBoy struct {
-	cpu  *CPU
+	cpu  *cpu.CPU
 	ppu  *PPU
 	mem  *Memory
 	jp   *Joypad
 	cart *cart.Cartridge
-
-	// TODO: Replace CPU with new CPU.
-	newCpu *cpu.CPU
 
 	clk *Clock
 
@@ -45,16 +42,11 @@ func NewGameBoy() (*GameBoy, error) {
 	}
 
 	// Create the components.
-	gb.cpu = NewCPU(gb)
-	gb.ppu = NewPPU(gb)
 	gb.mem = NewMemory(gb)
+	gb.cpu = cpu.NewCPU(gb.mem)
+	gb.ppu = NewPPU(gb)
 	gb.jp = NewJoypad(gb)
 	gb.clk = NewClock(BaseClock)
-
-	gb.newCpu = cpu.NewCPU()
-
-	// Initialize the instruction set.
-	gb.cpu.CreateInstructionSet()
 
 	go gb.Run()
 
@@ -112,7 +104,7 @@ func (gb *GameBoy) LoadCartridge(cartridge *cart.Cartridge) {
 }
 
 // Get the CPU.
-func (gb *GameBoy) CPU() *CPU {
+func (gb *GameBoy) CPU() *cpu.CPU {
 	return gb.cpu
 }
 

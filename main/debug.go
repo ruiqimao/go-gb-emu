@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/ruiqimao/go-gb-emu/gb"
+	"github.com/ruiqimao/go-gb-emu/gb/cpu"
 	"github.com/ruiqimao/go-gfx/gfx"
 )
 
@@ -30,7 +31,7 @@ func (e *Emulator) debugLoop() {
 }
 
 func (e *Emulator) debugExec(input []string) {
-	cpu := e.gb.CPU()
+	gbCPU := e.gb.CPU()
 	ppu := e.gb.PPU()
 	mem := e.gb.Memory()
 
@@ -43,21 +44,28 @@ func (e *Emulator) debugExec(input []string) {
 		// Print registers.
 		fmt.Printf("B  C   D  E   H  L   A  F\n")
 		fmt.Printf("%02x %02x  %02x %02x  %02x %02x  %02x %02x\n",
-			cpu.B(), cpu.C(), cpu.D(), cpu.E(), cpu.H(), cpu.L(), cpu.A(), cpu.F())
+			gbCPU.GetRegister(cpu.RegisterB),
+			gbCPU.GetRegister(cpu.RegisterC),
+			gbCPU.GetRegister(cpu.RegisterD),
+			gbCPU.GetRegister(cpu.RegisterE),
+			gbCPU.GetRegister(cpu.RegisterH),
+			gbCPU.GetRegister(cpu.RegisterL),
+			gbCPU.GetRegister(cpu.RegisterA),
+			gbCPU.GetRegister(cpu.RegisterF))
 		fmt.Printf("\n")
 
 		// Print flags.
 		fmt.Printf("Z N H C\n")
 		fmt.Printf("%d %d %d %d\n",
-			boolToUint8(cpu.FlagZ()),
-			boolToUint8(cpu.FlagN()),
-			boolToUint8(cpu.FlagH()),
-			boolToUint8(cpu.FlagC()))
+			boolToUint8(gbCPU.GetFlag(cpu.FlagZ)),
+			boolToUint8(gbCPU.GetFlag(cpu.FlagN)),
+			boolToUint8(gbCPU.GetFlag(cpu.FlagH)),
+			boolToUint8(gbCPU.GetFlag(cpu.FlagC)))
 		fmt.Printf("\n")
 
 		// Print stack pointer and program counter.
-		fmt.Printf("SP: %04x (%04x)\n", cpu.SP(), mem.Read16(cpu.SP()))
-		fmt.Printf("PC: %04x (%s)\n", cpu.PC(), e.gb.InstructionName())
+		fmt.Printf("SP: %04x (%04x)\n", gbCPU.SP(), mem.Read16(gbCPU.SP()))
+		fmt.Printf("PC: %04x (%s)\n", gbCPU.PC(), e.gb.InstructionName())
 
 	// Read memory.
 	case "print", "p":
@@ -171,7 +179,7 @@ func (e *Emulator) debugExec(input []string) {
 
 		cycles := e.gb.Step()
 		for {
-			if cpu.PC() == addr {
+			if gbCPU.PC() == addr {
 				break
 			}
 

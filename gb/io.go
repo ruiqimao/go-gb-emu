@@ -82,6 +82,15 @@ func (m *Memory) ReadIO(addr uint16) uint8 {
 	case AddrDIV:
 		return gb.cpu.DIV()
 
+	case AddrTIMA:
+		return gb.cpu.TIMA()
+
+	case AddrTMA:
+		return gb.cpu.TMA()
+
+	case AddrTAC:
+		return gb.cpu.TAC()
+
 	case AddrIF:
 		return gb.cpu.IF()
 
@@ -123,8 +132,17 @@ func (m *Memory) WriteIO(addr uint16, v uint8) {
 	case AddrDIV:
 		gb.cpu.SetDIV(v)
 
+	case AddrTIMA:
+		gb.cpu.SetTIMA(v)
+
+	case AddrTMA:
+		gb.cpu.SetTMA(v)
+
 	case AddrTAC:
 		gb.cpu.SetTAC(v)
+
+	case AddrIF:
+		gb.cpu.SetIF(v)
 
 	case AddrLCDC:
 		gb.ppu.SetLCDC(v)

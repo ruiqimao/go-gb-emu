@@ -53,8 +53,7 @@ type Memory struct {
 	hram [0xff]uint8
 
 	// Scratch space for I/O registers.
-	// IE flag is stored in last byte of scratch space.
-	IO [0x81]uint8
+	IO [0x80]uint8
 }
 
 func NewMemory(gb *GameBoy) *Memory {
@@ -118,7 +117,7 @@ func (m *Memory) Read(addr uint16) uint8 {
 
 	// Interrupt enable register.
 	case addr == AddrIE:
-		return m.IO[0x80]
+		return m.gb.cpu.IE()
 
 	}
 
@@ -167,7 +166,7 @@ func (m *Memory) Write(addr uint16, v uint8) {
 
 	// Interrupt enable register.
 	case addr == AddrIE:
-		m.IO[0x80] = v
+		m.gb.cpu.SetIE(v)
 
 	}
 }

@@ -15,21 +15,21 @@ type InstructionIO struct {
 	SetFlag func(flag Flag, v bool)
 
 	// Memory access.
-	Read  func(addr uint16) uint8
-	Read16 func(addr uint16) uint16
-	Write func(addr uint16, v uint8)
+	Read    func(addr uint16) uint8
+	Read16  func(addr uint16) uint16
+	Write   func(addr uint16, v uint8)
 	Write16 func(addr uint16, v uint16)
 
 	// Immediate value access.
-	PC    func() uint16
-	SetPC func(v uint16)
-	PopPC func() uint8
+	PC      func() uint16
+	SetPC   func(v uint16)
+	PopPC   func() uint8
 	PopPC16 func() uint16
 
 	// Stack access.
-	SP    func() uint16
-	SetSP func(v uint16)
-	PopSP func() uint16
+	SP     func() uint16
+	SetSP  func(v uint16)
+	PopSP  func() uint16
 	PushSP func(uint16)
 
 	// Interrupt access.
@@ -151,7 +151,7 @@ func (c *CPU) initInstructionSet() {
 		0x31: opLD16(opSetSP(), opImmediate16()),
 
 		0xf9: opPAD(opLD16(opSetSP(), opLoad16(RegisterHL))),
-		0xf8: opPAD(opLD16(opStore16(RegisterHL), opSAdd(opSP(), opLoad(RegisterHL)))),
+		0xf8: opPAD(opLD16(opStore16(RegisterHL), opSAdd(opSP(), opImmediate()))),
 		0x08: opLD16(opWrite16(opImmediate16()), opSP()),
 
 		0xc5: opPUSH(opLoad16(RegisterBC)),
@@ -290,11 +290,11 @@ func (c *CPU) initInstructionSet() {
 
 		0xe9: opJPHL(),
 
-		0x18: opJP(opSAdd(opPC(), opImmediate()), opTrue()),
-		0x20: opJP(opSAdd(opPC(), opImmediate()), opNotFlag(FlagZ)),
-		0x28: opJP(opSAdd(opPC(), opImmediate()), opFlag(FlagZ)),
-		0x30: opJP(opSAdd(opPC(), opImmediate()), opNotFlag(FlagC)),
-		0x38: opJP(opSAdd(opPC(), opImmediate()), opFlag(FlagC)),
+		0x18: opJR(opTrue()),
+		0x20: opJR(opNotFlag(FlagZ)),
+		0x28: opJR(opFlag(FlagZ)),
+		0x30: opJR(opNotFlag(FlagC)),
+		0x38: opJR(opFlag(FlagC)),
 
 		0xcd: opCALL(opTrue()),
 		0xc4: opCALL(opNotFlag(FlagZ)),
@@ -312,10 +312,10 @@ func (c *CPU) initInstructionSet() {
 		0xff: opRST(0x0038),
 
 		0xc9: opRET(opTrue()),
-		0xc0: opRET(opNotFlag(FlagZ)),
-		0xc8: opRET(opFlag(FlagZ)),
-		0xd0: opRET(opNotFlag(FlagC)),
-		0xd8: opRET(opFlag(FlagC)),
+		0xc0: opPAD(opRET(opNotFlag(FlagZ))),
+		0xc8: opPAD(opRET(opFlag(FlagZ))),
+		0xd0: opPAD(opRET(opNotFlag(FlagC))),
+		0xd8: opPAD(opRET(opFlag(FlagC))),
 
 		0xd9: opRETI(),
 
@@ -827,8 +827,9 @@ func opDEC16(dst OpDst16, src OpSrc16) Instruction {
 // Generate a JP instruction.
 func opJP(src OpSrc16, flag OpFlagSrc) Instruction {
 	return func(io InstructionIO) {
+		f := flag(io)
 		a := src(io)
-		if flag(io) {
+		if f {
 			io.Nop()
 			io.SetPC(a)
 		}
@@ -839,6 +840,19 @@ func opJP(src OpSrc16, flag OpFlagSrc) Instruction {
 func opJPHL() Instruction {
 	return func(io InstructionIO) {
 		io.SetPC(io.Load16(RegisterHL))
+	}
+}
+
+// Generate a JR instruction.
+func opJR(flag OpFlagSrc) Instruction {
+	return func(io InstructionIO) {
+		f := flag(io)
+		r := uint16(int8(io.PopPC()))
+		target := io.PC() + r
+		if f {
+			io.Nop()
+			io.SetPC(target)
+		}
 	}
 }
 
@@ -858,10 +872,6 @@ func opCALL(flag OpFlagSrc) Instruction {
 func opRST(addr uint16) Instruction {
 	return func(io InstructionIO) {
 		io.Nop()
-		io.Nop()
-		io.Nop()
-		io.Nop()
-		io.Nop()
 		io.PushSP(io.PC())
 		io.SetPC(addr)
 	}
@@ -870,7 +880,6 @@ func opRST(addr uint16) Instruction {
 // Generate a RET instruction.
 func opRET(flag OpFlagSrc) Instruction {
 	return func(io InstructionIO) {
-		io.Nop()
 		if flag(io) {
 			io.Nop()
 			io.SetPC(io.PopSP())
@@ -930,8 +939,8 @@ func opCPL() Instruction {
 // Generate a CCF instruction.
 func opCCF() Instruction {
 	return func(io InstructionIO) {
-		io.SetFlag(FlagN, true)
-		io.SetFlag(FlagH, true)
+		io.SetFlag(FlagN, false)
+		io.SetFlag(FlagH, false)
 		io.SetFlag(FlagC, !io.GetFlag(FlagC))
 	}
 }
@@ -1054,7 +1063,7 @@ func opRL(src OpSrc, dst OpDst, c bool) Instruction {
 		a := src(io)
 		r := a << 1
 		if c {
-			r |= a << 1
+			r |= a >> 7
 		} else if io.GetFlag(FlagC) {
 			r |= 0x1
 		}
@@ -1064,7 +1073,7 @@ func opRL(src OpSrc, dst OpDst, c bool) Instruction {
 		io.SetFlag(FlagH, false)
 		io.SetFlag(FlagC, a>>7 == 0x1)
 
-		dst(io, a)
+		dst(io, r)
 	}
 }
 
@@ -1084,7 +1093,7 @@ func opRR(src OpSrc, dst OpDst, c bool) Instruction {
 		io.SetFlag(FlagH, false)
 		io.SetFlag(FlagC, a&0x1 == 0x1)
 
-		dst(io, a)
+		dst(io, r)
 	}
 }
 
@@ -1099,7 +1108,7 @@ func opSLA(src OpSrc, dst OpDst) Instruction {
 		io.SetFlag(FlagH, false)
 		io.SetFlag(FlagC, a>>7 == 0x1)
 
-		dst(io, a)
+		dst(io, r)
 	}
 }
 
@@ -1117,7 +1126,7 @@ func opSR(src OpSrc, dst OpDst, keepMSB bool) Instruction {
 		io.SetFlag(FlagH, false)
 		io.SetFlag(FlagC, a&0x1 == 0x1)
 
-		dst(io, a)
+		dst(io, r)
 	}
 }
 
@@ -1132,7 +1141,7 @@ func opSWAP(src OpSrc, dst OpDst) Instruction {
 		io.SetFlag(FlagH, false)
 		io.SetFlag(FlagC, false)
 
-		dst(io, a)
+		dst(io, r)
 	}
 }
 
