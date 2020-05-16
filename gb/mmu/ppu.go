@@ -8,7 +8,6 @@ type PPU interface {
 	SCX() uint8
 	LY() uint8
 	LYC() uint8
-	DMA() uint8
 	BGP() uint8
 	OBP0() uint8
 	OBP1() uint8
@@ -21,12 +20,17 @@ type PPU interface {
 	SetSCX(uint8)
 	SetLY(uint8)
 	SetLYC(uint8)
-	SetDMA(uint8)
 	SetBGP(uint8)
 	SetOBP0(uint8)
 	SetOBP1(uint8)
 	SetWY(uint8)
 	SetWX(uint8)
+
+	ReadVRAM(uint16) uint8
+	ReadOAM(uint16) uint8
+
+	WriteVRAM(uint16, uint8)
+	WriteOAM(uint16, uint8)
 }
 
 type PPUBus struct {
@@ -35,11 +39,11 @@ type PPUBus struct {
 }
 
 // Handle read operations from the PPU.
-func (m *MMU) cpuRead(addr uint16) uint8 {
+func (m *MMU) ppuRead(addr uint16) uint8 {
 	return m.read(addr)
 }
 
 // Handle write operations from the PPU.
-func (m *MMU) cpuWrite(addr uint16, v uint8) {
+func (m *MMU) ppuWrite(addr uint16, v uint8) {
 	m.write(addr, v)
 }
