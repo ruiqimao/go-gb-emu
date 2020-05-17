@@ -8,6 +8,8 @@ import (
 )
 
 const (
+	FrameWidth   = 160
+	FrameHeight  = 144
 	DisplayScale = 2
 )
 
@@ -32,7 +34,7 @@ func NewDisplay() (*Display, error) {
 
 	// Initialize the window.
 	var err error
-	d.window, err = gfx.NewWindow(DisplayScale*gb.FrameWidth, DisplayScale*gb.FrameHeight, "Game Boy", false)
+	d.window, err = gfx.NewWindow(DisplayScale*FrameWidth, DisplayScale*FrameHeight, "Game Boy", false)
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +91,7 @@ func (d *Display) init() error {
 	d.quad = gfx.NewVao(vbo, gl.TRIANGLE_STRIP)
 
 	// Make the texture.
-	d.texture = gfx.NewTexture2D(nil, gb.FrameWidth, gb.FrameHeight, gl.RED, gl.UNSIGNED_BYTE)
+	d.texture = gfx.NewTexture2D(nil, FrameWidth, FrameHeight, gl.RED, gl.UNSIGNED_BYTE)
 	d.texture.Bind()
 	d.texture.SetParam(gl.TEXTURE_MIN_FILTER, gl.NEAREST)
 	d.texture.SetParam(gl.TEXTURE_MAG_FILTER, gl.NEAREST)

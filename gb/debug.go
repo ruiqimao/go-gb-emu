@@ -70,13 +70,3 @@ func (gb *GameBoy) InstructionName() string {
 
 	return name
 }
-
-// Get the raw contents of the VRAM.
-func (p *PPU) VRAM() []uint8 {
-	return p.vram[:]
-}
-
-// Get the raw contents of the OAM.
-func (p *PPU) OAM() []uint8 {
-	return p.oam[:]
-}
