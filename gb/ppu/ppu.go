@@ -42,6 +42,9 @@ type PPU struct {
 	// Scanline counter.
 	sc uint16
 
+	// OAM cache.
+	oamCache []Sprite
+
 	// Pixel transfer state.
 	fetcher *Fetcher
 	lx      uint8
