@@ -83,13 +83,13 @@ func (m *Memory) Read(addr uint16) uint8 {
 
 	// Video RAM.
 	case addr < AddrCartRAM:
-		if m.gb.cart != nil {
-			return m.gb.ppu.ReadVRAM(addr - AddrVRAM)
-		}
+		return m.gb.ppu.ReadVRAM(addr - AddrVRAM)
 
 	// Cartridge RAM.
 	case addr < AddrWRAM0:
-		return m.gb.cart.ReadRAM(addr - AddrCartRAM)
+		if m.gb.cart != nil {
+			return m.gb.cart.ReadRAM(addr - AddrCartRAM)
+		}
 
 	// Work RAM banks 0 and 1.
 	case addr < AddrEcho:

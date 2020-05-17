@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ruiqimao/go-gb-emu/gb"
 	"github.com/ruiqimao/go-gb-emu/gb/cpu"
+	"github.com/ruiqimao/go-gb-emu/gb/ppu"
 	"github.com/ruiqimao/go-gfx/gfx"
 )
 
@@ -32,7 +32,7 @@ func (e *Emulator) debugLoop() {
 
 func (e *Emulator) debugExec(input []string) {
 	gbCPU := e.gb.CPU()
-	ppu := e.gb.PPU()
+	gbPPU := e.gb.PPU()
 	mem := e.gb.Memory()
 
 	var err error
@@ -83,8 +83,8 @@ func (e *Emulator) debugExec(input []string) {
 
 	// Dump the background.
 	case "background", "bg":
-		vram := ppu.VRAM()
-		bgMap := ppu.BgTileMap()
+		vram := gbPPU.VRAM()
+		bgMap := gbPPU.BgMapAddr()
 		fmt.Printf("%04x\n", bgMap)
 		for i := 0; i < 32; i++ {
 			for j := 0; j < 32; j++ {
@@ -96,8 +96,8 @@ func (e *Emulator) debugExec(input []string) {
 
 	// Dump the window.
 	case "window", "wd":
-		vram := ppu.VRAM()
-		wdMap := ppu.WindowTileMap()
+		vram := gbPPU.VRAM()
+		wdMap := gbPPU.WinMapAddr()
 		fmt.Printf("%04x\n", wdMap)
 		for i := 0; i < 32; i++ {
 			for j := 0; j < 32; j++ {
@@ -121,8 +121,8 @@ func (e *Emulator) debugExec(input []string) {
 
 		// Get the pixel data.
 		for i := 0; i < 16; i += 2 {
-			line0 := ppu.Tile(id, uint8(i), sprite)
-			line1 := ppu.Tile(id, uint8(i+1), sprite)
+			line0 := gbPPU.TileData(id, uint8(i), sprite)
+			line1 := gbPPU.TileData(id, uint8(i+1), sprite)
 
 			for j := 7; j >= 0; j-- {
 				lo := (line0 >> j) & 0x1
@@ -130,8 +130,8 @@ func (e *Emulator) debugExec(input []string) {
 				data := lo | hi<<1
 
 				// Convert to a Pixel and resolve the color
-				px := gb.NewPixel(data, gb.PixelSrcBG)
-				color := ppu.Resolve(px)
+				px := ppu.NewPixel(data, true, 0, false)
+				color := gbPPU.Resolve(px)
 
 				// Print the color as a block.
 				char := ""

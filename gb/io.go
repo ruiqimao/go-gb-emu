@@ -103,8 +103,23 @@ func (m *Memory) ReadIO(addr uint16) uint8 {
 	case AddrLY:
 		return gb.ppu.LY()
 
-	case AddrDMA:
-		return gb.ppu.DMA()
+	case AddrLYC:
+		return gb.ppu.LYC()
+
+	case AddrBGP:
+		return gb.ppu.BGP()
+
+	case AddrOBP0:
+		return gb.ppu.OBP0()
+
+	case AddrOBP1:
+		return gb.ppu.OBP1()
+
+	case AddrWY:
+		return gb.ppu.WY()
+
+	case AddrWX:
+		return gb.ppu.WX()
 
 	default:
 		return m.IO[addr-AddrIO]
@@ -150,8 +165,26 @@ func (m *Memory) WriteIO(addr uint16, v uint8) {
 	case AddrSTAT:
 		gb.ppu.SetSTAT(v)
 
-	case AddrDMA:
-		gb.ppu.SetDMA(v)
+	case AddrLY:
+		gb.ppu.SetLY(v)
+
+	case AddrLYC:
+		gb.ppu.SetLYC(v)
+
+	case AddrBGP:
+		gb.ppu.SetBGP(v)
+
+	case AddrOBP0:
+		gb.ppu.SetOBP0(v)
+
+	case AddrOBP1:
+		gb.ppu.SetOBP1(v)
+
+	case AddrWY:
+		gb.ppu.SetWY(v)
+
+	case AddrWX:
+		gb.ppu.SetWX(v)
 
 	default:
 		m.IO[addr-AddrIO] = v

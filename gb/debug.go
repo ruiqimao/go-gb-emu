@@ -38,7 +38,7 @@ func (gb *GameBoy) Pause() {
 
 // Step forward by one instruction. Returns how many cycles were taken.
 func (gb *GameBoy) Step() int {
-	return gb.RunCycles(1) + 1
+	return gb.RunClocks(1) + 1
 }
 
 // Get a readable version of the current instruction.

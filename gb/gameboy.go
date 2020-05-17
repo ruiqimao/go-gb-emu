@@ -16,12 +16,10 @@ const (
 
 type GameBoy struct {
 	cpu  *cpu.CPU
-	ppu  *PPU
+	ppu  *ppu.PPU
 	mem  *Memory
 	jp   *Joypad
 	cart *cart.Cartridge
-
-	newPPU *ppu.PPU
 
 	clk *Clock
 
@@ -46,13 +44,14 @@ func NewGameBoy() (*GameBoy, error) {
 
 	// Create the components.
 	gb.cpu = cpu.NewCPU()
-	gb.ppu = NewPPU(gb)
+	gb.ppu = ppu.NewPPU()
 	gb.mem = NewMemory(gb)
 	gb.jp = NewJoypad(gb)
 	gb.clk = NewClock(BaseClock)
 
 	// Attach components together.
 	gb.cpu.AttachMMU(gb.mem)
+	gb.ppu.AttachMMU(gb.mem)
 
 	go gb.Run()
 
@@ -61,36 +60,43 @@ func NewGameBoy() (*GameBoy, error) {
 
 // Run the Game Boy loop.
 func (gb *GameBoy) Run() {
-	// Number of extra cycles done in the last tick.
-	cycleDebt := 0
+	// Number of extra clocks consumed in the last tick.
+	clockDebt := 0
 
 	for {
 		select {
 
 		case <-gb.clk.C:
-			cycleDebt = gb.RunCycles(CPUClock/BaseClock - cycleDebt)
+			clockDebt = gb.RunClocks(CPUClock/BaseClock - clockDebt)
 
 		case event := <-gb.events:
 			gb.jp.Handle(event)
+
+		case frame := <-gb.ppu.F:
+			select {
+			case gb.F <- frame:
+			default:
+			}
 
 		}
 	}
 }
 
-// Run a number of cycles. Returns how many extra cycles above the given limit were taken.
-func (gb *GameBoy) RunCycles(limit int) int {
+// Run a number of clocks. Returns how many extra clocks above the given limit were taken.
+func (gb *GameBoy) RunClocks(limit int) int {
 	for limit > 0 {
 
 		// Process an instruction.
-		cycles, err := gb.cpu.Step()
+		clocks, err := gb.cpu.Step()
 		if err != nil {
 			log.Fatal(err)
 		}
+		limit -= clocks
 
 		// Catch the PPU up to the CPU.
-		gb.ppu.Update(cycles)
-
-		limit -= cycles
+		for clocks > 0 {
+			clocks -= gb.ppu.Step()
+		}
 	}
 	return -limit
 }
@@ -115,7 +121,7 @@ func (gb *GameBoy) CPU() *cpu.CPU {
 }
 
 // Get the PPU.
-func (gb *GameBoy) PPU() *PPU {
+func (gb *GameBoy) PPU() *ppu.PPU {
 	return gb.ppu
 }
 
