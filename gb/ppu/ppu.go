@@ -42,8 +42,10 @@ type PPU struct {
 	// Scanline counter.
 	sc uint16
 
-	// Current frame.
-	frame [FrameWidth * FrameHeight]uint8
+	// Pixel transfer state.
+	fetcher *Fetcher
+	lx      uint8
+	frame   [FrameWidth * FrameHeight]uint8
 
 	// Latest rendered frame.
 	F chan []uint8
@@ -53,6 +55,7 @@ func NewPPU() *PPU {
 	p := &PPU{
 		F: make(chan []uint8, 1),
 	}
+	p.fetcher = NewFetcher(p)
 	return p
 }
 
@@ -62,7 +65,7 @@ func (p *PPU) Step() int {
 	// If the LCD is off, reset the PPU.
 	if !p.lcdPower {
 		p.reset()
-		return 2
+		return 1
 	}
 
 	// Update the mode.
