@@ -19,9 +19,9 @@ const (
 // STAT flags.
 const (
 	FlagLYCCheck      = 6
-	FlagMode2Check    = 5
-	FlagMode1Check    = 4
-	FlagMode0Check    = 3
+	FlagHBLCheck      = 5
+	FlagVBLCheck      = 4
+	FlagOAMCheck      = 3
 	FlagLYCComparison = 2
 )
 
@@ -36,8 +36,9 @@ const (
 
 // Timing constants.
 const (
-	HClocks = 456
-	VLines  = 154
+	OAMClocks = 80
+	HClocks   = 456
+	VLines    = 154
 )
 
 // Buffer constants.
@@ -58,9 +59,48 @@ func (p *PPU) reset() {
 	p.ly = 0
 }
 
-// Runs a step of the PPU.
-func (p *PPU) step() {
-	// TODO.
+// Push a frame to the MMU.
+func (p *PPU) pushFrame() {
+	// Make a copy of the frame.
+	frame := make([]byte, len(p.frame))
+	copy(frame, p.frame[:])
+
+	// If the LCD is off, send nil instead.
+	if !p.lcdPower {
+		frame = nil
+	}
+
+	// Try to push the frame. If the channel is full, drop the frame.
+	select {
+	case p.F <- frame:
+	default:
+	}
+}
+
+// Update the STAT signal.
+func (p *PPU) updateSTAT() {
+	statSig := uint8(0)
+
+	// Calculate new signal.
+	if p.lycCheck && p.ly == p.lyc {
+		statSig = 0x1
+	}
+	if p.hblCheck && p.mode == ModeHBlank {
+		statSig = 0x1
+	}
+	if (p.vblCheck || p.oamCheck) && p.mode == ModeVBlank { // Possible bug in Game Boy hardware.
+		statSig = 0x1
+	}
+	if p.oamCheck && p.mode == ModeOAM {
+		statSig = 0x1
+	}
+
+	// If there is a rising edge, trigger the STAT interrupt.
+	if p.statSig == 0x0 && statSig == 0x1 {
+		p.mmu.RequestInterrupt(InterruptStat)
+	}
+
+	p.statSig = statSig
 }
 
 // Get the LCDC register.
@@ -93,20 +133,20 @@ func (p *PPU) SetLCDC(v uint8) {
 func (p *PPU) STAT() uint8 {
 	stat := uint8(p.mode) & 0x3
 	stat = utils.SetBit(stat, FlagLYCComparison, p.ly == p.lyc)
-	stat = utils.SetBit(stat, FlagMode0Check, p.check0Enable)
-	stat = utils.SetBit(stat, FlagMode1Check, p.check1Enable)
-	stat = utils.SetBit(stat, FlagMode2Check, p.check2Enable)
-	stat = utils.SetBit(stat, FlagLYCCheck, p.lycEnable)
+	stat = utils.SetBit(stat, FlagHBLCheck, p.hblCheck)
+	stat = utils.SetBit(stat, FlagVBLCheck, p.vblCheck)
+	stat = utils.SetBit(stat, FlagOAMCheck, p.oamCheck)
+	stat = utils.SetBit(stat, FlagLYCCheck, p.lycCheck)
 	stat |= 0x80 // Bit 7 always reads 1.
 	return stat
 }
 
 // Set the STAT register.
 func (p *PPU) SetSTAT(v uint8) {
-	p.check0Enable = utils.GetBit(v, FlagMode0Check)
-	p.check1Enable = utils.GetBit(v, FlagMode1Check)
-	p.check2Enable = utils.GetBit(v, FlagMode2Check)
-	p.lycEnable = utils.GetBit(v, FlagLYCCheck)
+	p.hblCheck = utils.GetBit(v, FlagHBLCheck)
+	p.vblCheck = utils.GetBit(v, FlagVBLCheck)
+	p.oamCheck = utils.GetBit(v, FlagOAMCheck)
+	p.lycCheck = utils.GetBit(v, FlagLYCCheck)
 }
 
 // Get the LY register.

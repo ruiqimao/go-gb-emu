@@ -26,11 +26,14 @@ type PPU struct {
 	bgEnable      bool
 
 	// STAT flags.
-	mode         Mode
-	check0Enable bool
-	check1Enable bool
-	check2Enable bool
-	lycEnable    bool
+	mode     Mode
+	hblCheck bool
+	vblCheck bool
+	oamCheck bool
+	lycCheck bool
+
+	// STAT signal.
+	statSig uint8
 
 	// Memory.
 	vram [0x4000]uint8
@@ -38,15 +41,23 @@ type PPU struct {
 
 	// Scanline counter.
 	sc uint16
+
+	// Current frame.
+	frame [FrameWidth * FrameHeight]uint8
+
+	// Latest rendered frame.
+	F chan []uint8
 }
 
 func NewPPU() *PPU {
-	p := &PPU{}
+	p := &PPU{
+		F: make(chan []uint8, 1),
+	}
 	return p
 }
 
 // Do a PPU step. Returns how many clocks were used.
-// The PPU runs at a resolution of 2 clocks, so always returns 2.
+// The PPU runs at a resolution of 1 clock, so always returns 1.
 func (p *PPU) Step() int {
 	// If the LCD is off, reset the PPU.
 	if !p.lcdPower {
@@ -54,10 +65,38 @@ func (p *PPU) Step() int {
 		return 2
 	}
 
-	// Run a step.
-	p.step()
+	// Update the mode.
+	switch {
+	case p.ly < FrameHeight && p.sc == 0:
+		p.mode = ModeOAM
+		p.startOAMSearch()
+	case p.ly < FrameHeight && p.sc == OAMClocks:
+		p.mode = ModeTransfer
+		p.startPixelTransfer()
+	case p.ly == FrameHeight && p.sc == 0:
+		p.mode = ModeVBlank
+		p.pushFrame()
+		p.mmu.RequestInterrupt(InterruptVBlank)
+	}
 
-	return 2
+	// Update the STAT signal.
+	p.updateSTAT()
+
+	// Perform a step of OAM search or pixel transfer.
+	if p.mode == ModeOAM {
+		p.stepOAMSearch()
+	}
+	if p.mode == ModeTransfer {
+		p.stepPixelTransfer()
+	}
+
+	// Increment the scanline counter and scanline.
+	p.sc = (p.sc + 1) % HClocks
+	if p.sc == 0 {
+		p.ly = (p.ly + 1) % VLines
+	}
+
+	return 1
 }
 
 // Attach an MMU.
