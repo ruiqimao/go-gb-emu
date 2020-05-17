@@ -100,6 +100,12 @@ func (m *Memory) ReadIO(addr uint16) uint8 {
 	case AddrSTAT:
 		return gb.ppu.STAT()
 
+	case AddrSCY:
+		return gb.ppu.SCY()
+
+	case AddrSCX:
+		return gb.ppu.SCX()
+
 	case AddrLY:
 		return gb.ppu.LY()
 
@@ -164,6 +170,12 @@ func (m *Memory) WriteIO(addr uint16, v uint8) {
 
 	case AddrSTAT:
 		gb.ppu.SetSTAT(v)
+
+	case AddrSCY:
+		gb.ppu.SetSCY(v)
+
+	case AddrSCX:
+		gb.ppu.SetSCX(v)
 
 	case AddrLY:
 		gb.ppu.SetLY(v)
