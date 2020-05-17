@@ -10,6 +10,12 @@ func (p *PPU) stepPixelTransfer() {
 	// TODO.
 }
 
+// Resolve the color of a pixel.
+func (p *PPU) resolve(px Pixel) uint8 {
+	// TODO.
+	return 0x00
+}
+
 func (p *PPU) SCY() uint8 {
 	return p.scy
 }
