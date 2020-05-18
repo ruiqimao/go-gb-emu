@@ -162,3 +162,13 @@ func (p *PPU) LYC() uint8 {
 func (p *PPU) SetLYC(v uint8) {
 	p.lyc = v
 }
+
+// Get whether the VRAM is accessible.
+func (p *PPU) VRAMAccessible() bool {
+	return p.mode != ModeTransfer
+}
+
+// Get whether the OAM is accessible.
+func (p *PPU) OAMAccessible() bool {
+	return p.mode != ModeOAM && p.mode != ModeTransfer
+}

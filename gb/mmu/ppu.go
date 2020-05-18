@@ -31,6 +31,9 @@ type PPU interface {
 
 	WriteVRAM(uint16, uint8)
 	WriteOAM(uint16, uint8)
+
+	VRAMAccessible() bool
+	OAMAccessible() bool
 }
 
 type PPUBus struct {
