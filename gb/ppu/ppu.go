@@ -62,13 +62,11 @@ func NewPPU() *PPU {
 	return p
 }
 
-// Do a PPU step. Returns how many clocks were used.
-// The PPU runs at a resolution of 1 clock, so always returns 1.
-func (p *PPU) Step() int {
+// Do a PPU step. Consumes 1 clock.
+func (p *PPU) Step() {
 	// If the LCD is off, reset the PPU.
 	if !p.lcdPower {
 		p.reset()
-		return 1
 	}
 
 	// Update the mode.
@@ -101,8 +99,6 @@ func (p *PPU) Step() int {
 	if p.sc == 0 {
 		p.ly = (p.ly + 1) % VLines
 	}
-
-	return 1
 }
 
 // Attach an MMU.
