@@ -99,39 +99,39 @@ func (m *MMU) write(addr uint16, v uint8) {
 // Handle a read to an IO register.
 func (m *MMU) readIO(addr uint16) uint8 {
 	switch {
-	case AddrJOYP && m.joypad != nil:
+	case addr == AddrJOYP && m.joypad != nil:
 		return m.joypad.JOYP()
-	case AddrDIV && m.cpu != nil:
+	case addr == AddrDIV && m.cpu != nil:
 		return m.cpu.DIV()
-	case AddrTIMA && m.cpu != nil:
+	case addr == AddrTIMA && m.cpu != nil:
 		return m.cpu.TIMA()
-	case AddrTMA && m.cpu != nil:
+	case addr == AddrTMA && m.cpu != nil:
 		return m.cpu.TMA()
-	case AddrTAC && m.cpu != nil:
+	case addr == AddrTAC && m.cpu != nil:
 		return m.cpu.TAC()
-	case AddrIF && m.cpu != nil:
+	case addr == AddrIF && m.cpu != nil:
 		return m.cpu.IF()
-	case AddrLCDC && m.ppu != nil:
+	case addr == AddrLCDC && m.ppu != nil:
 		return m.ppu.LCDC()
-	case AddrSTAT && m.ppu != nil:
+	case addr == AddrSTAT && m.ppu != nil:
 		return m.ppu.STAT()
-	case AddrSCY && m.ppu != nil:
+	case addr == AddrSCY && m.ppu != nil:
 		return m.ppu.SCY()
-	case AddrSCX && m.ppu != nil:
+	case addr == AddrSCX && m.ppu != nil:
 		return m.ppu.SCX()
-	case AddrLY && m.ppu != nil:
+	case addr == AddrLY && m.ppu != nil:
 		return m.ppu.LY()
-	case AddrLYC && m.ppu != nil:
+	case addr == AddrLYC && m.ppu != nil:
 		return m.ppu.LYC()
-	case AddrBGP && m.ppu != nil:
+	case addr == AddrBGP && m.ppu != nil:
 		return m.ppu.BGP()
-	case AddrOBP0 && m.ppu != nil:
+	case addr == AddrOBP0 && m.ppu != nil:
 		return m.ppu.OBP0()
-	case AddrOBP1 && m.ppu != nil:
+	case addr == AddrOBP1 && m.ppu != nil:
 		return m.ppu.OBP1()
-	case AddrWY && m.ppu != nil:
+	case addr == AddrWY && m.ppu != nil:
 		return m.ppu.WY()
-	case AddrWX && m.ppu != nil:
+	case addr == AddrWX && m.ppu != nil:
 		return m.ppu.WX()
 	}
 
@@ -141,39 +141,39 @@ func (m *MMU) readIO(addr uint16) uint8 {
 // Handle a write to an IO register.
 func (m *MMU) writeIO(addr uint16) uint8 {
 	switch {
-	case AddrJOYP && m.joypad != nil:
+	case addr == AddrJOYP && m.joypad != nil:
 		m.joypad.SetJOYP(v)
-	case AddrDIV && m.cpu != nil:
+	case addr == AddrDIV && m.cpu != nil:
 		m.cpu.SetDIV(v)
-	case AddrTIMA && m.cpu != nil:
+	case addr == AddrTIMA && m.cpu != nil:
 		m.cpu.SetTIMA(v)
-	case AddrTMA && m.cpu != nil:
+	case addr == AddrTMA && m.cpu != nil:
 		m.cpu.SetTMA(v)
-	case AddrTAC && m.cpu != nil:
+	case addr == AddrTAC && m.cpu != nil:
 		m.cpu.SetTAC(v)
-	case AddrIF && m.cpu != nil:
+	case addr == AddrIF && m.cpu != nil:
 		m.cpu.SetIF(v)
-	case AddrLCDC && m.ppu != nil:
+	case addr == AddrLCDC && m.ppu != nil:
 		m.ppu.SetLCDC(v)
-	case AddrSTAT && m.ppu != nil:
+	case addr == AddrSTAT && m.ppu != nil:
 		m.ppu.SetSTAT(v)
-	case AddrSCY && m.ppu != nil:
+	case addr == AddrSCY && m.ppu != nil:
 		m.ppu.SetSCY(v)
-	case AddrSCX && m.ppu != nil:
+	case addr == AddrSCX && m.ppu != nil:
 		m.ppu.SetSCX(v)
-	case AddrLY && m.ppu != nil:
+	case addr == AddrLY && m.ppu != nil:
 		m.ppu.SetLY(v)
-	case AddrLYC && m.ppu != nil:
+	case addr == AddrLYC && m.ppu != nil:
 		m.ppu.SetLYC(v)
-	case AddrBGP && m.ppu != nil:
+	case addr == AddrBGP && m.ppu != nil:
 		m.ppu.SetBGP(v)
-	case AddrOBP0 && m.ppu != nil:
+	case addr == AddrOBP0 && m.ppu != nil:
 		m.ppu.SetOBP0(v)
-	case AddrOBP1 && m.ppu != nil:
+	case addr == AddrOBP1 && m.ppu != nil:
 		m.ppu.SetOBP1(v)
-	case AddrWY && m.ppu != nil:
+	case addr == AddrWY && m.ppu != nil:
 		m.ppu.SetWY(v)
-	case AddrWX && m.ppu != nil:
+	case addr == AddrWX && m.ppu != nil:
 		m.ppu.SetWX(v)
 	}
 }
