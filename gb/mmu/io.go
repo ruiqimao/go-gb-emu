@@ -1,69 +1,179 @@
 package mmu
 
-// Memory addresses for IO registers.
-const (
-	AddrJOYP = 0xff00 // Joypad.
-	AddrSB   = 0xff01 // Serial byte.
-	AddrSC   = 0xff02 // Serial control.
-	// Unmapped: FF03.
-	AddrDIV  = 0xff04 // Clock divider.
-	AddrTIMA = 0xff05 // Timer value.
-	AddrTMA  = 0xff06 // Timer reload.
-	AddrTAC  = 0xff07 // Timer control.
-	// Unmapped: FF08 - FF0E.
-	AddrIF   = 0xff0f // Interrupt asserted.
-	AddrNR10 = 0xff10 // Audio channel 1 sweep.
-	AddrNR11 = 0xff11 // Audio channel 1 sound length/wave duty.
-	AddrNR12 = 0xff12 // Audio channel 1 envelope.
-	AddrNR13 = 0xff13 // Audio channel 1 frequency.
-	AddrNR14 = 0xff14 // Audio channel 1 control.
-	// Unmapped: FF15.
-	AddrNR21 = 0xff16 // Audio channel 2 sound length/wave duty.
-	AddrNR22 = 0xff17 // Audio channel 2 envelope.
-	AddrNR23 = 0xff18 // Audio channel 2 frequency.
-	AddrNR24 = 0xff19 // Audio channel 2 control.
-	AddrNR30 = 0xff1a // Audio channel 3 enable.
-	AddrNR31 = 0xff1b // Audio channel 3 sound length/wave duty.
-	AddrNR32 = 0xff1c // Audio channel 3 envelope.
-	AddrNR33 = 0xff1d // Audio channel 3 frequency.
-	AddrNR34 = 0xff1e // Audio channel 3 control.
-	// Unmapped: FF1F.
-	AddrNR41 = 0xff20 // Audio channel 4 sound length.
-	AddrNR42 = 0xff21 // Audio channel 4 volume.
-	AddrNR43 = 0xff22 // Audio channel 4 frequency.
-	AddrNR44 = 0xff23 // Audio channel 4 control.
-	AddrNR50 = 0xff24 // Audio output mapping.
-	AddrNR51 = 0xff25 // Audio channel mapping.
-	AddrNR52 = 0xff26 // Audio channel control.
-	// Unmapped: FF27 - FF2F.
-	AddrWAVE = 0xff27 // Wave pattern.
-	// AddrWAVE: FF28 - FF3F.
-	AddrLCDC = 0xff40 // LCD control.
-	AddrSTAT = 0xff41 // LCD status.
-	AddrSCY  = 0xff42 // Background vertical scroll.
-	AddrSCX  = 0xff43 // Background horizontal scroll.
-	AddrLY   = 0xff44 // LCD Y coordinate.
-	AddrLYC  = 0xff45 // LCD Y compare.
-	AddrDMA  = 0xff46 // OAM DMA source address.
-	AddrBGP  = 0xff47 // Background palette.
-	AddrOBP0 = 0xff48 // OBJ palette 0.
-	AddrOBP1 = 0xff49 // OBJ palette 1.
-	AddrWY   = 0xff4a // Window Y coordinate.
-	AddrWX   = 0xff4b // Window X coordinate.
-	// Unmapped: FF4C - FF4F.
-	AddrBOOT = 0xff50 // Boot ROM control.
-	// Unmapped: FF51 - FF7F.
-	// High RAM: FF80 - FFFE.
-	AddrIE = 0xffff // Interrupts enabled.
-)
-
 // Handle a read.
 func (m *MMU) read(addr uint16) uint8 {
-	// TODO.
+	switch {
+
+	// Boot ROM.
+	case addr < 0x0100 && m.bootrom != nil && m.bootrom.BOOT() == 0x0:
+		return m.bootrom.Read(addr)
+
+	// Cartridge ROM banks.
+	case addr >= AddrCartROM0 && addr < AddrVRAM && m.cart != nil:
+		return m.cart.ReadROM(addr)
+
+	// Video RAM.
+	case addr >= AddrVRAM && addr < AddrCartRAM && m.ppu != nil:
+		return m.ppu.ReadVRAM(addr - AddrVRAM)
+
+	// Cartridge RAM.
+	case addr >= AddrCartRAM && addr < AddrWRAM0:
+		return m.cart.ReadRAM(addr - AddrCartRAM)
+
+	// Work RAM banks 0 and 1.
+	case addr >= AddrWRAM0 && addr < AddrEcho:
+		return m.wram[addr-AddrWRAM0]
+
+	// Mirror of C000 - DDFF.
+	case addr >= AddrEcho && addr < AddrOAM:
+		return m.read(addr - 0x2000)
+
+	// Sprite attribute table.
+	case addr >= AddrOAM && addr < AddrEmpty && m.ppu != nil:
+		return m.ppu.ReadOAM(addr - AddrOAM)
+
+	// Empty.
+	case addr >= AddrEmpty && addr < AddrIO:
+		return 0x00
+
+	// I/O registers.
+	case addr >= AddrIO && addr < AddrHRAM:
+		return m.readIO(addr)
+
+	// High RAM.
+	case addr >= addrHRAM && addr < AddrIE:
+		return m.hram[addr-AddrHRAM]
+
+	// Interrupt enable register.
+	case addr == AddrIE && m.cpu != nil:
+		return m.cpu.IE()
+
+	}
+
 	return 0x00
 }
 
 // Handle a write.
 func (m *MMU) write(addr uint16, v uint8) {
-	// TODO.
+	switch {
+
+	// Cartridge ROM.
+	case addr < AddrVRAM && m.cart != nil:
+		m.gb.cart.WriteROM(addr, v)
+
+	// Video RAM.
+	case addr >= AddrVRAM && addr < AddrCartRAM && m.ppu != nil:
+		m.ppu.WriteVRAM(addr-AddrVRAM, v)
+
+	// Cartridge RAM.
+	case addr >= AddrCartRAM && addr < AddrWRAM0 && m.cart != nil:
+		m.gb.cart.WriteROM(addr-AddrCartRAM, v)
+
+	// Work RAM banks 0 and 1.
+	case addr >= AddrWRAM0 && addr < AddrEcho:
+		m.wram[addr-AddrWRAM0] = v
+
+	// Mirror of C000 - DDFF.
+	case addr >= AddrEcho && addr < AddrOAM:
+		m.write(addr-0x2000, v)
+
+	// Sprite attribute table.
+	case addr >= AddrOAM && addr < AddrIO && m.ppu != nil:
+		m.ppu.WriteOAM(addr-AddrOAM, v)
+
+	// I/O registers.
+	case addr >= AddrIO && addr < AddrHRAM:
+		m.writeIO(addr, v)
+
+	// High RAM.
+	case addr >= AddrHRAM && addr < AddrIE:
+		m.hram[addr-AddrHRAM] = v
+
+	// Interrupt enable register.
+	case addr == AddrIE && m.cpu != nil:
+		m.cpu.SetIE(v)
+
+	}
+}
+
+// Handle a read to an IO register.
+func (m *MMU) readIO(addr uint16) uint8 {
+	switch {
+	case AddrJOYP && m.joypad != nil:
+		return m.joypad.JOYP()
+	case AddrDIV && m.cpu != nil:
+		return m.cpu.DIV()
+	case AddrTIMA && m.cpu != nil:
+		return m.cpu.TIMA()
+	case AddrTMA && m.cpu != nil:
+		return m.cpu.TMA()
+	case AddrTAC && m.cpu != nil:
+		return m.cpu.TAC()
+	case AddrIF && m.cpu != nil:
+		return m.cpu.IF()
+	case AddrLCDC && m.ppu != nil:
+		return m.ppu.LCDC()
+	case AddrSTAT && m.ppu != nil:
+		return m.ppu.STAT()
+	case AddrSCY && m.ppu != nil:
+		return m.ppu.SCY()
+	case AddrSCX && m.ppu != nil:
+		return m.ppu.SCX()
+	case AddrLY && m.ppu != nil:
+		return m.ppu.LY()
+	case AddrLYC && m.ppu != nil:
+		return m.ppu.LYC()
+	case AddrBGP && m.ppu != nil:
+		return m.ppu.BGP()
+	case AddrOBP0 && m.ppu != nil:
+		return m.ppu.OBP0()
+	case AddrOBP1 && m.ppu != nil:
+		return m.ppu.OBP1()
+	case AddrWY && m.ppu != nil:
+		return m.ppu.WY()
+	case AddrWX && m.ppu != nil:
+		return m.ppu.WX()
+	}
+
+	return 0x00
+}
+
+// Handle a write to an IO register.
+func (m *MMU) writeIO(addr uint16) uint8 {
+	switch {
+	case AddrJOYP && m.joypad != nil:
+		m.joypad.SetJOYP(v)
+	case AddrDIV && m.cpu != nil:
+		m.cpu.SetDIV(v)
+	case AddrTIMA && m.cpu != nil:
+		m.cpu.SetTIMA(v)
+	case AddrTMA && m.cpu != nil:
+		m.cpu.SetTMA(v)
+	case AddrTAC && m.cpu != nil:
+		m.cpu.SetTAC(v)
+	case AddrIF && m.cpu != nil:
+		m.cpu.SetIF(v)
+	case AddrLCDC && m.ppu != nil:
+		m.ppu.SetLCDC(v)
+	case AddrSTAT && m.ppu != nil:
+		m.ppu.SetSTAT(v)
+	case AddrSCY && m.ppu != nil:
+		m.ppu.SetSCY(v)
+	case AddrSCX && m.ppu != nil:
+		m.ppu.SetSCX(v)
+	case AddrLY && m.ppu != nil:
+		m.ppu.SetLY(v)
+	case AddrLYC && m.ppu != nil:
+		m.ppu.SetLYC(v)
+	case AddrBGP && m.ppu != nil:
+		m.ppu.SetBGP(v)
+	case AddrOBP0 && m.ppu != nil:
+		m.ppu.SetOBP0(v)
+	case AddrOBP1 && m.ppu != nil:
+		m.ppu.SetOBP1(v)
+	case AddrWY && m.ppu != nil:
+		m.ppu.SetWY(v)
+	case AddrWX && m.ppu != nil:
+		m.ppu.SetWX(v)
+	}
 }
