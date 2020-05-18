@@ -16,6 +16,10 @@ type MMU struct {
 	// RAM.
 	wram [0x2000]uint8
 	hram [0xff]uint8
+
+	// DMA.
+	dma       uint8
+	dmaClocks uint16
 }
 
 func NewMMU() *MMU {
@@ -27,6 +31,14 @@ func NewMMU() *MMU {
 	m.joypadBus = &JoypadBus{m}
 
 	return m
+}
+
+// Do a step of the MMU. Consumes 1 clock.
+func (m *MMU) Step() {
+	if m.dmaClocks > 0 {
+		m.stepDMA()
+		m.dmaClocks--
+	}
 }
 
 // Attach a CPU.

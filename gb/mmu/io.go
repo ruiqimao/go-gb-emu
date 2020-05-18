@@ -131,6 +131,8 @@ func (m *MMU) readIO(addr uint16) uint8 {
 			return m.ppu.LY()
 		case AddrLYC:
 			return m.ppu.LYC()
+		case AddrDMA:
+			return m.DMA()
 		case AddrBGP:
 			return m.ppu.BGP()
 		case AddrOBP0:
@@ -186,6 +188,8 @@ func (m *MMU) writeIO(addr uint16, v uint8) {
 			m.ppu.SetLY(v)
 		case AddrLYC:
 			m.ppu.SetLYC(v)
+		case AddrDMA:
+			m.SetDMA(v)
 		case AddrBGP:
 			m.ppu.SetBGP(v)
 		case AddrOBP0:

@@ -61,7 +61,7 @@ func (p *PPU) startOAMSearch() {
 // Run a step of OAM search.
 func (p *PPU) stepOAMSearch() {
 	// Do OAM search every other clock.
-	if p.sc%2 == 0 {
+	if p.sc%2 != 0 {
 		return
 	}
 

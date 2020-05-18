@@ -93,9 +93,10 @@ func (gb *GameBoy) RunClocks(limit int) int {
 		}
 		limit -= clocks
 
-		// Catch the PPU up to the CPU.
+		// Catch the other components up to the CPU.
 		for i := 0; i < clocks; i++ {
 			gb.ppu.Step()
+			gb.mmu.Step()
 		}
 	}
 	return -limit
