@@ -34,16 +34,5 @@ type PPU interface {
 }
 
 type PPUBus struct {
-	Read  func(addr uint16) uint8
-	Write func(addr uint16, v uint8)
-}
-
-// Handle read operations from the PPU.
-func (m *MMU) ppuRead(addr uint16) uint8 {
-	return m.read(addr)
-}
-
-// Handle write operations from the PPU.
-func (m *MMU) ppuWrite(addr uint16, v uint8) {
-	m.write(addr, v)
+	RequestInterrupt (int)
 }

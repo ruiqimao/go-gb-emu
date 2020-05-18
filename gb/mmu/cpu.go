@@ -15,6 +15,8 @@ type CPU interface {
 	SetTAC(uint8)
 	SetIF(uint8)
 	SetIE(uint8)
+
+	RequestInterrupt(int)
 }
 
 type CPUBus struct {
@@ -30,4 +32,11 @@ func (m *MMU) cpuRead(addr uint16) uint8 {
 // Handle write operations from the CPU.
 func (m *MMU) cpuWrite(addr uint16, v uint8) {
 	m.write(addr, v)
+}
+
+// Request an interrupt from the CPU.
+func (m *MMU) requestInterrupt(interrupt int) {
+	if m.cpu != nil {
+		m.cpu.RequestInterrupt(interrupt)
+	}
 }

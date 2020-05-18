@@ -7,6 +7,9 @@ type MMU struct {
 	ppu    PPU
 	ppuBus PPUBus
 
+	joypad    Joypad
+	joypadBus JoypadBus
+
 	// RAM.
 	wram [0x2000]uint8
 	hram [0xff]uint8
@@ -23,8 +26,12 @@ func NewMMU() *MMU {
 
 	// Create the PPU bus.
 	m.ppuBus = PPUBus{
-		Read:  m.ppuRead,
-		Write: m.ppuWrite,
+		RequestInterrupt: m.requestInterrupt,
+	}
+
+	// Create the joypad bus.
+	m.joypadBus = JoypadBus{
+		RequestInterrupt: m.requestInterrupt,
 	}
 
 	return m
@@ -40,6 +47,11 @@ func (m *MMU) AttachPPU(ppu PPU) {
 	m.ppu = ppu
 }
 
+// Attach a joypad.
+func (m *MMU) AttachJoypad(joypad Joypad) {
+	m.joypad = joypad
+}
+
 // Get the CPU bus.
 func (m *MMU) CPUBus() CPUBus {
 	return m.cpuBus
@@ -48,4 +60,9 @@ func (m *MMU) CPUBus() CPUBus {
 // Get the PPU bus.
 func (m *MMU) PPUBus() PPUBus {
 	return m.ppuBus
+}
+
+// Get the joypad bus.
+func (m *MMU) JoypadBus() JoypadBus {
+	return m.joypadBus
 }
