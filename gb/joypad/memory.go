@@ -10,7 +10,7 @@ type MMU interface {
 	RequestInterrupt(int)
 }
 
-func (j *Joypad) interruptJOYP() {
+func (j *Joypad) interruptJoypad() {
 	if j.mmu != nil {
 		j.mmu.RequestInterrupt(InterruptJoypad)
 	}

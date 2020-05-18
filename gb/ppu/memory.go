@@ -32,7 +32,7 @@ func (p *PPU) WriteOAM(addr uint16, v uint8) {
 }
 
 // Request a VBLANK interrupt.
-func (p *PPU) interruptVBLANK() {
+func (p *PPU) interruptVBlank() {
 	if p.mmu != nil {
 		p.mmu.RequestInterrupt(InterruptVBlank)
 	}

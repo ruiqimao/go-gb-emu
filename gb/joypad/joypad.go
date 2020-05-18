@@ -49,7 +49,7 @@ func (j *Joypad) updateJOYP() {
 	newBits := j.joyp & 0x0f
 	if newBits^(oldBits|newBits) != 0x0 {
 		// Trigger a joypad interrupt.
-		j.interruptJOYP()
+		j.interruptJoypad()
 	}
 }
 
