@@ -9,8 +9,8 @@ func (m *MMU) read(addr uint16) uint8 {
 		return m.bootrom.Read(addr)
 
 	// Cartridge ROM banks.
-	case addr >= AddrCartROM0 && addr < AddrVRAM && m.cart != nil:
-		return m.cart.ReadROM(addr)
+	case addr >= AddrCartROM0 && addr < AddrVRAM && m.cartridge != nil:
+		return m.cartridge.ReadROM(addr)
 
 	// Video RAM.
 	case addr >= AddrVRAM && addr < AddrCartRAM && m.ppu != nil:
@@ -18,7 +18,7 @@ func (m *MMU) read(addr uint16) uint8 {
 
 	// Cartridge RAM.
 	case addr >= AddrCartRAM && addr < AddrWRAM0:
-		return m.cart.ReadRAM(addr - AddrCartRAM)
+		return m.cartridge.ReadRAM(addr - AddrCartRAM)
 
 	// Work RAM banks 0 and 1.
 	case addr >= AddrWRAM0 && addr < AddrEcho:
@@ -41,7 +41,7 @@ func (m *MMU) read(addr uint16) uint8 {
 		return m.readIO(addr)
 
 	// High RAM.
-	case addr >= addrHRAM && addr < AddrIE:
+	case addr >= AddrHRAM && addr < AddrIE:
 		return m.hram[addr-AddrHRAM]
 
 	// Interrupt enable register.
@@ -58,16 +58,16 @@ func (m *MMU) write(addr uint16, v uint8) {
 	switch {
 
 	// Cartridge ROM.
-	case addr < AddrVRAM && m.cart != nil:
-		m.gb.cart.WriteROM(addr, v)
+	case addr < AddrVRAM && m.cartridge != nil:
+		m.cartridge.WriteROM(addr, v)
 
 	// Video RAM.
 	case addr >= AddrVRAM && addr < AddrCartRAM && m.ppu != nil:
 		m.ppu.WriteVRAM(addr-AddrVRAM, v)
 
 	// Cartridge RAM.
-	case addr >= AddrCartRAM && addr < AddrWRAM0 && m.cart != nil:
-		m.gb.cart.WriteROM(addr-AddrCartRAM, v)
+	case addr >= AddrCartRAM && addr < AddrWRAM0 && m.cartridge != nil:
+		m.cartridge.WriteROM(addr-AddrCartRAM, v)
 
 	// Work RAM banks 0 and 1.
 	case addr >= AddrWRAM0 && addr < AddrEcho:
@@ -133,13 +133,15 @@ func (m *MMU) readIO(addr uint16) uint8 {
 		return m.ppu.WY()
 	case addr == AddrWX && m.ppu != nil:
 		return m.ppu.WX()
+	case addr == AddrBOOT && m.bootrom != nil:
+		return m.bootrom.BOOT()
 	}
 
 	return 0x00
 }
 
 // Handle a write to an IO register.
-func (m *MMU) writeIO(addr uint16) uint8 {
+func (m *MMU) writeIO(addr uint16, v uint8) {
 	switch {
 	case addr == AddrJOYP && m.joypad != nil:
 		m.joypad.SetJOYP(v)
@@ -175,5 +177,7 @@ func (m *MMU) writeIO(addr uint16) uint8 {
 		m.ppu.SetWY(v)
 	case addr == AddrWX && m.ppu != nil:
 		m.ppu.SetWX(v)
+	case addr == AddrBOOT && m.bootrom != nil:
+		m.bootrom.SetBOOT(v)
 	}
 }

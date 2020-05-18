@@ -20,18 +20,19 @@ type CPU interface {
 }
 
 type CPUBus struct {
-	Read  func(addr uint16) uint8
-	Write func(addr uint16, v uint8)
+	mmu *MMU
 }
 
 // Handle read operations from the CPU.
-func (m *MMU) cpuRead(addr uint16) uint8 {
-	return m.read(addr)
+func (b *CPUBus) Read(addr uint16) uint8 {
+	// TODO: CPU bus gates.
+	return b.mmu.read(addr)
 }
 
 // Handle write operations from the CPU.
-func (m *MMU) cpuWrite(addr uint16, v uint8) {
-	m.write(addr, v)
+func (b *CPUBus) Write(addr uint16, v uint8) {
+	// TODO: CPU bus gates.
+	b.mmu.write(addr, v)
 }
 
 // Request an interrupt from the CPU.

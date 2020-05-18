@@ -34,5 +34,9 @@ type PPU interface {
 }
 
 type PPUBus struct {
-	RequestInterrupt (int)
+	mmu *MMU
+}
+
+func (b *PPUBus) RequestInterrupt(interrupt int) {
+	b.mmu.requestInterrupt(interrupt)
 }

@@ -8,5 +8,9 @@ type Joypad interface {
 }
 
 type JoypadBus struct {
-	RequestInterrupt (int)
+	mmu *MMU
+}
+
+func (b *JoypadBus) RequestInterrupt(interrupt int) {
+	b.mmu.requestInterrupt(interrupt)
 }

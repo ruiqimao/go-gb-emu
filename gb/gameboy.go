@@ -1,12 +1,12 @@
 package gb
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/ruiqimao/go-gb-emu/cart"
 	"github.com/ruiqimao/go-gb-emu/gb/cpu"
 	"github.com/ruiqimao/go-gb-emu/gb/joypad"
+	"github.com/ruiqimao/go-gb-emu/gb/mmu"
 	"github.com/ruiqimao/go-gb-emu/gb/ppu"
 )
 
@@ -16,6 +16,7 @@ const (
 )
 
 type GameBoy struct {
+	mmu  *mmu.MMU
 	cpu  *cpu.CPU
 	ppu  *ppu.PPU
 	jp   *joypad.Joypad
@@ -44,6 +45,7 @@ func NewGameBoy() (*GameBoy, error) {
 	}
 
 	// Create the components.
+	gb.mmu = mmu.NewMMU()
 	gb.cpu = cpu.NewCPU()
 	gb.ppu = ppu.NewPPU()
 	gb.jp = joypad.NewJoypad()
@@ -51,9 +53,13 @@ func NewGameBoy() (*GameBoy, error) {
 	gb.clk = NewClock(BaseClock)
 
 	// Attach components together.
-	gb.cpu.AttachMMU(gb.mem)
-	gb.ppu.AttachMMU(gb.mem)
-	gb.jp.AttachMMU(gb.mem)
+	gb.cpu.AttachMMU(gb.mmu.CPUBus())
+	gb.ppu.AttachMMU(gb.mmu.PPUBus())
+	gb.jp.AttachMMU(gb.mmu.JoypadBus())
+
+	gb.mmu.AttachCPU(gb.cpu)
+	gb.mmu.AttachPPU(gb.ppu)
+	gb.mmu.AttachJoypad(gb.jp)
 
 	go gb.Run()
 
@@ -105,16 +111,17 @@ func (gb *GameBoy) RunClocks(limit int) int {
 
 // Load the Boot ROM.
 func (gb *GameBoy) LoadBootRom(rom []byte) error {
-	if len(rom) != 0x100 {
-		return fmt.Errorf("Improper Boot ROM size: %v", len(rom))
+	bootrom, err := NewBootROM(rom)
+	if err != nil {
+		return err
 	}
-	copy(gb.boot[:], rom)
+	gb.mmu.AttachBootROM(bootrom)
 	return nil
 }
 
 // Load a cartridge.
 func (gb *GameBoy) LoadCartridge(cartridge *cart.Cartridge) {
-	gb.cart = cartridge
+	gb.mmu.AttachCartridge(cartridge)
 }
 
 // Register input.

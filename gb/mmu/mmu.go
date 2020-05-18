@@ -2,15 +2,14 @@ package mmu
 
 type MMU struct {
 	cpu    CPU
-	cpuBus CPUBus
-
 	ppu    PPU
-	ppuBus PPUBus
+	joypad Joypad
 
-	joypad    Joypad
-	joypadBus JoypadBus
+	cpuBus    *CPUBus
+	ppuBus    *PPUBus
+	joypadBus *JoypadBus
 
-	bootrom BootRom
+	bootrom BootROM
 
 	cartridge Cartridge
 
@@ -22,21 +21,10 @@ type MMU struct {
 func NewMMU() *MMU {
 	m := &MMU{}
 
-	// Create the CPU bus.
-	m.cpuBus = CPUBus{
-		Read:  m.cpuRead,
-		Write: m.cpuWrite,
-	}
-
-	// Create the PPU bus.
-	m.ppuBus = PPUBus{
-		RequestInterrupt: m.requestInterrupt,
-	}
-
-	// Create the joypad bus.
-	m.joypadBus = JoypadBus{
-		RequestInterrupt: m.requestInterrupt,
-	}
+	// Create the buses.
+	m.cpuBus = &CPUBus{m}
+	m.ppuBus = &PPUBus{m}
+	m.joypadBus = &JoypadBus{m}
 
 	return m
 }
@@ -67,16 +55,16 @@ func (m *MMU) AttachCartridge(cartridge Cartridge) {
 }
 
 // Get the CPU bus.
-func (m *MMU) CPUBus() CPUBus {
+func (m *MMU) CPUBus() *CPUBus {
 	return m.cpuBus
 }
 
 // Get the PPU bus.
-func (m *MMU) PPUBus() PPUBus {
+func (m *MMU) PPUBus() *PPUBus {
 	return m.ppuBus
 }
 
 // Get the joypad bus.
-func (m *MMU) JoypadBus() JoypadBus {
+func (m *MMU) JoypadBus() *JoypadBus {
 	return m.joypadBus
 }
