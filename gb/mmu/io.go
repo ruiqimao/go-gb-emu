@@ -98,42 +98,53 @@ func (m *MMU) write(addr uint16, v uint8) {
 
 // Handle a read to an IO register.
 func (m *MMU) readIO(addr uint16) uint8 {
-	switch {
-	case addr == AddrJOYP && m.joypad != nil:
+	if m.joypad != nil && addr == AddrJOYP {
 		return m.joypad.JOYP()
-	case addr == AddrDIV && m.cpu != nil:
-		return m.cpu.DIV()
-	case addr == AddrTIMA && m.cpu != nil:
-		return m.cpu.TIMA()
-	case addr == AddrTMA && m.cpu != nil:
-		return m.cpu.TMA()
-	case addr == AddrTAC && m.cpu != nil:
-		return m.cpu.TAC()
-	case addr == AddrIF && m.cpu != nil:
-		return m.cpu.IF()
-	case addr == AddrLCDC && m.ppu != nil:
-		return m.ppu.LCDC()
-	case addr == AddrSTAT && m.ppu != nil:
-		return m.ppu.STAT()
-	case addr == AddrSCY && m.ppu != nil:
-		return m.ppu.SCY()
-	case addr == AddrSCX && m.ppu != nil:
-		return m.ppu.SCX()
-	case addr == AddrLY && m.ppu != nil:
-		return m.ppu.LY()
-	case addr == AddrLYC && m.ppu != nil:
-		return m.ppu.LYC()
-	case addr == AddrBGP && m.ppu != nil:
-		return m.ppu.BGP()
-	case addr == AddrOBP0 && m.ppu != nil:
-		return m.ppu.OBP0()
-	case addr == AddrOBP1 && m.ppu != nil:
-		return m.ppu.OBP1()
-	case addr == AddrWY && m.ppu != nil:
-		return m.ppu.WY()
-	case addr == AddrWX && m.ppu != nil:
-		return m.ppu.WX()
-	case addr == AddrBOOT && m.bootrom != nil:
+	}
+
+	if m.cpu != nil {
+		switch addr {
+		case AddrDIV:
+			return m.cpu.DIV()
+		case AddrTIMA:
+			return m.cpu.TIMA()
+		case AddrTMA:
+			return m.cpu.TMA()
+		case AddrTAC:
+			return m.cpu.TAC()
+		case AddrIF:
+			return m.cpu.IF()
+		}
+	}
+
+	if m.ppu != nil {
+		switch addr {
+		case AddrLCDC:
+			return m.ppu.LCDC()
+		case AddrSTAT:
+			return m.ppu.STAT()
+		case AddrSCY:
+			return m.ppu.SCY()
+		case AddrSCX:
+			return m.ppu.SCX()
+		case AddrLY:
+			return m.ppu.LY()
+		case AddrLYC:
+			return m.ppu.LYC()
+		case AddrBGP:
+			return m.ppu.BGP()
+		case AddrOBP0:
+			return m.ppu.OBP0()
+		case AddrOBP1:
+			return m.ppu.OBP1()
+		case AddrWY:
+			return m.ppu.WY()
+		case AddrWX:
+			return m.ppu.WX()
+		}
+	}
+
+	if m.bootrom != nil && addr == AddrBOOT {
 		return m.bootrom.BOOT()
 	}
 
@@ -142,42 +153,53 @@ func (m *MMU) readIO(addr uint16) uint8 {
 
 // Handle a write to an IO register.
 func (m *MMU) writeIO(addr uint16, v uint8) {
-	switch {
-	case addr == AddrJOYP && m.joypad != nil:
+	if m.joypad != nil && addr == AddrJOYP {
 		m.joypad.SetJOYP(v)
-	case addr == AddrDIV && m.cpu != nil:
-		m.cpu.SetDIV(v)
-	case addr == AddrTIMA && m.cpu != nil:
-		m.cpu.SetTIMA(v)
-	case addr == AddrTMA && m.cpu != nil:
-		m.cpu.SetTMA(v)
-	case addr == AddrTAC && m.cpu != nil:
-		m.cpu.SetTAC(v)
-	case addr == AddrIF && m.cpu != nil:
-		m.cpu.SetIF(v)
-	case addr == AddrLCDC && m.ppu != nil:
-		m.ppu.SetLCDC(v)
-	case addr == AddrSTAT && m.ppu != nil:
-		m.ppu.SetSTAT(v)
-	case addr == AddrSCY && m.ppu != nil:
-		m.ppu.SetSCY(v)
-	case addr == AddrSCX && m.ppu != nil:
-		m.ppu.SetSCX(v)
-	case addr == AddrLY && m.ppu != nil:
-		m.ppu.SetLY(v)
-	case addr == AddrLYC && m.ppu != nil:
-		m.ppu.SetLYC(v)
-	case addr == AddrBGP && m.ppu != nil:
-		m.ppu.SetBGP(v)
-	case addr == AddrOBP0 && m.ppu != nil:
-		m.ppu.SetOBP0(v)
-	case addr == AddrOBP1 && m.ppu != nil:
-		m.ppu.SetOBP1(v)
-	case addr == AddrWY && m.ppu != nil:
-		m.ppu.SetWY(v)
-	case addr == AddrWX && m.ppu != nil:
-		m.ppu.SetWX(v)
-	case addr == AddrBOOT && m.bootrom != nil:
+	}
+
+	if m.cpu != nil {
+		switch addr {
+		case AddrDIV:
+			m.cpu.SetDIV(v)
+		case AddrTIMA:
+			m.cpu.SetTIMA(v)
+		case AddrTMA:
+			m.cpu.SetTMA(v)
+		case AddrTAC:
+			m.cpu.SetTAC(v)
+		case AddrIF:
+			m.cpu.SetIF(v)
+		}
+	}
+
+	if m.ppu != nil {
+		switch addr {
+		case AddrLCDC:
+			m.ppu.SetLCDC(v)
+		case AddrSTAT:
+			m.ppu.SetSTAT(v)
+		case AddrSCY:
+			m.ppu.SetSCY(v)
+		case AddrSCX:
+			m.ppu.SetSCX(v)
+		case AddrLY:
+			m.ppu.SetLY(v)
+		case AddrLYC:
+			m.ppu.SetLYC(v)
+		case AddrBGP:
+			m.ppu.SetBGP(v)
+		case AddrOBP0:
+			m.ppu.SetOBP0(v)
+		case AddrOBP1:
+			m.ppu.SetOBP1(v)
+		case AddrWY:
+			m.ppu.SetWY(v)
+		case AddrWX:
+			m.ppu.SetWX(v)
+		}
+	}
+
+	if m.bootrom != nil && addr == AddrBOOT {
 		m.bootrom.SetBOOT(v)
 	}
 }
