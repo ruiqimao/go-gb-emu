@@ -6,27 +6,9 @@ import (
 
 	"github.com/ruiqimao/go-gb-emu/gb/cpu"
 	"github.com/ruiqimao/go-gb-emu/gb/joypad"
+	"github.com/ruiqimao/go-gb-emu/gb/mmu"
 	"github.com/ruiqimao/go-gb-emu/gb/ppu"
 )
-
-// Load a debug ROM.
-func (gb *GameBoy) LoadDebugRom(r []uint8) {
-	gb.dbgRom = make([]uint8, len(r))
-	copy(gb.dbgRom, r)
-
-	// Initialize manually due to no Boot ROM.
-	gb.cpu.SetSP(0xfffe)
-	gb.cpu.SetPC(0x0100)
-	gb.cpu.SetRegister16(cpu.RegisterBC, 0x0013)
-	gb.cpu.SetRegister16(cpu.RegisterDE, 0x00d8)
-	gb.cpu.SetRegister16(cpu.RegisterHL, 0x014d)
-	gb.cpu.SetRegister16(cpu.RegisterAF, 0x01b0)
-}
-
-// Whether debug is enabled.
-func (gb *GameBoy) Debugging() bool {
-	return gb.dbgRom != nil
-}
 
 // Run the Game Boy clock.
 func (gb *GameBoy) Resume() {
@@ -45,14 +27,14 @@ func (gb *GameBoy) Step() int {
 
 // Get a readable version of the current instruction.
 func (gb *GameBoy) InstructionName() string {
-	opCode := uint16(gb.mem.Read(gb.cpu.PC()))
+	opCode := uint16(gb.mmu.Read(gb.cpu.PC()))
 	if opCode == 0xcb {
-		opCode = uint16(gb.mem.Read(gb.cpu.PC()+1)) + 0x100
+		opCode = uint16(gb.mmu.Read(gb.cpu.PC()+1)) + 0x100
 	}
 	name := InstructionNames[opCode]
 
 	// Get all the possible components.
-	d16 := gb.mem.Read16(gb.cpu.PC() + 0x1)
+	d16 := gb.mmu.Read16(gb.cpu.PC() + 0x1)
 	d8 := uint8(d16)
 	a16 := fmt.Sprintf("$%04x", d16)
 	a8 := fmt.Sprintf("$%02x", d8)
@@ -89,8 +71,8 @@ func (gb *GameBoy) Joypad() *joypad.Joypad {
 }
 
 // Get the memory controller.
-func (gb *GameBoy) Memory() *Memory {
-	return gb.mem
+func (gb *GameBoy) MMU() *mmu.MMU {
+	return gb.mmu
 }
 
 // Get the clock.

@@ -33,7 +33,7 @@ func (e *Emulator) debugLoop() {
 func (e *Emulator) debugExec(input []string) {
 	gbCPU := e.gb.CPU()
 	gbPPU := e.gb.PPU()
-	mem := e.gb.Memory()
+	gbMMU := e.gb.MMU()
 
 	var err error
 	cmd := strings.ToLower(input[0])
@@ -64,7 +64,7 @@ func (e *Emulator) debugExec(input []string) {
 		fmt.Printf("\n")
 
 		// Print stack pointer and program counter.
-		fmt.Printf("SP: %04x (%04x)\n", gbCPU.SP(), mem.Read16(gbCPU.SP()))
+		fmt.Printf("SP: %04x (%04x)\n", gbCPU.SP(), gbMMU.Read16(gbCPU.SP()))
 		fmt.Printf("PC: %04x (%s)\n", gbCPU.PC(), e.gb.InstructionName())
 
 	// Read memory.
@@ -79,7 +79,7 @@ func (e *Emulator) debugExec(input []string) {
 		}
 
 		// Read both a byte and a short at the address.
-		fmt.Printf("%02x %04x\n", mem.Read(addr), mem.Read16(addr))
+		fmt.Printf("%02x %04x\n", gbMMU.Read(addr), gbMMU.Read16(addr))
 
 	// Dump the background.
 	case "background", "bg":

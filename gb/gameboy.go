@@ -20,22 +20,15 @@ type GameBoy struct {
 	cpu  *cpu.CPU
 	ppu  *ppu.PPU
 	jp   *joypad.Joypad
-	mem  *Memory
 	cart *cart.Cartridge
 
 	clk *Clock
-
-	// Boot ROM.
-	boot [0x100]uint8
 
 	// Input events.
 	events chan joypad.Input
 
 	// Latest rendered frame.
 	F chan []byte
-
-	// Debug.
-	dbgRom []uint8
 }
 
 func NewGameBoy() (*GameBoy, error) {
@@ -49,7 +42,6 @@ func NewGameBoy() (*GameBoy, error) {
 	gb.cpu = cpu.NewCPU()
 	gb.ppu = ppu.NewPPU()
 	gb.jp = joypad.NewJoypad()
-	gb.mem = NewMemory(gb)
 	gb.clk = NewClock(BaseClock)
 
 	// Attach components together.
