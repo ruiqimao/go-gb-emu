@@ -17,7 +17,18 @@ func (p *PPU) stepPixelTransfer() {
 	}
 
 	// Check for a sprite.
-	// TODO.
+	oamCache := p.oamCache[:0]
+	for _, sprite := range p.oamCache {
+		if sprite.posX-8 == p.lx {
+			// Try to push the sprite to the fetcher.
+			if p.fetcher.PushSprite(sprite) {
+				// Remove the sprite from the cache if it has been accepted by the fetcher.
+				continue
+			}
+		}
+		oamCache = append(oamCache, sprite)
+	}
+	p.oamCache = oamCache
 
 	// Try to pop a pixel off the fetcher.
 	if color, ok := p.fetcher.Pop(); ok {
@@ -46,9 +57,9 @@ func (p *PPU) resolve(px Pixel) uint8 {
 	switch {
 	case px.bg:
 		palette = p.bgp
-	case px.palette == 0:
+	case px.palette == false:
 		palette = p.obp0
-	case px.palette == 1:
+	case px.palette == true:
 		palette = p.obp1
 	}
 	return (palette >> (px.data * 2)) & 0x3

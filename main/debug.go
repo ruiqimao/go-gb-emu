@@ -130,7 +130,7 @@ func (e *Emulator) debugExec(input []string) {
 				data := lo | hi<<1
 
 				// Convert to a Pixel and resolve the color
-				px := ppu.NewPixel(data, true, 0, false)
+				px := ppu.NewPixel(data, true, false, false)
 				color := gbPPU.Resolve(px)
 
 				// Print the color as a block.

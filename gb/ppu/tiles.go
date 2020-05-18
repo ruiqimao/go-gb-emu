@@ -27,7 +27,7 @@ func (p *PPU) winMapAddr() uint16 {
 // If the tile is a sprite tile, unsigned addressing mode will be forced.
 // The offset must be in the range [0, 16).
 func (p *PPU) tileData(id uint8, offset uint8, sprite bool) uint8 {
-	if p.tileset == Tileset1 {
+	if p.tileset == Tileset1 || sprite {
 		// Unsigned addressing mode.
 		return p.vram[uint16(id)*16+uint16(offset)]
 	} else {
