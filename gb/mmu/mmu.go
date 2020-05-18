@@ -10,6 +10,10 @@ type MMU struct {
 	joypad    Joypad
 	joypadBus JoypadBus
 
+	bootrom BootRom
+
+	cartridge Cartridge
+
 	// RAM.
 	wram [0x2000]uint8
 	hram [0xff]uint8
@@ -50,6 +54,16 @@ func (m *MMU) AttachPPU(ppu PPU) {
 // Attach a joypad.
 func (m *MMU) AttachJoypad(joypad Joypad) {
 	m.joypad = joypad
+}
+
+// Attach a boot ROM.
+func (m *MMU) AttachBootROM(bootrom BootROM) {
+	m.bootrom = bootrom
+}
+
+// Attach a cartridge.
+func (m *MMU) AttachCartridge(cartridge Cartridge) {
+	m.cartridge = cartridge
 }
 
 // Get the CPU bus.
