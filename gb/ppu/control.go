@@ -47,12 +47,6 @@ const (
 	FrameHeight = 144
 )
 
-// Interrupts.
-const (
-	InterruptVBlank = 0
-	InterruptStat   = 1
-)
-
 // Resets the PPU.
 func (p *PPU) reset() {
 	p.sc = 0
@@ -97,7 +91,7 @@ func (p *PPU) updateSTAT() {
 
 	// If there is a rising edge, trigger the STAT interrupt.
 	if p.statSig == 0x0 && statSig == 0x1 {
-		p.mmu.RequestInterrupt(InterruptStat)
+		p.interruptSTAT()
 	}
 
 	p.statSig = statSig

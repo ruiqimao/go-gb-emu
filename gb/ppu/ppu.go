@@ -82,7 +82,7 @@ func (p *PPU) Step() int {
 	case p.ly == FrameHeight && p.sc == 0:
 		p.mode = ModeVBlank
 		p.pushFrame()
-		p.mmu.RequestInterrupt(InterruptVBlank)
+		p.interruptVBLANK()
 	}
 
 	// Update the STAT signal.

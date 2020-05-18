@@ -1,5 +1,11 @@
 package ppu
 
+// Interrupts.
+const (
+	InterruptVBlank = 0
+	InterruptStat   = 1
+)
+
 // MMU interface.
 type MMU interface {
 	Read(uint16) uint8
@@ -26,4 +32,18 @@ func (p *PPU) WriteVRAM(addr uint16, v uint8) {
 // Writes to the OAM. The address is in the range [0x0000, 0x0100).
 func (p *PPU) WriteOAM(addr uint16, v uint8) {
 	p.oam[addr] = v
+}
+
+// Request a VBLANK interrupt.
+func (p *PPU) interruptVBLANK() {
+	if p.mmu != nil {
+		p.mmu.RequestInterrupt(InterruptVBlank)
+	}
+}
+
+// Request a STAT interrupt.
+func (p *PPU) interruptSTAT() {
+	if p.mmu != nil {
+		p.mmu.RequestInterrupt(InterruptStat)
+	}
 }
