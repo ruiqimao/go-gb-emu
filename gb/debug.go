@@ -5,6 +5,8 @@ import (
 	"strings"
 
 	"github.com/ruiqimao/go-gb-emu/gb/cpu"
+	"github.com/ruiqimao/go-gb-emu/gb/joypad"
+	"github.com/ruiqimao/go-gb-emu/gb/ppu"
 )
 
 // Load a debug ROM.
@@ -69,4 +71,29 @@ func (gb *GameBoy) InstructionName() string {
 	name = strings.ReplaceAll(name, "r8", fmt.Sprintf("%02x", r8))
 
 	return name
+}
+
+// Get the CPU.
+func (gb *GameBoy) CPU() *cpu.CPU {
+	return gb.cpu
+}
+
+// Get the PPU.
+func (gb *GameBoy) PPU() *ppu.PPU {
+	return gb.ppu
+}
+
+// Get the joypad.
+func (gb *GameBoy) Joypad() *joypad.Joypad {
+	return gb.jp
+}
+
+// Get the memory controller.
+func (gb *GameBoy) Memory() *Memory {
+	return gb.mem
+}
+
+// Get the clock.
+func (gb *GameBoy) Clock() *Clock {
+	return gb.clk
 }

@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"github.com/ruiqimao/go-gb-emu/gb"
 	"github.com/ruiqimao/go-gfx/gfx"
 )
 
@@ -23,13 +22,13 @@ type Display struct {
 	texture *gfx.Texture2D // Display texture.
 
 	// Input event channel.
-	I chan gb.Input
+	I chan Input
 }
 
 // Create a new Display.
 func NewDisplay() (*Display, error) {
 	d := &Display{
-		I: make(chan gb.Input, 16),
+		I: make(chan Input, 16),
 	}
 
 	// Initialize the window.
@@ -140,29 +139,29 @@ func (d *Display) keyCallback(window *glfw.Window, key glfw.Key, scrollCount int
 	}
 
 	// Create an input event.
-	var button int
+	var button Button
 	state := action == glfw.Press
 	switch key {
 	case glfw.KeyW:
-		button = gb.JoypadUp
+		button = ButtonUp
 	case glfw.KeyA:
-		button = gb.JoypadLeft
+		button = ButtonLeft
 	case glfw.KeyS:
-		button = gb.JoypadDown
+		button = ButtonDown
 	case glfw.KeyD:
-		button = gb.JoypadRight
+		button = ButtonRight
 	case glfw.KeyK:
-		button = gb.JoypadA
+		button = ButtonA
 	case glfw.KeyJ:
-		button = gb.JoypadB
+		button = ButtonB
 	case glfw.KeyN:
-		button = gb.JoypadStart
+		button = ButtonStart
 	case glfw.KeyB:
-		button = gb.JoypadSelect
+		button = ButtonSelect
 	default:
 		return
 	}
-	event := gb.NewInput(button, state)
+	event := Input{button, state}
 
 	// Try to push the event to the channel.
 	select {

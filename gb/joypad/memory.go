@@ -12,6 +12,6 @@ type MMU interface {
 
 func (j *Joypad) interruptJOYP() {
 	if j.mmu != nil {
-		j.mmu.RequestInterrupt(InterruptJOYP)
+		j.mmu.RequestInterrupt(InterruptJoypad)
 	}
 }

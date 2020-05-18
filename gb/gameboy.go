@@ -6,6 +6,7 @@ import (
 
 	"github.com/ruiqimao/go-gb-emu/cart"
 	"github.com/ruiqimao/go-gb-emu/gb/cpu"
+	"github.com/ruiqimao/go-gb-emu/gb/joypad"
 	"github.com/ruiqimao/go-gb-emu/gb/ppu"
 )
 
@@ -17,8 +18,8 @@ const (
 type GameBoy struct {
 	cpu  *cpu.CPU
 	ppu  *ppu.PPU
+	jp   *joypad.Joypad
 	mem  *Memory
-	jp   *Joypad
 	cart *cart.Cartridge
 
 	clk *Clock
@@ -27,7 +28,7 @@ type GameBoy struct {
 	boot [0x100]uint8
 
 	// Input events.
-	events chan Input
+	events chan joypad.Input
 
 	// Latest rendered frame.
 	F chan []byte
@@ -38,20 +39,21 @@ type GameBoy struct {
 
 func NewGameBoy() (*GameBoy, error) {
 	gb := &GameBoy{
-		events: make(chan Input, 16), // Allow a buffer of input events.
+		events: make(chan joypad.Input, 16), // Allow a buffer of input events.
 		F:      make(chan []uint8, 1),
 	}
 
 	// Create the components.
 	gb.cpu = cpu.NewCPU()
 	gb.ppu = ppu.NewPPU()
+	gb.jp = joypad.NewJoypad()
 	gb.mem = NewMemory(gb)
-	gb.jp = NewJoypad(gb)
 	gb.clk = NewClock(BaseClock)
 
 	// Attach components together.
 	gb.cpu.AttachMMU(gb.mem)
 	gb.ppu.AttachMMU(gb.mem)
+	gb.jp.AttachMMU(gb.mem)
 
 	go gb.Run()
 
@@ -115,27 +117,7 @@ func (gb *GameBoy) LoadCartridge(cartridge *cart.Cartridge) {
 	gb.cart = cartridge
 }
 
-// Get the CPU.
-func (gb *GameBoy) CPU() *cpu.CPU {
-	return gb.cpu
-}
-
-// Get the PPU.
-func (gb *GameBoy) PPU() *ppu.PPU {
-	return gb.ppu
-}
-
-// Get the memory controller.
-func (gb *GameBoy) Memory() *Memory {
-	return gb.mem
-}
-
-// Get the clock.
-func (gb *GameBoy) Clock() *Clock {
-	return gb.clk
-}
-
 // Register input.
-func (gb *GameBoy) Input(event Input) {
+func (gb *GameBoy) Input(event joypad.Input) {
 	gb.events <- event
 }
