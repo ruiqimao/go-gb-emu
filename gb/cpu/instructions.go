@@ -151,7 +151,7 @@ func (c *CPU) initInstructionSet() {
 		0x31: opLD16(opSetSP(), opImmediate16()),
 
 		0xf9: opPAD(opLD16(opSetSP(), opLoad16(RegisterHL))),
-		0xf8: opPAD(opLD16(opStore16(RegisterHL), opSAdd(opSP(), opImmediate()))),
+		0xf8: opADDSP(),
 		0x08: opLD16(opWrite16(opImmediate16()), opSP()),
 
 		0xc5: opPUSH(opLoad16(RegisterBC)),
@@ -182,7 +182,7 @@ func (c *CPU) initInstructionSet() {
 		0x8c: opADD(opLoad(RegisterH), true),
 		0x8d: opADD(opLoad(RegisterL), true),
 		0x8e: opADD(opRead(opLoad16(RegisterHL)), true),
-		0x8f: opADD(opLoad(RegisterA), true),
+	0x8f: opADD(opLoad(RegisterA), true),
 		0xce: opADD(opImmediate(), true),
 
 		0x90: opSUB(opLoad(RegisterB), false),
@@ -647,6 +647,17 @@ func opLD16(dst OpDst16, src OpSrc16) Instruction {
 func opPOP(dst OpDst16) Instruction {
 	return func(io InstructionIO) {
 		dst(io, io.PopSP())
+	}
+}
+
+// Generate an ADD SP,r8 instruction.
+func opADDSP() Instruction {
+	return func(io InstructionIO) {
+		src := opSAdd(opSP(), opImmediate())
+		dst := opStore16(RegisterHL)
+		r := src(io)
+		io.Nop()
+		dst(io, r)
 	}
 }
 

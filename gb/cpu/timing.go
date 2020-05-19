@@ -68,8 +68,8 @@ func (c *CPU) DIV() uint8 {
 
 // Set the DIV register.
 func (c *CPU) SetDIV(v uint8) {
-	// Set the upper 8 bits of internal counter to DIV.
-	c.ic = (uint16(v) << 8) | (c.ic & 0x0f)
+	// DIV is reset to 0.
+	c.ic = 0
 }
 
 // Get the TIMA register.
